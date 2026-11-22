@@ -1112,6 +1112,7 @@
     let isKioskMode = false;
     let kioskResetTimer = null;
     let labRealtimeChannel = null;
+    let staffAutoSyncInterval = null;
     let lastKnownOrderCount = null;
 
     function formatCurrency(amount) {
@@ -2390,22 +2391,47 @@
             const code = payload.new?.order_code || 'NUEVA';
             playNewOrderChime();
             showToast(`🔔 ¡Nueva orden recibida: #${code}!`, 'success');
-            fetchLabOrders();
+            if (isLabUnlocked) fetchLabOrders();
+            if (isCashierUnlocked) fetchCashierOrders();
           }
         )
         .on(
           'postgres_changes',
           { event: 'UPDATE', schema: 'foto_estudio', table: 'orders' },
           () => {
-            fetchLabOrders();
+            if (isLabUnlocked) fetchLabOrders();
+            if (isCashierUnlocked) fetchCashierOrders();
+          }
+        )
+        .on(
+          'postgres_changes',
+          { event: 'DELETE', schema: 'foto_estudio', table: 'orders' },
+          () => {
+            if (isLabUnlocked) fetchLabOrders();
+            if (isCashierUnlocked) fetchCashierOrders();
           }
         )
         .subscribe((status) => {
           const statusEl = document.getElementById('labConnectionStatus');
           if (status === 'SUBSCRIBED' && statusEl) {
-            statusEl.textContent = '🟢 En vivo • Esperando órdenes en tiempo real';
+            statusEl.textContent = '🟢 En vivo • Sincronización automática activa';
           }
         });
+
+      // Respaldo automático cada 5 segundos entre Caja y Laboratorio en distintos dispositivos
+      if (!staffAutoSyncInterval) {
+        staffAutoSyncInterval = setInterval(() => {
+          if (isLabUnlocked) fetchLabOrders(true);
+          if (isCashierUnlocked) fetchCashierOrders(true);
+        }, 5000);
+      }
+    }
+
+    function stopStaffAutoSyncIfIdle() {
+      if (!isLabUnlocked && !isCashierUnlocked && staffAutoSyncInterval) {
+        clearInterval(staffAutoSyncInterval);
+        staffAutoSyncInterval = null;
+      }
     }
 
     function openLabPanelView() {
@@ -2425,6 +2451,7 @@
 
     function logoutLabSession() {
       isLabUnlocked = false;
+      stopStaffAutoSyncIfIdle();
       document.getElementById('labPinInput').value = '';
       document.getElementById('labPinGate').classList.remove('hidden');
       document.getElementById('labOrdersContent').classList.add('hidden');
@@ -2435,6 +2462,7 @@
     function closeLabPanelModal() {
       // Bloquear sesión automáticamente al salir del panel de laboratorio
       isLabUnlocked = false;
+      stopStaffAutoSyncIfIdle();
       document.getElementById('labPinInput').value = '';
       document.getElementById('labPanelModal').classList.add('hidden');
     }
@@ -2459,6 +2487,7 @@
 
     function logoutCashierSession() {
       isCashierUnlocked = false;
+      stopStaffAutoSyncIfIdle();
       document.getElementById('cashierPinInput').value = '';
       document.getElementById('cashierPinGate').classList.remove('hidden');
       document.getElementById('cashierOrdersContent').classList.add('hidden');
@@ -2468,6 +2497,7 @@
 
     function closeCashierPanelModal() {
       isCashierUnlocked = false;
+      stopStaffAutoSyncIfIdle();
       document.getElementById('cashierPinInput').value = '';
       document.getElementById('cashierPanelModal').classList.add('hidden');
     }
@@ -2498,7 +2528,7 @@
       renderCashierOrdersList();
     }
 
-    async function fetchCashierOrders() {
+    async function fetchCashierOrders(silent = false) {
       const statusEl = document.getElementById('cashierConnectionStatus');
       const listEl = document.getElementById('cashierOrdersList');
 
@@ -2508,7 +2538,7 @@
         return;
       }
 
-      statusEl.textContent = 'Actualizando cuentas...';
+      if (!silent) statusEl.textContent = 'Actualizando cuentas...';
       try {
         const { data, error } = await supabaseClient
           .from('orders')
@@ -2521,8 +2551,10 @@
         renderCashierOrdersList();
       } catch (err) {
         console.error(err);
-        statusEl.textContent = 'Error de conexión';
-        listEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-4 text-xs">${escapeHtml(err.message)}</div>`;
+        if (!silent) {
+          statusEl.textContent = 'Error de conexión';
+          listEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-4 text-xs">${escapeHtml(err.message)}</div>`;
+        }
       }
     }
 
@@ -2656,7 +2688,7 @@
       }
     }
 
-    async function fetchLabOrders() {
+    async function fetchLabOrders(silent = false) {
       const statusEl = document.getElementById('labConnectionStatus');
       const listEl = document.getElementById('labOrdersList');
       const tabsEl = document.getElementById('labStatusTabs');
@@ -2697,7 +2729,7 @@
         return;
       }
 
-      statusEl.textContent = 'Sincronizando órdenes...';
+      if (!silent) statusEl.textContent = 'Sincronizando órdenes...';
       try {
         const { data, error } = await supabaseClient
           .from('orders')
@@ -2733,7 +2765,7 @@
         badge.textContent = activeCount;
         badge.classList.toggle('hidden', activeCount === 0);
 
-        statusEl.textContent = `🟢 Conectado • ${activeCount} activas (${pendingCount} pendientes)`;
+        statusEl.textContent = `🟢 En vivo • ${activeCount} activas (${pendingCount} pendientes)`;
 
         const filterDefs = [
           { key: 'all', label: `Todas (${labOrdersCache.length})` },
@@ -2773,8 +2805,10 @@
         listEl.innerHTML = filteredOrders.map((order) => buildLabOrderCardHTML(order)).join('');
       } catch (err) {
         console.error(err);
-        statusEl.textContent = 'Error de conexión';
-        listEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-4 text-xs">${escapeHtml(err.message)}</div>`;
+        if (!silent) {
+          statusEl.textContent = 'Error de conexión';
+          listEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-4 text-xs">${escapeHtml(err.message)}</div>`;
+        }
       }
     }
 
