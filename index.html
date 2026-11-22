@@ -1,0 +1,2382 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Foto Estudio Centro — Pedidos de Impresión en Línea</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- JSZip para empaquetar carpetas reales por Orden/Cliente/Tamaño_Papel -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            brand: {
+              50: '#f0f7ff',
+              100: '#e0effe',
+              500: '#0ea5e9',
+              600: '#0284c7',
+              700: '#0369a1',
+              900: '#0c4a6e',
+            }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #f8fafc;
+      color: #0f172a;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .crop-stage {
+      touch-action: none;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .paper-checker {
+      background-color: #ffffff;
+      background-image: linear-gradient(45deg, #f1f5f9 25%, transparent 25%),
+        linear-gradient(-45deg, #f1f5f9 25%, transparent 25%),
+        linear-gradient(45deg, transparent 75%, #f1f5f9 75%),
+        linear-gradient(-45deg, transparent 75%, #f1f5f9 75%);
+      background-size: 16px 16px;
+      background-position: 0 0, 0 8px, 8px -8px, -8px 0;
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col pb-28">
+
+  <!-- ==================== 1. ENCABEZADO DE LA TIENDA ==================== -->
+  <header class="sticky top-0 z-30 bg-white/95 backdrop-blur border-b border-slate-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0">
+        <div class="w-10 h-10 rounded-xl bg-slate-900 text-white flex items-center justify-center shrink-0 shadow-sm">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+            <circle cx="12" cy="13" r="3" />
+          </svg>
+        </div>
+        <div class="min-w-0">
+          <div class="flex items-center gap-2">
+            <h1 class="text-base sm:text-lg font-bold text-slate-900 truncate">Foto Estudio Centro</h1>
+            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Abierto hoy
+            </span>
+          </div>
+          <p class="text-xs text-slate-500 truncate">Laboratorio Digital • Impresión 300 DPI • Tegucigalpa</p>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+        <div class="hidden md:flex flex-col items-end text-right">
+          <span class="text-[11px] uppercase tracking-wider font-semibold text-slate-400">Moneda Local</span>
+          <span class="text-xs font-semibold text-slate-700">Lempiras (HNL • L.)</span>
+        </div>
+
+        <button
+          id="headerCartBtn"
+          type="button"
+          onclick="openCheckoutModal()"
+          class="inline-flex items-center gap-2.5 bg-slate-900 hover:bg-slate-800 active:scale-[0.99] text-white px-3.5 py-2 rounded-xl text-sm font-semibold transition shadow-sm"
+        >
+          <svg class="w-4 h-4 text-sky-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+          </svg>
+          <span id="headerCopiesBadge" class="bg-white/15 px-2 py-0.5 rounded-lg text-xs">0 copias</span>
+          <span id="headerTotalText" class="font-bold text-sky-300">L. 0.00</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- ==================== CONTENIDO PRINCIPAL ==================== -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 pt-6 space-y-6">
+
+    <!-- Catálogo de referencia rápida -->
+    <section aria-label="Tarifas de impresión" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+      <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 flex items-center justify-between shadow-sm">
+        <div>
+          <span class="text-xs font-semibold text-sky-600 uppercase tracking-wide">Estándar</span>
+          <h2 class="text-sm font-bold text-slate-900">4×6</h2>
+          <p class="text-xs text-slate-500">1200×1800 px • Brillo / Mate / Lustre</p>
+        </div>
+        <span class="text-sm sm:text-base font-extrabold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-xl">L. 8.00</span>
+      </div>
+
+      <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 flex items-center justify-between shadow-sm">
+        <div>
+          <span class="text-xs font-semibold text-indigo-600 uppercase tracking-wide">Retrato</span>
+          <h2 class="text-sm font-bold text-slate-900">5×7</h2>
+          <p class="text-xs text-slate-500">1500×2100 px • Brillo / Mate / Lustre</p>
+        </div>
+        <span class="text-sm sm:text-base font-extrabold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-xl">L. 18.00</span>
+      </div>
+
+      <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 flex items-center justify-between shadow-sm">
+        <div>
+          <span class="text-xs font-semibold text-amber-600 uppercase tracking-wide">Ampliación</span>
+          <h2 class="text-sm font-bold text-slate-900">8×10</h2>
+          <p class="text-xs text-slate-500">2400×3000 px • Brillo / Mate / Lustre</p>
+        </div>
+        <span class="text-sm sm:text-base font-extrabold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-xl">L. 45.00</span>
+      </div>
+
+      <div class="bg-white border border-slate-200/90 rounded-2xl p-3.5 flex items-center justify-between shadow-sm">
+        <div>
+          <span class="text-xs font-semibold text-emerald-600 uppercase tracking-wide">Documento</span>
+          <h2 class="text-sm font-bold text-slate-900">Carné 4×4</h2>
+          <p class="text-xs text-slate-500">600×600 px • Brillo / Mate / Lustre</p>
+        </div>
+        <span class="text-sm sm:text-base font-extrabold text-slate-900 bg-slate-100 px-2.5 py-1 rounded-xl">L. 25.00</span>
+      </div>
+    </section>
+
+    <!-- ==================== 2. ZONA DE SUBIDA MÚLTIPLE ==================== -->
+    <section
+      id="dropZone"
+      class="relative bg-white border-2 border-dashed border-slate-300 hover:border-sky-500 rounded-2xl p-6 sm:p-8 text-center transition-all shadow-sm"
+    >
+      <input
+        id="fileInput"
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/heic"
+        multiple
+        class="hidden"
+      />
+
+      <div class="max-w-xl mx-auto flex flex-col items-center">
+        <div class="w-14 h-14 rounded-2xl bg-sky-50 text-sky-600 flex items-center justify-center mb-3 border border-sky-100">
+          <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+          </svg>
+        </div>
+
+        <h2 class="text-lg sm:text-xl font-bold text-slate-900">Sube tus fotos para imprimir</h2>
+        <p class="text-sm text-slate-500 mt-1">
+          Arrastra y suelta tus imágenes aquí o selecciónalas desde tu galería. Conservamos la resolución original para laboratorio.
+        </p>
+
+        <div class="mt-5 flex flex-wrap items-center justify-center gap-3 w-full">
+          <button
+            type="button"
+            onclick="document.getElementById('fileInput').click()"
+            class="inline-flex items-center justify-center gap-2 bg-sky-600 hover:bg-sky-700 active:scale-[0.99] text-white font-semibold text-sm px-5 py-3 rounded-xl shadow-sm transition"
+          >
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            Seleccionar fotos de mi dispositivo
+          </button>
+
+          <button
+            id="loadSamplesBtn"
+            type="button"
+            onclick="loadSamplePhotos()"
+            class="inline-flex items-center justify-center gap-2 bg-slate-100 hover:bg-slate-200 active:scale-[0.99] text-slate-800 font-semibold text-sm px-4 py-3 rounded-xl border border-slate-200 transition"
+          >
+            <svg class="w-4 h-4 text-amber-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+            </svg>
+            Cargar fotos de muestra
+          </button>
+        </div>
+
+        <p class="text-xs text-slate-400 mt-3">Soporta JPG, PNG y WEBP • Verificación automática de 300 DPI</p>
+      </div>
+    </section>
+
+    <!-- ==================== 3. BARRA DE ACCIONES MASIVAS ==================== -->
+    <section
+      id="bulkToolbar"
+      class="hidden bg-white border border-slate-200 rounded-2xl p-4 shadow-sm flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+    >
+      <div class="flex items-center gap-3">
+        <span class="inline-flex items-center justify-center w-9 h-9 rounded-xl bg-sky-50 text-sky-700 font-bold text-sm border border-sky-100" id="photoCountPill">
+          0
+        </span>
+        <div>
+          <h3 class="text-sm font-bold text-slate-900">Acciones masivas del lote</h3>
+          <p class="text-xs text-slate-500">Aplica el mismo papel o copias a todas tus fotos en un clic</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+          <label for="bulkProductSelect" class="text-xs font-semibold text-slate-600 whitespace-nowrap">Tamaño:</label>
+          <select
+            id="bulkProductSelect"
+            class="bg-transparent text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none py-1"
+          ></select>
+        </div>
+
+        <button
+          type="button"
+          onclick="applyBulkProduct()"
+          class="bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold px-3.5 py-2.5 rounded-xl transition"
+        >
+          Aplicar tamaño
+        </button>
+
+        <div class="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
+          <label for="bulkFinishSelect" class="text-xs font-semibold text-slate-600 whitespace-nowrap">Papel:</label>
+          <select
+            id="bulkFinishSelect"
+            class="bg-transparent text-xs sm:text-sm font-semibold text-slate-900 focus:outline-none py-1"
+          ></select>
+        </div>
+
+        <button
+          type="button"
+          onclick="applyBulkFinish()"
+          class="bg-slate-900 hover:bg-slate-800 text-white text-xs sm:text-sm font-semibold px-3.5 py-2.5 rounded-xl transition"
+        >
+          Aplicar papel
+        </button>
+
+        <button
+          type="button"
+          onclick="incrementAllCopies()"
+          class="bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs sm:text-sm font-semibold px-3.5 py-2.5 rounded-xl border border-slate-200 transition"
+        >
+          +1 copia a todas
+        </button>
+
+        <button
+          type="button"
+          onclick="clearAllPhotos()"
+          class="text-rose-600 hover:bg-rose-50 text-xs sm:text-sm font-semibold px-3 py-2.5 rounded-xl transition"
+        >
+          Vaciar lote
+        </button>
+      </div>
+    </section>
+
+    <!-- ==================== 4. CUADRÍCULA DE TARJETAS DE FOTOS ==================== -->
+    <section aria-label="Fotos seleccionadas para imprimir">
+      <div id="emptyState" class="bg-white border border-slate-200 rounded-2xl p-10 text-center">
+        <p class="text-sm font-medium text-slate-500">Aún no has agregado fotografías a tu orden.</p>
+        <p class="text-xs text-slate-400 mt-1">Usa el botón <strong>"Cargar fotos de muestra"</strong> arriba para probar el editor de recorte y la alerta de resolución.</p>
+      </div>
+
+      <div id="photosGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5"></div>
+    </section>
+  </main>
+
+  <!-- ==================== 6. BARRA INFERIOR FIJA (STICKY FOOTER) ==================== -->
+  <footer class="fixed bottom-0 inset-x-0 z-30 bg-white/95 backdrop-blur border-t border-slate-200 shadow-[0_-4px_20px_rgba(15,23,42,0.06)]">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3 flex items-center justify-between gap-4">
+      <div class="flex items-center gap-4 sm:gap-8">
+        <div>
+          <span class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400">Resumen del lote</span>
+          <div class="flex items-baseline gap-2">
+            <span id="footerTotalCopies" class="text-sm sm:text-base font-bold text-slate-900">0 copias</span>
+            <span class="text-slate-300">•</span>
+            <span id="footerUniquePhotos" class="text-xs sm:text-sm text-slate-500">0 fotos</span>
+          </div>
+        </div>
+
+        <div class="border-l border-slate-200 pl-4 sm:pl-8">
+          <span class="block text-[11px] font-semibold uppercase tracking-wider text-slate-400">Total a pagar</span>
+          <span id="footerTotalAmount" class="text-lg sm:text-2xl font-extrabold text-slate-900">L. 0.00</span>
+        </div>
+      </div>
+
+      <button
+        id="checkoutBtn"
+        type="button"
+        onclick="openCheckoutModal()"
+        disabled
+        class="inline-flex items-center gap-2 bg-sky-600 hover:bg-sky-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white font-bold text-sm sm:text-base px-5 sm:px-7 py-3.5 rounded-xl shadow-sm transition"
+      >
+        <span>Continuar al Checkout</span>
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+        </svg>
+      </button>
+    </div>
+  </footer>
+
+  <!-- ==================== 5. MODAL INTERACTIVO DE RECORTE ==================== -->
+  <div
+    id="cropModal"
+    class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="cropModalTitle"
+  >
+    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[94vh]">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between gap-3">
+        <div>
+          <h3 id="cropModalTitle" class="text-base sm:text-lg font-bold text-slate-900">Ajustar encuadre y recorte</h3>
+          <p id="cropModalSubtitle" class="text-xs text-slate-500">Proporción bloqueada • Arrastra el texto o activa mover foto</p>
+        </div>
+        <button
+          type="button"
+          onclick="closeCropModal()"
+          class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="flex-1 bg-slate-900 p-4 sm:p-6 flex flex-col items-center justify-center overflow-hidden min-h-[290px] sm:min-h-[360px]">
+        <div
+          id="cropViewport"
+          class="crop-stage relative overflow-hidden rounded-lg shadow-2xl ring-2 ring-sky-400 bg-white flex items-center justify-center cursor-default"
+          style="width: 300px; height: 200px;"
+        >
+          <canvas
+            id="cropPreviewCanvas"
+            class="block w-full h-full pointer-events-none select-none"
+          ></canvas>
+
+          <div class="pointer-events-none absolute inset-0 grid grid-cols-3 grid-rows-3">
+            <div class="border-r border-b border-white/25"></div>
+            <div class="border-r border-b border-white/25"></div>
+            <div class="border-b border-white/25"></div>
+            <div class="border-r border-b border-white/25"></div>
+            <div class="border-r border-b border-white/25"></div>
+            <div class="border-b border-white/25"></div>
+            <div class="border-r border-white/25"></div>
+            <div class="border-r border-white/25"></div>
+            <div></div>
+          </div>
+
+          <div id="textGuideVertical" class="pointer-events-none hidden absolute inset-y-0 left-1/2 -translate-x-1/2 w-0.5 bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.95)] z-10"></div>
+          <div id="textGuideHorizontal" class="pointer-events-none hidden absolute inset-x-0 top-1/2 -translate-y-1/2 h-0.5 bg-amber-400 shadow-[0_0_8px_rgba(251,191,36,0.95)] z-10"></div>
+          <span id="textCenteredBadge" class="pointer-events-none hidden absolute top-2 left-1/2 -translate-x-1/2 bg-amber-400 text-slate-950 text-[10px] font-extrabold px-2 py-0.5 rounded-full shadow z-10">
+            Centrado
+          </span>
+
+          <span class="pointer-events-none absolute bottom-2 right-2 bg-slate-950/75 text-white text-[10px] font-medium px-2 py-0.5 rounded">
+            Área impresa exacta
+          </span>
+
+          <div
+            id="textDragHandle"
+            class="hidden absolute -translate-x-1/2 -translate-y-1/2 cursor-move px-3 py-1.5 rounded-lg border-2 border-dashed border-sky-400 bg-sky-500/15 hover:bg-sky-500/25 transition-colors z-10 flex items-center gap-1.5 shadow-sm"
+            style="left: 50%; top: 86%;"
+            title="Arrastra para mover el texto"
+          >
+            <svg class="w-3.5 h-3.5 text-sky-300 shrink-0 drop-shadow" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4" />
+            </svg>
+            <span class="text-[10px] font-extrabold text-white drop-shadow whitespace-nowrap">Mover texto</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="p-4 sm:p-5 bg-white border-t border-slate-200 space-y-4 overflow-y-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-4 items-center">
+          <div class="lg:col-span-5 flex rounded-xl bg-slate-100 p-1 border border-slate-200">
+            <button
+              id="modeFillBtn"
+              type="button"
+              onclick="setCropFitMode('fill')"
+              class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition bg-white text-slate-900 shadow-sm"
+            >
+              Sin bordes (Fill)
+            </button>
+            <button
+              id="modeFitBtn"
+              type="button"
+              onclick="setCropFitMode('border')"
+              class="flex-1 py-2 px-3 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900"
+            >
+              Imprimir con bordes
+            </button>
+          </div>
+
+          <div class="lg:col-span-7 flex flex-wrap items-center gap-2.5">
+            <div class="flex-1 min-w-[120px]">
+              <div class="flex justify-between text-xs font-semibold text-slate-600 mb-1">
+                <span>Zoom</span>
+                <span id="cropZoomLabel">100%</span>
+              </div>
+              <input
+                id="cropZoomSlider"
+                type="range"
+                min="1"
+                max="2.5"
+                step="0.05"
+                value="1"
+                oninput="updateCropZoom(this.value)"
+                class="w-full accent-sky-600 cursor-pointer"
+              />
+            </div>
+
+            <button
+              id="modalOrientBtn"
+              type="button"
+              onclick="toggleModalOrientation()"
+              class="inline-flex items-center gap-1.5 bg-sky-50 hover:bg-sky-100 text-sky-800 text-xs font-bold px-3.5 py-2.5 rounded-xl border border-sky-200 transition shrink-0"
+              title="Orientar fotografía a la plantilla"
+            >
+              <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 7h12a2 2 0 012 2v8a2 2 0 01-2 2H4a2 2 0 01-2-2V9a2 2 0 012-2zm16 3l2 2m0 0l-2 2m2-2H18" />
+              </svg>
+              <span>Orientar</span>
+            </button>
+
+            <button
+              id="togglePhotoPanBtn"
+              type="button"
+              onclick="togglePhotoPanLock()"
+              class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-200 transition shrink-0"
+              title="Bloquear o desbloquear el movimiento de la fotografía"
+            >
+              <svg id="photoPanLockIcon" class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span id="togglePhotoPanLabel">Foto fija</span>
+            </button>
+
+            <button
+              type="button"
+              onclick="resetCropState()"
+              class="text-xs font-semibold text-slate-600 hover:text-slate-900 px-3 py-2.5 rounded-xl hover:bg-slate-100 transition shrink-0"
+            >
+              Centrar
+            </button>
+          </div>
+        </div>
+
+        <div id="borderColorToolbar" class="hidden bg-slate-50 border border-slate-200 rounded-2xl px-3.5 py-3 space-y-2.5">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-800">Color del borde:</span>
+              <span id="borderColorNameLabel" class="text-xs font-semibold text-sky-700">Blanco clásico</span>
+            </div>
+            <div class="flex items-center gap-2" id="borderColorSwatches">
+              <button type="button" onclick="setDraftBorderColor('#ffffff', 'Blanco clásico')" data-border-color="#ffffff" class="w-6 h-6 rounded-full bg-white border-2 border-slate-300 shadow-xs transition" title="Blanco clásico"></button>
+              <button type="button" onclick="setDraftBorderColor('#0f172a', 'Negro elegante')" data-border-color="#0f172a" class="w-6 h-6 rounded-full bg-slate-900 border-2 border-white shadow-xs transition" title="Negro elegante"></button>
+              <button type="button" onclick="setDraftBorderColor('#fef3c7', 'Crema vintage')" data-border-color="#fef3c7" class="w-6 h-6 rounded-full bg-amber-100 border-2 border-slate-300 shadow-xs transition" title="Crema vintage"></button>
+              <button type="button" onclick="setDraftBorderColor('#eab308', 'Dorado')" data-border-color="#eab308" class="w-6 h-6 rounded-full bg-yellow-500 border-2 border-white shadow-xs transition" title="Dorado"></button>
+              <button type="button" onclick="setDraftBorderColor('#0284c7', 'Azul cielo')" data-border-color="#0284c7" class="w-6 h-6 rounded-full bg-sky-600 border-2 border-white shadow-xs transition" title="Azul cielo"></button>
+              <button type="button" onclick="setDraftBorderColor('#e11d48', 'Rosa festivo')" data-border-color="#e11d48" class="w-6 h-6 rounded-full bg-rose-600 border-2 border-white shadow-xs transition" title="Rosa festivo"></button>
+            </div>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 pt-2 border-t border-slate-200/80">
+            <div class="flex items-center gap-1.5">
+              <label for="borderWidthSlider" class="text-xs font-bold text-slate-700 whitespace-nowrap">Grosor del borde:</label>
+              <span id="borderWidthValueLabel" class="text-xs font-extrabold text-sky-700 bg-sky-50 border border-sky-200 px-2 py-0.5 rounded-md min-w-[46px] text-center">3 mm</span>
+            </div>
+            <input
+              id="borderWidthSlider"
+              type="range"
+              min="2"
+              max="15"
+              step="1"
+              value="3"
+              oninput="setDraftBorderWidth(this.value)"
+              class="flex-1 min-w-[110px] accent-sky-600 cursor-pointer"
+            />
+            <div class="flex items-center gap-1">
+              <button type="button" onclick="setDraftBorderWidth(3)" class="px-2 py-1 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-[11px] font-bold text-slate-700">3 mm</button>
+              <button type="button" onclick="setDraftBorderWidth(5)" class="px-2 py-1 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-[11px] font-bold text-slate-700">5 mm</button>
+              <button type="button" onclick="setDraftBorderWidth(8)" class="px-2 py-1 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-[11px] font-bold text-slate-700">8 mm</button>
+              <button type="button" onclick="setDraftBorderWidth(12)" class="px-2 py-1 rounded-lg bg-white hover:bg-sky-50 border border-slate-200 text-[11px] font-bold text-slate-700">12 mm</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-2xl p-3.5 space-y-3">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <label for="modalOverlayTextInput" class="inline-flex items-center gap-1.5 text-xs font-bold text-slate-800">
+              <svg class="w-4 h-4 text-sky-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+              </svg>
+              <span>Texto o dedicatoria en la foto (opcional)</span>
+            </label>
+            <div class="flex flex-wrap items-center gap-1">
+              <button
+                type="button"
+                onclick="applyPresetOverlayText('¡Te invito a mi cumpleaños!')"
+                class="text-[11px] font-semibold bg-white hover:bg-sky-50 text-slate-700 hover:text-sky-700 border border-slate-200 px-2 py-1 rounded-lg transition"
+              >
+                + ¡Te invito a mi cumpleaños!
+              </button>
+              <button
+                type="button"
+                onclick="applyPresetOverlayText('¡Feliz Cumpleaños!')"
+                class="text-[11px] font-semibold bg-white hover:bg-sky-50 text-slate-700 hover:text-sky-700 border border-slate-200 px-2 py-1 rounded-lg transition"
+              >
+                + ¡Feliz Cumpleaños!
+              </button>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2">
+            <input
+              id="modalOverlayTextInput"
+              type="text"
+              maxlength="70"
+              placeholder="Ej. ¡Te invito a mi cumpleaños! • Sábado 4:00 PM"
+              oninput="updateDraftOverlayText(this.value)"
+              class="flex-1 rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs sm:text-sm font-medium text-slate-900 focus:outline-none focus:ring-2 focus:ring-sky-500"
+            />
+            <button
+              type="button"
+              onclick="clearDraftOverlayText()"
+              class="px-3 py-2 rounded-xl text-xs font-semibold text-slate-600 hover:text-rose-600 hover:bg-rose-50 border border-slate-200 bg-white transition shrink-0"
+              title="Quitar texto"
+            >
+              Limpiar
+            </button>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-center">
+            <div class="sm:col-span-4 flex items-center gap-2">
+              <span class="text-[11px] font-semibold text-slate-500">Color:</span>
+              <div class="flex items-center gap-1.5" id="textColorSwatches">
+                <button type="button" onclick="setDraftTextColor('#ffffff')" data-color="#ffffff" class="w-6 h-6 rounded-full bg-white border-2 border-slate-300 shadow-xs transition" title="Blanco"></button>
+                <button type="button" onclick="setDraftTextColor('#0f172a')" data-color="#0f172a" class="w-6 h-6 rounded-full bg-slate-900 border-2 border-white shadow-xs transition" title="Negro"></button>
+                <button type="button" onclick="setDraftTextColor('#facc15')" data-color="#facc15" class="w-6 h-6 rounded-full bg-yellow-400 border-2 border-white shadow-xs transition" title="Dorado"></button>
+                <button type="button" onclick="setDraftTextColor('#f43f5e')" data-color="#f43f5e" class="w-6 h-6 rounded-full bg-rose-500 border-2 border-white shadow-xs transition" title="Rosa"></button>
+                <button type="button" onclick="setDraftTextColor('#38bdf8')" data-color="#38bdf8" class="w-6 h-6 rounded-full bg-sky-400 border-2 border-white shadow-xs transition" title="Celeste"></button>
+              </div>
+            </div>
+
+            <div class="sm:col-span-4 flex items-center gap-1.5">
+              <span class="text-[11px] font-semibold text-slate-500">Posición:</span>
+              <div class="flex rounded-lg bg-white border border-slate-200 p-0.5 text-[11px] font-bold flex-1">
+                <button type="button" id="textPosTopBtn" onclick="setDraftTextPosition('top')" class="flex-1 py-1 rounded-md transition text-slate-600">Arriba</button>
+                <button type="button" id="textPosCenterBtn" onclick="setDraftTextPosition('center')" class="flex-1 py-1 rounded-md transition text-slate-600">Centro</button>
+                <button type="button" id="textPosBottomBtn" onclick="setDraftTextPosition('bottom')" class="flex-1 py-1 rounded-md transition bg-slate-900 text-white">Abajo</button>
+              </div>
+            </div>
+
+            <div class="sm:col-span-4 flex items-center justify-between sm:justify-end gap-2">
+              <div class="inline-flex items-center rounded-lg border border-slate-200 bg-white p-0.5" title="Tamaño de letra">
+                <button
+                  type="button"
+                  onclick="stepDraftTextScale(-0.15)"
+                  class="px-2 py-1 rounded-md text-[11px] font-extrabold text-slate-700 hover:bg-slate-100 transition"
+                  title="Reducir letra"
+                >
+                  A−
+                </button>
+                <span id="modalTextScaleLabel" class="px-1.5 text-[11px] font-extrabold text-sky-700 min-w-[40px] text-center">100%</span>
+                <button
+                  type="button"
+                  onclick="stepDraftTextScale(0.15)"
+                  class="px-2 py-1 rounded-md text-[11px] font-extrabold text-slate-700 hover:bg-slate-100 transition"
+                  title="Aumentar letra"
+                >
+                  A+
+                </button>
+              </div>
+
+              <label class="inline-flex items-center gap-1.5 text-[11px] font-semibold text-slate-700 cursor-pointer select-none">
+                <input
+                  id="modalTextBgCheckbox"
+                  type="checkbox"
+                  checked
+                  onchange="setDraftTextBg(this.checked)"
+                  class="rounded accent-sky-600"
+                />
+                <span>Fondo</span>
+              </label>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3 pt-1">
+            <label for="modalTextScaleSlider" class="text-[11px] font-semibold text-slate-500 whitespace-nowrap">Tamaño de letra:</label>
+            <input
+              id="modalTextScaleSlider"
+              type="range"
+              min="0.5"
+              max="2.2"
+              step="0.05"
+              value="1"
+              oninput="setDraftTextScale(this.value)"
+              class="flex-1 accent-sky-600 cursor-pointer"
+            />
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-3 pt-2 border-t border-slate-100">
+          <button
+            type="button"
+            onclick="closeCropModal()"
+            class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition"
+          >
+            Cancelar
+          </button>
+          <button
+            type="button"
+            onclick="saveCropChanges()"
+            class="px-6 py-2.5 rounded-xl text-sm font-bold bg-sky-600 hover:bg-sky-700 text-white shadow-sm transition"
+          >
+            Guardar recorte
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 6. MODAL DE CHECKOUT Y COMPROBANTE ==================== -->
+  <div
+    id="checkoutModal"
+    class="fixed inset-0 z-50 hidden bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="bg-white w-full max-w-3xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[94vh]">
+      <div class="px-5 py-4 border-b border-slate-200 flex items-center justify-between">
+        <div>
+          <h3 id="checkoutHeaderTitle" class="text-lg font-bold text-slate-900">Finalizar pedido en línea</h3>
+          <p id="checkoutHeaderSubtitle" class="text-xs text-slate-500">Foto Estudio Centro • Sin necesidad de crear cuenta</p>
+        </div>
+        <button
+          type="button"
+          onclick="closeCheckoutModal()"
+          class="p-2 rounded-xl text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-5 overflow-y-auto space-y-5 flex-1">
+        <!-- VISTA 1: FORMULARIO DE CHECKOUT -->
+        <form id="checkoutForm" onsubmit="submitOrder(event)" class="space-y-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="customerName">Nombre completo *</label>
+              <input
+                id="customerName"
+                type="text"
+                required
+                placeholder="Ej. María Fernanda López"
+                class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              />
+            </div>
+
+            <div>
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="customerPhone">WhatsApp para avisarte *</label>
+              <div class="flex rounded-xl border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-sky-500">
+                <span class="bg-slate-100 px-3 py-2.5 text-sm font-semibold text-slate-600 border-r border-slate-300 select-none">+504</span>
+                <input
+                  id="customerPhone"
+                  type="tel"
+                  required
+                  placeholder="9988-7766"
+                  class="w-full px-3.5 py-2.5 text-sm focus:outline-none"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <span class="block text-xs font-bold text-slate-700 mb-2">Método de entrega</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="cursor-pointer border rounded-xl p-3.5 flex items-start gap-3 transition border-sky-500 bg-sky-50/50" id="pickupCard">
+                <input type="radio" name="deliveryMethod" value="pickup" checked onchange="toggleDeliveryMethod()" class="mt-1 accent-sky-600" />
+                <div>
+                  <span class="block text-sm font-bold text-slate-900">Recoger en tienda</span>
+                  <span class="block text-xs text-slate-500">Sin costo • Listo en ~45 min</span>
+                </div>
+              </label>
+
+              <label class="cursor-pointer border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 transition hover:border-slate-300" id="deliveryCard">
+                <input type="radio" name="deliveryMethod" value="delivery" onchange="toggleDeliveryMethod()" class="mt-1 accent-sky-600" />
+                <div>
+                  <span class="block text-sm font-bold text-slate-900">Envío a domicilio</span>
+                  <span class="block text-xs text-slate-500">Casco urbano (+ L. 60.00)</span>
+                </div>
+              </label>
+            </div>
+
+            <div id="deliveryAddressBox" class="hidden mt-3">
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="deliveryAddress">Dirección exacta y referencias *</label>
+              <textarea
+                id="deliveryAddress"
+                rows="2"
+                placeholder="Colonia, bloque, número de casa o punto de referencia..."
+                class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              ></textarea>
+            </div>
+          </div>
+
+          <div>
+            <span class="block text-xs font-bold text-slate-700 mb-2">Método de pago</span>
+            <div class="border border-sky-500 bg-sky-50/50 rounded-xl p-3.5 flex items-start gap-3">
+              <input type="hidden" name="paymentMethod" value="transfer" />
+              <div class="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+              </div>
+              <div>
+                <span class="block text-sm font-bold text-slate-900">Transferencia bancaria (Pago anticipado)</span>
+                <span class="block text-xs text-slate-500">BAC / Atlántida / Ficohsa • Confirmación requerida para iniciar impresión</span>
+              </div>
+            </div>
+
+            <div id="transferProofBox" class="mt-3 bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2.5">
+              <div class="text-xs text-slate-600">
+                <p class="font-bold text-slate-800">Cuenta BAC Credomatic: 742891034 (Foto Estudio Centro)</p>
+                <p>Adjunta la captura del comprobante para iniciar impresión de inmediato *</p>
+              </div>
+              <input
+                id="paymentProofInput"
+                type="file"
+                required
+                accept="image/*,application/pdf"
+                onchange="handleProofSelected(this)"
+                class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-700 cursor-pointer"
+              />
+              <p id="proofFileName" class="text-xs font-medium text-emerald-700 hidden"></p>
+            </div>
+          </div>
+
+          <div class="bg-slate-900 text-white rounded-2xl p-4 space-y-2">
+            <div class="flex justify-between text-xs text-slate-300">
+              <span>Subtotal de impresión (<span id="checkoutCopiesCount">0</span> copias)</span>
+              <span id="checkoutSubtotal">L. 0.00</span>
+            </div>
+            <div class="flex justify-between text-xs text-slate-300">
+              <span>Costo de envío</span>
+              <span id="checkoutDeliveryFee">L. 0.00</span>
+            </div>
+            <div class="border-t border-slate-700 pt-2 flex justify-between items-baseline">
+              <span class="text-sm font-bold">Total de la orden</span>
+              <span id="checkoutGrandTotal" class="text-xl font-extrabold text-sky-400">L. 0.00</span>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-end gap-3 pt-1">
+            <button
+              type="button"
+              onclick="closeCheckoutModal()"
+              class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100"
+            >
+              Volver a editar fotos
+            </button>
+            <button
+              type="submit"
+              class="px-6 py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition"
+            >
+              Confirmar y enviar orden
+            </button>
+          </div>
+        </form>
+
+        <!-- VISTA 2: CONFIRMACIÓN PARA EL CLIENTE + RECEPCIÓN DE LABORATORIO POR CARPETAS -->
+        <div id="orderConfirmationView" class="hidden space-y-5">
+          <!-- A) Mensaje limpio y amigable para el CLIENTE -->
+          <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 text-center space-y-2">
+            <div class="w-12 h-12 rounded-full bg-emerald-600 text-white mx-auto flex items-center justify-center shadow-sm">
+              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
+              </svg>
+            </div>
+            <span class="inline-block text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-0.5 rounded-full">
+              ¡Orden creada con éxito!
+            </span>
+            <h4 class="text-xl sm:text-2xl font-extrabold text-slate-900">
+              Tu número de orden es <span id="generatedOrderNumber" class="text-sky-700">W-2085</span>
+            </h4>
+            <p id="generatedOrderSummaryText" class="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto"></p>
+            <p class="text-xs text-emerald-800 font-medium pt-1">
+              Hemos recibido tu pedido y comprobante. Te avisaremos por WhatsApp en cuanto tus fotos estén listas.
+            </p>
+          </div>
+
+          <!-- B) Vista interna de RECEPCIÓN EN LABORATORIO (Estructura de carpetas) -->
+          <div class="border-2 border-slate-200 rounded-2xl overflow-hidden bg-slate-50/70">
+            <div class="bg-slate-900 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+              <div class="flex items-center gap-2.5">
+                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-400/30">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+                  </svg>
+                </span>
+                <div>
+                  <span class="block text-[10px] font-bold uppercase tracking-wider text-sky-300">Recepción en Laboratorio • Árbol de carpetas</span>
+                  <h5 id="labRootFolderTitle" class="text-xs sm:text-sm font-extrabold text-white font-mono">W-2085_Cliente/</h5>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                id="downloadZipBtn"
+                onclick="downloadOrderZipPackage()"
+                class="inline-flex items-center gap-2 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm transition shrink-0"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Descargar ZIP con carpetas (300 DPI)</span>
+              </button>
+            </div>
+
+            <div class="p-3.5 space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-slate-700">Subcarpetas clasificadas por Tamaño y Papel:</span>
+                <span id="productionBatchCountBadge" class="text-[11px] font-bold bg-white text-sky-700 border border-sky-200 px-2.5 py-0.5 rounded-full">0 subcarpetas</span>
+              </div>
+
+              <div id="productionBatchesContainer" class="space-y-2.5">
+                <!-- Subcarpetas inyectadas dinámicamente -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Payload JSON listo para API / Supabase -->
+          <details class="bg-slate-50 border border-slate-200 rounded-xl p-3">
+            <summary class="cursor-pointer text-xs font-bold text-slate-700 flex items-center justify-between">
+              <span>Ver Payload JSON técnico para integración API / Minilab</span>
+              <button
+                type="button"
+                onclick="event.preventDefault(); copyOrderJson()"
+                id="copyJsonBtn"
+                class="text-xs font-bold text-sky-600 hover:text-sky-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200"
+              >
+                Copiar JSON
+              </button>
+            </summary>
+            <pre id="orderJsonOutput" class="mt-3 bg-slate-950 text-emerald-300 text-[11px] leading-relaxed p-4 rounded-xl overflow-x-auto max-h-56 font-mono"></pre>
+          </details>
+
+          <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+            <button
+              type="button"
+              onclick="startNewOrder()"
+              class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200"
+            >
+              Crear otra orden
+            </button>
+            <button
+              type="button"
+              onclick="closeCheckoutModal()"
+              class="px-6 py-2.5 rounded-xl text-sm font-bold bg-slate-900 hover:bg-slate-800 text-white"
+            >
+              Listo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast de notificación ligero (sin alert) -->
+  <div
+    id="toastBanner"
+    class="fixed top-20 right-4 z-50 hidden bg-slate-900 text-white text-xs sm:text-sm font-medium px-4 py-3 rounded-xl shadow-lg border border-slate-700 flex items-center gap-2.5"
+  >
+    <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+    <span id="toastMessage">Mensaje</span>
+  </div>
+
+  <!-- ==================== LÓGICA DE APLICACIÓN ==================== -->
+  <script>
+    const PRINT_PRODUCTS = [
+      { id: '4x6', name: '4×6', widthInches: 6, heightInches: 4, dpi: 300, price: 8.00 },
+      { id: '5x7', name: '5×7', widthInches: 7, heightInches: 5, dpi: 300, price: 18.00 },
+      { id: '8x10', name: '8×10', widthInches: 10, heightInches: 8, dpi: 300, price: 45.00 },
+      { id: 'carne-4x4', name: 'Carné 4×4', widthInches: 2, heightInches: 2, dpi: 300, price: 25.00 }
+    ];
+
+    const PAPER_FINISHES = [
+      { id: 'glossy', name: 'Brillo' },
+      { id: 'matte', name: 'Mate' },
+      { id: 'luster', name: 'Lustre' }
+    ];
+
+    const DEFAULT_BORDER_MM = 3;
+    const DELIVERY_FEE_HNL = 60.00;
+    let photoItems = [];
+    let lastConfirmedOrderNumber = 'W-0000';
+    let lastConfirmedCustomerName = 'Cliente';
+    let activeCropPhotoId = null;
+    let activeCropImageEl = null;
+    let draftCrop = {
+      x: 0,
+      y: 0,
+      zoom: 1,
+      rotation: 0,
+      fit_mode: 'fill',
+      border_mm: DEFAULT_BORDER_MM,
+      border_color: '#ffffff',
+      border_color_name: 'Blanco clásico',
+      overlay_text: { text: '', color: '#ffffff', position: 'bottom', x_norm: 0.5, y_norm: 0.86, scale: 1, backdrop: true }
+    };
+    let isDraggingCrop = false;
+    let isDraggingText = false;
+    let isPhotoPanEnabled = false;
+    let dragStart = { x: 0, y: 0 };
+    let textDragStart = { x: 0, y: 0 };
+    let proofFileNameSelected = null;
+
+    function createDefaultOverlayText() {
+      return {
+        text: '',
+        color: '#ffffff',
+        position: 'bottom',
+        x_norm: 0.5,
+        y_norm: 0.86,
+        scale: 1,
+        backdrop: true
+      };
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      populateBulkProductSelect();
+      populateBulkFinishSelect();
+      setupFileUploadListeners();
+      setupCropDragEvents();
+      renderAll();
+    });
+
+    function populateBulkProductSelect() {
+      const select = document.getElementById('bulkProductSelect');
+      if (!select) return;
+      select.innerHTML = PRINT_PRODUCTS.map(
+        p => `<option value="${p.id}">${p.name} — L. ${p.price.toFixed(2)}</option>`
+      ).join('');
+    }
+
+    function populateBulkFinishSelect() {
+      const select = document.getElementById('bulkFinishSelect');
+      if (!select) return;
+      select.innerHTML = PAPER_FINISHES.map(
+        f => `<option value="${f.id}">${f.name}</option>`
+      ).join('');
+    }
+
+    function setupFileUploadListeners() {
+      const fileInput = document.getElementById('fileInput');
+      const dropZone = document.getElementById('dropZone');
+
+      if (fileInput) {
+        fileInput.addEventListener('change', e => {
+          if (e.target.files && e.target.files.length > 0) {
+            handleFilesSelected(Array.from(e.target.files));
+            fileInput.value = '';
+          }
+        });
+      }
+
+      if (dropZone) {
+        ['dragenter', 'dragover'].forEach(evtName => {
+          dropZone.addEventListener(evtName, e => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.add('border-sky-500', 'bg-sky-50/40');
+          });
+        });
+
+        ['dragleave', 'drop'].forEach(evtName => {
+          dropZone.addEventListener(evtName, e => {
+            e.preventDefault();
+            e.stopPropagation();
+            dropZone.classList.remove('border-sky-500', 'bg-sky-50/40');
+          });
+        });
+
+        dropZone.addEventListener('drop', e => {
+          const files = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
+          const imageFiles = files.filter(f => f.type.startsWith('image/'));
+          if (imageFiles.length > 0) {
+            handleFilesSelected(imageFiles);
+          } else {
+            showToast('Sube únicamente archivos de imagen (JPG, PNG o WEBP).');
+          }
+        });
+      }
+    }
+
+    function handleFilesSelected(files) {
+      let loadedCount = 0;
+      files.forEach((file, idx) => {
+        const reader = new FileReader();
+        reader.onload = ev => {
+          const dataUrl = ev.target.result;
+          const img = new Image();
+          img.onload = () => {
+            const isVertical = img.naturalHeight > img.naturalWidth;
+            photoItems.push({
+              id: `photo_${Date.now()}_${idx}_${Math.random().toString(36).slice(2, 6)}`,
+              fileName: file.name,
+              dataUrl,
+              naturalWidth: img.naturalWidth,
+              naturalHeight: img.naturalHeight,
+              productId: '4x6',
+              finishId: 'glossy',
+              quantity: 1,
+              upscaled: false,
+              crop_data: {
+                x: 0,
+                y: 0,
+                zoom: 1,
+                rotation: isVertical ? 90 : 0,
+                fit_mode: 'fill',
+                border_mm: DEFAULT_BORDER_MM,
+                border_color: '#ffffff',
+                border_color_name: 'Blanco clásico',
+                overlay_text: createDefaultOverlayText()
+              }
+            });
+            loadedCount++;
+            if (loadedCount === files.length) {
+              renderAll();
+              showToast(`${loadedCount} ${loadedCount === 1 ? 'foto agregada' : 'fotos agregadas'} al pedido.`);
+            }
+          };
+          img.src = dataUrl;
+        };
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function loadSamplePhotos() {
+      const samples = [
+        { name: 'Cumpleanos_Sofia.jpg', w: 1200, h: 1800, c1: '#0284c7', c2: '#38bdf8', label: 'Retrato Vertical 1200×1800' },
+        { name: 'Familia_Playa.jpg', w: 2400, h: 1600, c1: '#0d9488', c2: '#5eead4', label: 'Paisaje HD 2400×1600' },
+        { name: 'Graduacion_2026.jpg', w: 2100, h: 1500, c1: '#4f46e5', c2: '#818cf8', label: 'Evento 2100×1500' },
+        { name: 'Captura_WhatsApp.jpg', w: 800, h: 600, c1: '#d97706', c2: '#fbbf24', label: 'Baja Res 800×600' }
+      ];
+
+      let created = 0;
+      samples.forEach((s, idx) => {
+        const c = document.createElement('canvas');
+        c.width = s.w;
+        c.height = s.h;
+        const ctx = c.getContext('2d');
+
+        const grad = ctx.createLinearGradient(0, 0, s.w, s.h);
+        grad.addColorStop(0, s.c1);
+        grad.addColorStop(1, s.c2);
+        ctx.fillStyle = grad;
+        ctx.fillRect(0, 0, s.w, s.h);
+
+        ctx.strokeStyle = 'rgba(255,255,255,0.35)';
+        ctx.lineWidth = Math.max(8, s.w * 0.01);
+        ctx.strokeRect(s.w * 0.06, s.h * 0.06, s.w * 0.88, s.h * 0.88);
+
+        ctx.fillStyle = '#ffffff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.font = `800 ${Math.round(Math.min(s.w, s.h) * 0.065)}px Inter, sans-serif`;
+        ctx.fillText(s.label, s.w / 2, s.h / 2);
+
+        const dataUrl = c.toDataURL('image/jpeg', 0.92);
+        const img = new Image();
+        img.onload = () => {
+          const isVertical = img.naturalHeight > img.naturalWidth;
+          photoItems.push({
+            id: `sample_${Date.now()}_${idx}`,
+            fileName: s.name,
+            dataUrl,
+            naturalWidth: img.naturalWidth,
+            naturalHeight: img.naturalHeight,
+            productId: '4x6',
+            finishId: 'glossy',
+            quantity: 1,
+            upscaled: false,
+            crop_data: {
+              x: 0,
+              y: 0,
+              zoom: 1,
+              rotation: isVertical ? 90 : 0,
+              fit_mode: 'fill',
+              border_mm: DEFAULT_BORDER_MM,
+              border_color: '#ffffff',
+              border_color_name: 'Blanco clásico',
+              overlay_text: createDefaultOverlayText()
+            }
+          });
+          created++;
+          if (created === samples.length) {
+            renderAll();
+            showToast('Se cargaron 4 fotografías de muestra.');
+          }
+        };
+        img.src = dataUrl;
+      });
+    }
+
+    function calculateEffectiveDpi(item, product) {
+      const rotDeg = ((item.crop_data.rotation % 360) + 360) % 360;
+      const isSwapped = rotDeg === 90 || rotDeg === 270;
+      const effW = isSwapped ? item.naturalHeight : item.naturalWidth;
+      const effH = isSwapped ? item.naturalWidth : item.naturalHeight;
+      const zoom = item.crop_data.zoom || 1;
+      const dpiX = (effW / zoom) / product.widthInches;
+      const dpiY = (effH / zoom) / product.heightInches;
+      return Math.round(Math.min(dpiX, dpiY));
+    }
+
+    function optimizePhotoResolution(itemId) {
+      const item = photoItems.find(i => i.id === itemId);
+      if (!item) return;
+      const product = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
+      const rotDeg = ((item.crop_data.rotation % 360) + 360) % 360;
+      const isSwapped = rotDeg === 90 || rotDeg === 270;
+
+      const targetW = Math.round((isSwapped ? product.heightInches : product.widthInches) * 300);
+      const targetH = Math.round((isSwapped ? product.widthInches : product.heightInches) * 300);
+
+      const scaleFactor = Math.max(targetW / item.naturalWidth, targetH / item.naturalHeight, 1.5);
+      const newW = Math.round(item.naturalWidth * scaleFactor);
+      const newH = Math.round(item.naturalHeight * scaleFactor);
+
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement('canvas');
+        canvas.width = newW;
+        canvas.height = newH;
+        const ctx = canvas.getContext('2d');
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'high';
+        ctx.drawImage(img, 0, 0, newW, newH);
+
+        item.dataUrl = canvas.toDataURL('image/jpeg', 0.95);
+        item.naturalWidth = newW;
+        item.naturalHeight = newH;
+        item.upscaled = true;
+        renderAll();
+        showToast(`Resolución optimizada a ${newW}×${newH} px (300 DPI).`);
+      };
+      img.src = item.dataUrl;
+    }
+
+    function updateItemProduct(itemId, productId) {
+      const item = photoItems.find(i => i.id === itemId);
+      if (!item) return;
+      item.productId = productId;
+      item.crop_data.x = 0;
+      item.crop_data.y = 0;
+      renderAll();
+    }
+
+    function updateItemFinish(itemId, finishId) {
+      const item = photoItems.find(i => i.id === itemId);
+      if (!item) return;
+      item.finishId = finishId;
+      renderAll();
+    }
+
+    function updateItemQuantity(itemId, delta) {
+      const item = photoItems.find(i => i.id === itemId);
+      if (!item) return;
+      item.quantity = Math.max(1, item.quantity + delta);
+      renderAll();
+    }
+
+    function toggleCardOrientation(itemId) {
+      const item = photoItems.find(i => i.id === itemId);
+      if (!item) return;
+      const currentRot = ((item.crop_data.rotation % 360) + 360) % 360;
+      item.crop_data.rotation = currentRot === 90 ? 0 : 90;
+      item.crop_data.x = 0;
+      item.crop_data.y = 0;
+      renderAll();
+    }
+
+    function toggleModalOrientation() {
+      const currentRot = ((draftCrop.rotation % 360) + 360) % 360;
+      draftCrop.rotation = currentRot === 90 ? 0 : 90;
+      draftCrop.x = 0;
+      draftCrop.y = 0;
+      if (draftCrop.overlay_text && draftCrop.overlay_text.position && draftCrop.overlay_text.position !== 'custom') {
+        setDraftTextPosition(draftCrop.overlay_text.position);
+      } else {
+        syncCropModalVisuals();
+      }
+    }
+
+    function applyBulkProduct() {
+      const select = document.getElementById('bulkProductSelect');
+      if (!select || photoItems.length === 0) return;
+      const productId = select.value;
+      photoItems.forEach(item => {
+        item.productId = productId;
+        item.crop_data.x = 0;
+        item.crop_data.y = 0;
+      });
+      renderAll();
+      showToast('Tamaño aplicado a todo el lote.');
+    }
+
+    function applyBulkFinish() {
+      const select = document.getElementById('bulkFinishSelect');
+      if (!select || photoItems.length === 0) return;
+      const finishId = select.value;
+      photoItems.forEach(item => {
+        item.finishId = finishId;
+      });
+      renderAll();
+      showToast('Tipo de papel aplicado a todo el lote.');
+    }
+
+    function incrementAllCopies() {
+      if (photoItems.length === 0) return;
+      photoItems.forEach(item => {
+        item.quantity += 1;
+      });
+      renderAll();
+      showToast('Se sumó +1 copia a cada fotografía.');
+    }
+
+    function clearAllPhotos() {
+      photoItems = [];
+      renderAll();
+      showToast('Lote vaciado.');
+    }
+
+    function removePhoto(itemId) {
+      photoItems = photoItems.filter(item => item.id !== itemId);
+      renderAll();
+      showToast('Fotografía eliminada del pedido.');
+    }
+
+    function drawOverlayTextOnCanvas(ctx, baseW, baseH, overlayText, photoRotation = 0) {
+      if (!overlayText || !overlayText.text || !overlayText.text.trim()) return;
+
+      const rotDeg = ((photoRotation % 360) + 360) % 360;
+      const isVerticalOriented = rotDeg === 90 || rotDeg === 270;
+      const textRad = isVerticalOriented ? (90 * Math.PI) / 180 : 0;
+
+      const readableSpan = isVerticalOriented ? baseH : baseW;
+      const crossSpan = isVerticalOriented ? baseW : baseH;
+
+      const text = overlayText.text.trim();
+      const textScale = typeof overlayText.scale === 'number'
+        ? overlayText.scale
+        : (overlayText.size === 'sm' ? 0.78 : overlayText.size === 'lg' ? 1.3 : 1);
+      const fontSize = Math.max(10, Math.round(crossSpan * 0.068 * textScale));
+
+      ctx.save();
+      ctx.font = `800 ${fontSize}px Inter, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+
+      const maxTextWidth = readableSpan * 0.88;
+      const words = text.split(' ');
+      const lines = [];
+      let currentLine = '';
+
+      words.forEach(word => {
+        const testLine = currentLine ? `${currentLine} ${word}` : word;
+        if (ctx.measureText(testLine).width > maxTextWidth && currentLine) {
+          lines.push(currentLine);
+          currentLine = word;
+        } else {
+          currentLine = testLine;
+        }
+      });
+      if (currentLine) lines.push(currentLine);
+
+      const lineHeight = Math.round(fontSize * 1.24);
+      const totalBlockHeight = lines.length * lineHeight;
+      const nx = typeof overlayText.x_norm === 'number' ? overlayText.x_norm : 0.5;
+      const ny = typeof overlayText.y_norm === 'number' ? overlayText.y_norm : 0.86;
+
+      ctx.translate(nx * baseW, ny * baseH);
+      ctx.rotate(textRad);
+
+      if (overlayText.backdrop) {
+        const maxMeasuredW = Math.max(...lines.map(l => ctx.measureText(l).width));
+        const padX = Math.round(fontSize * 0.65);
+        const padY = Math.round(fontSize * 0.35);
+        const boxW = Math.min(readableSpan * 0.94, maxMeasuredW + padX * 2);
+        const boxH = totalBlockHeight + padY * 2;
+        const radius = Math.min(12, boxH / 2);
+
+        ctx.fillStyle = overlayText.color === '#0f172a'
+          ? 'rgba(255, 255, 255, 0.85)'
+          : 'rgba(15, 23, 42, 0.72)';
+
+        ctx.beginPath();
+        if (ctx.roundRect) {
+          ctx.roundRect(-boxW / 2, -boxH / 2, boxW, boxH, radius);
+        } else {
+          ctx.rect(-boxW / 2, -boxH / 2, boxW, boxH);
+        }
+        ctx.fill();
+      }
+
+      ctx.fillStyle = overlayText.color || '#ffffff';
+      if (!overlayText.backdrop) {
+        ctx.shadowColor = overlayText.color === '#0f172a'
+          ? 'rgba(255, 255, 255, 0.9)'
+          : 'rgba(0, 0, 0, 0.85)';
+        ctx.shadowBlur = Math.max(4, Math.round(fontSize * 0.25));
+        ctx.shadowOffsetY = 1;
+      }
+
+      const startY = -((lines.length - 1) * lineHeight) / 2;
+      lines.forEach((line, idx) => {
+        ctx.fillText(line, 0, startY + idx * lineHeight);
+      });
+
+      ctx.restore();
+    }
+
+    function renderRotatedPhotoOnCanvas(canvas, imgEl, cropData, targetAspect, productInches = { widthInches: 6, heightInches: 4 }, exportOptions = null) {
+      if (!canvas || !imgEl || !imgEl.naturalWidth) return;
+
+      const isExport = Boolean(exportOptions && exportOptions.widthPx && exportOptions.heightPx);
+      const dpr = isExport ? 1 : Math.min(window.devicePixelRatio || 1, 2);
+      const rect = isExport ? null : canvas.getBoundingClientRect();
+      const baseW = isExport ? exportOptions.widthPx : (rect.width > 0 ? rect.width : 300);
+      const baseH = isExport ? exportOptions.heightPx : (rect.height > 0 ? rect.height : baseW / targetAspect);
+
+      canvas.width = Math.round(baseW * dpr);
+      canvas.height = Math.round(baseH * dpr);
+
+      const ctx = canvas.getContext('2d');
+      ctx.save();
+      ctx.scale(dpr, dpr);
+      ctx.clearRect(0, 0, baseW, baseH);
+
+      const hasBorder = cropData.fit_mode === 'border' || cropData.fit_mode === 'fit';
+      const borderMm = hasBorder ? Math.max(2, Number(cropData.border_mm) || DEFAULT_BORDER_MM) : 0;
+      const borderInches = borderMm / 25.4;
+      const borderPxX = hasBorder ? Math.max(3, (borderInches / productInches.widthInches) * baseW) : 0;
+      const borderPxY = hasBorder ? Math.max(3, (borderInches / productInches.heightInches) * baseH) : 0;
+
+      const innerW = Math.max(10, baseW - borderPxX * 2);
+      const innerH = Math.max(10, baseH - borderPxY * 2);
+
+      const rotDeg = ((cropData.rotation % 360) + 360) % 360;
+      const rotRad = (rotDeg * Math.PI) / 180;
+      const isSwapped = rotDeg === 90 || rotDeg === 270;
+
+      const effW = isSwapped ? imgEl.naturalHeight : imgEl.naturalWidth;
+      const effH = isSwapped ? imgEl.naturalWidth : imgEl.naturalHeight;
+
+      const baseScale = Math.max(innerW / effW, innerH / effH);
+      const finalScale = baseScale * (cropData.zoom || 1);
+
+      const panRatio = isExport ? (baseW / 320) : 1;
+
+      ctx.save();
+      if (hasBorder) {
+        ctx.beginPath();
+        ctx.rect(borderPxX, borderPxY, innerW, innerH);
+        ctx.clip();
+      }
+      ctx.translate(baseW / 2 + (cropData.x || 0) * panRatio, baseH / 2 + (cropData.y || 0) * panRatio);
+      ctx.rotate(rotRad);
+      ctx.scale(finalScale, finalScale);
+      ctx.drawImage(imgEl, -imgEl.naturalWidth / 2, -imgEl.naturalHeight / 2);
+      ctx.restore();
+
+      drawOverlayTextOnCanvas(ctx, baseW, baseH, cropData.overlay_text, rotDeg);
+
+      if (hasBorder) {
+        const borderColor = cropData.border_color || '#ffffff';
+        ctx.fillStyle = borderColor;
+        ctx.fillRect(0, 0, baseW, borderPxY);
+        ctx.fillRect(0, baseH - borderPxY, baseW, borderPxY);
+        ctx.fillRect(0, borderPxY, borderPxX, innerH);
+        ctx.fillRect(baseW - borderPxX, borderPxY, borderPxX, innerH);
+
+        if (!isExport) {
+          ctx.strokeStyle = borderColor.toLowerCase() === '#ffffff' ? 'rgba(148, 163, 184, 0.45)' : 'rgba(255, 255, 255, 0.25)';
+          ctx.lineWidth = 1;
+          ctx.strokeRect(borderPxX, borderPxY, innerW, innerH);
+        }
+      }
+
+      ctx.restore();
+    }
+
+    function renderAll() {
+      const grid = document.getElementById('photosGrid');
+      const emptyState = document.getElementById('emptyState');
+      const bulkToolbar = document.getElementById('bulkToolbar');
+      const photoCountPill = document.getElementById('photoCountPill');
+
+      if (photoItems.length === 0) {
+        grid.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        bulkToolbar.classList.add('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+        bulkToolbar.classList.remove('hidden');
+        photoCountPill.textContent = photoItems.length;
+        grid.innerHTML = photoItems.map(item => buildPhotoCardHTML(item)).join('');
+        paintAllCardCanvases();
+      }
+
+      updateTotalsUI();
+    }
+
+    function paintAllCardCanvases() {
+      photoItems.forEach(item => {
+        const canvas = document.getElementById(`cardCanvas_${item.id}`);
+        if (!canvas) return;
+        const product = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
+        const ratio = product.widthInches / product.heightInches;
+        const img = new Image();
+        img.onload = () => {
+          renderRotatedPhotoOnCanvas(canvas, img, item.crop_data, ratio, product);
+        };
+        img.src = item.dataUrl;
+      });
+    }
+
+    function buildPhotoCardHTML(item) {
+      const product = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
+      const finish = PAPER_FINISHES.find(f => f.id === item.finishId) || PAPER_FINISHES[0];
+      const ratio = product.widthInches / product.heightInches;
+      const effectiveDpi = calculateEffectiveDpi(item, product);
+      const isLowRes = effectiveDpi < 180;
+      const lineTotal = (product.price * item.quantity).toFixed(2);
+
+      const quickSizeButtons = PRINT_PRODUCTS.map(p => {
+        const shortLabel = p.id === 'carne-4x4' ? 'Carné' : p.name;
+        const activeClass = p.id === item.productId
+          ? 'bg-slate-900 text-white border-slate-900'
+          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100';
+        return `<button type="button" onclick="updateItemProduct('${item.id}', '${p.id}')" class="flex-1 py-1 px-1.5 rounded-lg border text-[11px] font-bold transition ${activeClass}">${shortLabel}</button>`;
+      }).join('');
+
+      const finishButtons = PAPER_FINISHES.map(f => {
+        const activeClass = f.id === item.finishId
+          ? 'bg-sky-600 text-white border-sky-600'
+          : 'bg-slate-50 text-slate-700 border-slate-200 hover:bg-slate-100';
+        return `<button type="button" onclick="updateItemFinish('${item.id}', '${f.id}')" class="flex-1 py-1 px-2 rounded-lg border text-[11px] font-bold transition ${activeClass}">${f.name}</button>`;
+      }).join('');
+
+      return `
+        <article class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden flex flex-col">
+          <div class="px-3.5 py-2.5 border-b border-slate-100 flex items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-xs font-bold text-slate-900 truncate" title="${item.fileName}">${item.fileName}</p>
+              <p class="text-[11px] text-slate-400">${item.naturalWidth}×${item.naturalHeight} px • ${effectiveDpi} DPI</p>
+            </div>
+            <button
+              type="button"
+              onclick="removePhoto('${item.id}')"
+              class="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:bg-rose-50 px-2 py-1 rounded-lg transition shrink-0"
+              title="Eliminar fotografía"
+            >
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+              </svg>
+              <span>Eliminar foto</span>
+            </button>
+          </div>
+
+          <div class="bg-slate-100 p-3.5 flex items-center justify-center">
+            <div
+              onclick="openCropModal('${item.id}')"
+              class="relative w-full max-w-[230px] rounded-lg overflow-hidden shadow-md ring-1 ring-slate-300 bg-white cursor-pointer group"
+              style="aspect-ratio: ${ratio};"
+            >
+              <canvas id="cardCanvas_${item.id}" class="w-full h-full block"></canvas>
+              <span class="absolute top-2 left-2 bg-slate-950/75 text-white text-[10px] font-semibold px-2 py-0.5 rounded inline-flex items-center gap-1.5">
+                ${(item.crop_data.fit_mode === 'border' || item.crop_data.fit_mode === 'fit')
+                  ? `<span class="w-2.5 h-2.5 rounded-full border border-white/60 inline-block" style="background-color: ${item.crop_data.border_color || '#ffffff'};"></span><span>Borde ${item.crop_data.border_mm || DEFAULT_BORDER_MM} mm</span>`
+                  : 'Sin bordes (Fill)'}
+              </span>
+              <button
+                type="button"
+                onclick="event.stopPropagation(); toggleCardOrientation('${item.id}')"
+                class="absolute bottom-2 right-2 bg-white/95 hover:bg-white text-slate-900 text-[10px] font-bold px-2 py-1 rounded-md shadow border border-slate-200"
+              >
+                Orientar
+              </button>
+            </div>
+          </div>
+
+          <div class="p-3.5 space-y-3 flex-1 flex flex-col justify-between">
+            <div class="space-y-2.5">
+              ${isLowRes ? `
+                <div class="bg-amber-50 border border-amber-200 rounded-xl p-2.5 space-y-1.5">
+                  <p class="text-[11px] font-semibold text-amber-800">
+                    Resolución baja (${effectiveDpi} DPI) para ${product.name}.
+                  </p>
+                  <button
+                    type="button"
+                    onclick="optimizePhotoResolution('${item.id}')"
+                    class="w-full bg-amber-600 hover:bg-amber-700 text-white text-[11px] font-bold py-1.5 px-2.5 rounded-lg transition"
+                  >
+                    Optimizar resolución a 300 DPI
+                  </button>
+                </div>
+              ` : ''}
+
+              <div>
+                <div class="flex items-center justify-between mb-1">
+                  <span class="text-[11px] font-bold text-slate-500">Tamaño</span>
+                  <span class="text-[11px] font-bold text-slate-800">L. ${product.price.toFixed(2)} c/u</span>
+                </div>
+                <div class="flex items-center gap-1">${quickSizeButtons}</div>
+              </div>
+
+              <div>
+                <span class="block text-[11px] font-bold text-slate-500 mb-1">Tipo de papel</span>
+                <div class="flex items-center gap-1">${finishButtons}</div>
+              </div>
+
+              <div class="flex items-center justify-between gap-2 pt-1">
+                <div class="inline-flex items-center rounded-xl border border-slate-200 bg-slate-50 p-0.5">
+                  <button
+                    type="button"
+                    onclick="updateItemQuantity('${item.id}', -1)"
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-700 hover:bg-white font-bold transition"
+                  >−</button>
+                  <span class="w-8 text-center text-xs font-extrabold text-slate-900">${item.quantity}</span>
+                  <button
+                    type="button"
+                    onclick="updateItemQuantity('${item.id}', 1)"
+                    class="w-7 h-7 rounded-lg flex items-center justify-center text-slate-700 hover:bg-white font-bold transition"
+                  >+</button>
+                </div>
+
+                <button
+                  type="button"
+                  onclick="openCropModal('${item.id}')"
+                  class="inline-flex items-center gap-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold px-2.5 py-2 rounded-xl transition"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M7 3v14h14M17 21V7H3" />
+                  </svg>
+                  <span>Recortar / Texto</span>
+                </button>
+              </div>
+            </div>
+
+            ${item.crop_data.overlay_text && item.crop_data.overlay_text.text ? `
+              <div class="flex items-center justify-between gap-2 bg-sky-50/80 border border-sky-200/80 rounded-xl px-2.5 py-1.5 text-[11px]">
+                <span class="truncate font-semibold text-sky-900">“${item.crop_data.overlay_text.text}”</span>
+                <button
+                  type="button"
+                  onclick="openCropModal('${item.id}')"
+                  class="text-sky-700 font-bold hover:underline shrink-0"
+                >
+                  Editar
+                </button>
+              </div>
+            ` : ''}
+
+            <div class="pt-2 border-t border-slate-100 flex items-center justify-between text-xs">
+              <span class="text-slate-500">${item.quantity} × ${product.name} (${finish.name})</span>
+              <span class="font-extrabold text-slate-900">L. ${lineTotal}</span>
+            </div>
+          </div>
+        </article>
+      `;
+    }
+
+    function updateTotalsUI() {
+      const totalCopies = photoItems.reduce((sum, item) => sum + item.quantity, 0);
+      const subtotal = photoItems.reduce((sum, item) => {
+        const prod = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
+        return sum + prod.price * item.quantity;
+      }, 0);
+
+      document.getElementById('headerCopiesBadge').textContent = `${totalCopies} ${totalCopies === 1 ? 'copia' : 'copias'}`;
+      document.getElementById('headerTotalText').textContent = `L. ${subtotal.toFixed(2)}`;
+      document.getElementById('footerTotalCopies').textContent = `${totalCopies} ${totalCopies === 1 ? 'copia' : 'copias'}`;
+      document.getElementById('footerUniquePhotos').textContent = `${photoItems.length} ${photoItems.length === 1 ? 'foto' : 'fotos'}`;
+      document.getElementById('footerTotalAmount').textContent = `L. ${subtotal.toFixed(2)}`;
+
+      const checkoutBtn = document.getElementById('checkoutBtn');
+      if (checkoutBtn) {
+        checkoutBtn.disabled = photoItems.length === 0;
+      }
+    }
+
+    function openCropModal(itemId) {
+      const item = photoItems.find(i => i.id === itemId);
+      if (!item) return;
+
+      activeCropPhotoId = itemId;
+      isPhotoPanEnabled = false;
+      syncPhotoPanButtonUI();
+      draftCrop = {
+        ...item.crop_data,
+        overlay_text: item.crop_data.overlay_text
+          ? { ...item.crop_data.overlay_text }
+          : createDefaultOverlayText()
+      };
+
+      const product = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
+      const viewport = document.getElementById('cropViewport');
+      const ratio = product.widthInches / product.heightInches;
+      const baseWidth = Math.min(340, window.innerWidth - 64);
+      viewport.style.width = `${baseWidth}px`;
+      viewport.style.height = `${Math.round(baseWidth / ratio)}px`;
+
+      document.getElementById('cropZoomSlider').value = draftCrop.zoom;
+      document.getElementById('cropZoomLabel').textContent = `${Math.round(draftCrop.zoom * 100)}%`;
+
+      syncOverlayTextControls();
+
+      activeCropImageEl = new Image();
+      activeCropImageEl.onload = () => {
+        document.getElementById('cropModal').classList.remove('hidden');
+        syncCropModalVisuals();
+      };
+      activeCropImageEl.src = item.dataUrl;
+    }
+
+    function closeCropModal() {
+      document.getElementById('cropModal').classList.add('hidden');
+      activeCropPhotoId = null;
+      activeCropImageEl = null;
+    }
+
+    function setCropFitMode(mode) {
+      draftCrop.fit_mode = mode;
+      if (!draftCrop.border_color) {
+        draftCrop.border_color = '#ffffff';
+        draftCrop.border_color_name = 'Blanco clásico';
+      }
+      if (!draftCrop.border_mm) {
+        draftCrop.border_mm = DEFAULT_BORDER_MM;
+      }
+      syncCropModalVisuals();
+    }
+
+    function setDraftBorderWidth(mmVal) {
+      const clamped = Math.max(2, Math.min(15, parseInt(mmVal, 10) || DEFAULT_BORDER_MM));
+      draftCrop.border_mm = clamped;
+      syncCropModalVisuals();
+    }
+
+    function setDraftBorderColor(hexColor, colorName) {
+      draftCrop.border_color = hexColor;
+      draftCrop.border_color_name = colorName;
+      syncCropModalVisuals();
+    }
+
+    function updateCropZoom(val) {
+      draftCrop.zoom = parseFloat(val);
+      document.getElementById('cropZoomLabel').textContent = `${Math.round(draftCrop.zoom * 100)}%`;
+      syncCropModalVisuals();
+    }
+
+    function resetCropState() {
+      const item = photoItems.find(i => i.id === activeCropPhotoId);
+      const isVertical = item ? item.naturalHeight > item.naturalWidth : false;
+      draftCrop.x = 0;
+      draftCrop.y = 0;
+      draftCrop.zoom = 1;
+      draftCrop.rotation = isVertical ? 90 : 0;
+      document.getElementById('cropZoomSlider').value = 1;
+      document.getElementById('cropZoomLabel').textContent = '100%';
+      syncCropModalVisuals();
+    }
+
+    function updateDraftOverlayText(val) {
+      draftCrop.overlay_text.text = val;
+      syncCropModalVisuals();
+    }
+
+    function applyPresetOverlayText(presetText) {
+      draftCrop.overlay_text.text = presetText;
+      const input = document.getElementById('modalOverlayTextInput');
+      if (input) input.value = presetText;
+      syncCropModalVisuals();
+    }
+
+    function clearDraftOverlayText() {
+      draftCrop.overlay_text.text = '';
+      const input = document.getElementById('modalOverlayTextInput');
+      if (input) input.value = '';
+      syncCropModalVisuals();
+    }
+
+    function setDraftTextColor(hexColor) {
+      draftCrop.overlay_text.color = hexColor;
+      syncOverlayTextControls();
+      syncCropModalVisuals();
+    }
+
+    function setDraftTextPosition(pos) {
+      const rotDeg = ((draftCrop.rotation % 360) + 360) % 360;
+      const isVerticalOriented = rotDeg === 90 || rotDeg === 270;
+
+      draftCrop.overlay_text.position = pos;
+      if (isVerticalOriented) {
+        draftCrop.overlay_text.x_norm = pos === 'top' ? 0.86 : pos === 'center' ? 0.5 : 0.14;
+        draftCrop.overlay_text.y_norm = 0.5;
+      } else {
+        draftCrop.overlay_text.x_norm = 0.5;
+        draftCrop.overlay_text.y_norm = pos === 'top' ? 0.14 : pos === 'center' ? 0.5 : 0.86;
+      }
+      syncOverlayTextControls();
+      syncCropModalVisuals();
+    }
+
+    function setDraftTextScale(val) {
+      const clamped = Math.max(0.5, Math.min(2.2, parseFloat(val) || 1));
+      draftCrop.overlay_text.scale = Number(clamped.toFixed(2));
+      syncOverlayTextControls();
+      syncCropModalVisuals();
+    }
+
+    function stepDraftTextScale(delta) {
+      const current = typeof draftCrop.overlay_text.scale === 'number' ? draftCrop.overlay_text.scale : 1;
+      setDraftTextScale(current + delta);
+    }
+
+    function setDraftTextBg(enabled) {
+      draftCrop.overlay_text.backdrop = enabled;
+      syncCropModalVisuals();
+    }
+
+    function syncOverlayTextControls() {
+      const ot = draftCrop.overlay_text || createDefaultOverlayText();
+      const input = document.getElementById('modalOverlayTextInput');
+      if (input) input.value = ot.text || '';
+
+      const currentScale = typeof ot.scale === 'number' ? ot.scale : 1;
+      const scaleSlider = document.getElementById('modalTextScaleSlider');
+      if (scaleSlider) scaleSlider.value = currentScale;
+      const scaleLabel = document.getElementById('modalTextScaleLabel');
+      if (scaleLabel) scaleLabel.textContent = `${Math.round(currentScale * 100)}%`;
+
+      const bgCheckbox = document.getElementById('modalTextBgCheckbox');
+      if (bgCheckbox) bgCheckbox.checked = Boolean(ot.backdrop);
+
+      document.querySelectorAll('#textColorSwatches button').forEach(btn => {
+        const isSelected = btn.getAttribute('data-color') === ot.color;
+        btn.classList.toggle('ring-2', isSelected);
+        btn.classList.toggle('ring-sky-500', isSelected);
+        btn.classList.toggle('scale-110', isSelected);
+      });
+
+      ['top', 'center', 'bottom'].forEach(pos => {
+        const btn = document.getElementById(
+          pos === 'top' ? 'textPosTopBtn' : pos === 'center' ? 'textPosCenterBtn' : 'textPosBottomBtn'
+        );
+        if (!btn) return;
+        if (ot.position === pos) {
+          btn.className = 'flex-1 py-1 rounded-md transition bg-slate-900 text-white';
+        } else {
+          btn.className = 'flex-1 py-1 rounded-md transition text-slate-600 hover:text-slate-900';
+        }
+      });
+    }
+
+    function syncCropModalVisuals() {
+      const viewport = document.getElementById('cropViewport');
+      const canvas = document.getElementById('cropPreviewCanvas');
+      const fillBtn = document.getElementById('modeFillBtn');
+      const fitBtn = document.getElementById('modeFitBtn');
+      const borderToolbar = document.getElementById('borderColorToolbar');
+      const borderNameLabel = document.getElementById('borderColorNameLabel');
+      const borderWidthSlider = document.getElementById('borderWidthSlider');
+      const borderWidthValueLabel = document.getElementById('borderWidthValueLabel');
+
+      const isBorderMode = draftCrop.fit_mode === 'border' || draftCrop.fit_mode === 'fit';
+      const currentBorderMm = Math.max(2, Number(draftCrop.border_mm) || DEFAULT_BORDER_MM);
+
+      if (!isBorderMode) {
+        viewport.classList.remove('paper-checker');
+        viewport.classList.add('bg-slate-950');
+        if (borderToolbar) borderToolbar.classList.add('hidden');
+
+        fillBtn.className = 'flex-1 py-2 px-3 rounded-lg text-xs font-bold transition bg-white text-slate-900 shadow-sm';
+        fitBtn.className = 'flex-1 py-2 px-3 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900';
+      } else {
+        viewport.classList.remove('paper-checker');
+        viewport.classList.add('bg-slate-950');
+        if (borderToolbar) borderToolbar.classList.remove('hidden');
+        if (borderNameLabel) borderNameLabel.textContent = draftCrop.border_color_name || 'Blanco clásico';
+        if (borderWidthSlider) borderWidthSlider.value = currentBorderMm;
+        if (borderWidthValueLabel) borderWidthValueLabel.textContent = `${currentBorderMm} mm`;
+
+        document.querySelectorAll('#borderColorSwatches button').forEach(btn => {
+          const isSelected = btn.getAttribute('data-border-color') === (draftCrop.border_color || '#ffffff');
+          btn.classList.toggle('ring-2', isSelected);
+          btn.classList.toggle('ring-sky-500', isSelected);
+          btn.classList.toggle('scale-110', isSelected);
+        });
+
+        fitBtn.className = 'flex-1 py-2 px-3 rounded-lg text-xs font-bold transition bg-white text-slate-900 shadow-sm';
+        fillBtn.className = 'flex-1 py-2 px-3 rounded-lg text-xs font-bold transition text-slate-600 hover:text-slate-900';
+      }
+
+      const textHandle = document.getElementById('textDragHandle');
+      const hasText = Boolean(draftCrop.overlay_text && draftCrop.overlay_text.text && draftCrop.overlay_text.text.trim());
+      if (textHandle) {
+        if (hasText) {
+          textHandle.classList.remove('hidden');
+          const nx = typeof draftCrop.overlay_text.x_norm === 'number' ? draftCrop.overlay_text.x_norm : 0.5;
+          const ny = typeof draftCrop.overlay_text.y_norm === 'number' ? draftCrop.overlay_text.y_norm : 0.86;
+          textHandle.style.left = `${(nx * 100).toFixed(2)}%`;
+          textHandle.style.top = `${(ny * 100).toFixed(2)}%`;
+        } else {
+          textHandle.classList.add('hidden');
+        }
+      }
+
+      const item = photoItems.find(i => i.id === activeCropPhotoId);
+      const product = item ? (PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0]) : PRINT_PRODUCTS[0];
+      const ratio = product.widthInches / product.heightInches;
+
+      if (canvas && activeCropImageEl) {
+        renderRotatedPhotoOnCanvas(canvas, activeCropImageEl, draftCrop, ratio, product);
+      }
+    }
+
+    function togglePhotoPanLock() {
+      isPhotoPanEnabled = !isPhotoPanEnabled;
+      syncPhotoPanButtonUI();
+    }
+
+    function syncPhotoPanButtonUI() {
+      const btn = document.getElementById('togglePhotoPanBtn');
+      const label = document.getElementById('togglePhotoPanLabel');
+      const icon = document.getElementById('photoPanLockIcon');
+      const viewport = document.getElementById('cropViewport');
+      if (!btn || !label || !icon || !viewport) return;
+
+      if (isPhotoPanEnabled) {
+        btn.className = 'inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 text-xs font-bold px-3 py-2.5 rounded-xl border border-amber-300 transition shrink-0';
+        label.textContent = 'Mover foto';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M8 11V7a4 4 0 118 0m-4 8v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2z" />';
+        viewport.classList.remove('cursor-default');
+        viewport.classList.add('cursor-grab', 'active:cursor-grabbing');
+      } else {
+        btn.className = 'inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold px-3 py-2.5 rounded-xl border border-slate-200 transition shrink-0';
+        label.textContent = 'Foto fija';
+        icon.innerHTML = '<path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />';
+        viewport.classList.remove('cursor-grab', 'active:cursor-grabbing');
+        viewport.classList.add('cursor-default');
+      }
+    }
+
+    function setupCropDragEvents() {
+      const viewport = document.getElementById('cropViewport');
+      const textHandle = document.getElementById('textDragHandle');
+      if (!viewport) return;
+
+      const startTextDrag = (clientX, clientY, e) => {
+        if (e) e.stopPropagation();
+        isDraggingText = true;
+        isDraggingCrop = false;
+        const rect = viewport.getBoundingClientRect();
+        const currentX = (draftCrop.overlay_text.x_norm ?? 0.5) * rect.width;
+        const currentY = (draftCrop.overlay_text.y_norm ?? 0.86) * rect.height;
+        textDragStart = { x: clientX - currentX, y: clientY - currentY };
+      };
+
+      const startDrag = (clientX, clientY) => {
+        if (isDraggingText || !isPhotoPanEnabled) return;
+        isDraggingCrop = true;
+        dragStart = { x: clientX - draftCrop.x, y: clientY - draftCrop.y };
+      };
+
+      const moveDrag = (clientX, clientY) => {
+        if (isDraggingText) {
+          const rect = viewport.getBoundingClientRect();
+          if (rect.width > 0 && rect.height > 0) {
+            let normX = Math.max(0.08, Math.min(0.92, (clientX - textDragStart.x) / rect.width));
+            let normY = Math.max(0.08, Math.min(0.92, (clientY - textDragStart.y) / rect.height));
+
+            const snapThreshold = 0.025;
+            const snappedX = Math.abs(normX - 0.5) <= snapThreshold;
+            const snappedY = Math.abs(normY - 0.5) <= snapThreshold;
+
+            if (snappedX) normX = 0.5;
+            if (snappedY) normY = 0.5;
+
+            draftCrop.overlay_text.x_norm = Number(normX.toFixed(4));
+            draftCrop.overlay_text.y_norm = Number(normY.toFixed(4));
+            draftCrop.overlay_text.position = (snappedX && snappedY) ? 'center' : 'custom';
+
+            updateTextCenterGuides(snappedX, snappedY);
+            syncOverlayTextControls();
+            syncCropModalVisuals();
+          }
+          return;
+        }
+        if (!isDraggingCrop) return;
+        draftCrop.x = clientX - dragStart.x;
+        draftCrop.y = clientY - dragStart.y;
+        syncCropModalVisuals();
+      };
+
+      const endDrag = () => {
+        isDraggingCrop = false;
+        isDraggingText = false;
+        updateTextCenterGuides(false, false);
+      };
+
+      if (textHandle) {
+        textHandle.addEventListener('mousedown', e => startTextDrag(e.clientX, e.clientY, e));
+        textHandle.addEventListener('touchstart', e => {
+          if (e.touches.length === 1) {
+            startTextDrag(e.touches[0].clientX, e.touches[0].clientY, e);
+          }
+        }, { passive: true });
+      }
+
+      viewport.addEventListener('mousedown', e => startDrag(e.clientX, e.clientY));
+      window.addEventListener('mousemove', e => moveDrag(e.clientX, e.clientY));
+      window.addEventListener('mouseup', endDrag);
+
+      viewport.addEventListener('touchstart', e => {
+        if (e.touches.length === 1) {
+          startDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+
+      viewport.addEventListener('touchmove', e => {
+        if ((isDraggingCrop || isDraggingText) && e.touches.length === 1) {
+          moveDrag(e.touches[0].clientX, e.touches[0].clientY);
+        }
+      }, { passive: true });
+
+      viewport.addEventListener('touchend', endDrag);
+    }
+
+    function updateTextCenterGuides(showVertical, showHorizontal) {
+      const vGuide = document.getElementById('textGuideVertical');
+      const hGuide = document.getElementById('textGuideHorizontal');
+      const badge = document.getElementById('textCenteredBadge');
+      if (vGuide) vGuide.classList.toggle('hidden', !showVertical);
+      if (hGuide) hGuide.classList.toggle('hidden', !showHorizontal);
+      if (badge) {
+        if (showVertical && showHorizontal) {
+          badge.textContent = 'Centrado exacto';
+          badge.classList.remove('hidden');
+        } else if (showVertical) {
+          badge.textContent = 'Centrado horizontal';
+          badge.classList.remove('hidden');
+        } else if (showHorizontal) {
+          badge.textContent = 'Centrado vertical';
+          badge.classList.remove('hidden');
+        } else {
+          badge.classList.add('hidden');
+        }
+      }
+    }
+
+    function saveCropChanges() {
+      const item = photoItems.find(i => i.id === activeCropPhotoId);
+      if (item) {
+        item.crop_data = {
+          ...draftCrop,
+          overlay_text: { ...draftCrop.overlay_text }
+        };
+        renderAll();
+        showToast('Encuadre y texto guardados.');
+      }
+      closeCropModal();
+    }
+
+    function openCheckoutModal() {
+      if (photoItems.length === 0) {
+        showToast('Agrega al menos una fotografía antes de continuar.');
+        return;
+      }
+
+      document.getElementById('checkoutForm').classList.remove('hidden');
+      document.getElementById('orderConfirmationView').classList.add('hidden');
+      document.getElementById('checkoutHeaderTitle').textContent = 'Finalizar pedido en línea';
+      document.getElementById('checkoutHeaderSubtitle').textContent = 'Foto Estudio Centro • Sin necesidad de crear cuenta';
+
+      recalculateCheckoutSummary();
+      document.getElementById('checkoutModal').classList.remove('hidden');
+    }
+
+    function closeCheckoutModal() {
+      document.getElementById('checkoutModal').classList.add('hidden');
+    }
+
+    function toggleDeliveryMethod() {
+      const method = document.querySelector('input[name="deliveryMethod"]:checked').value;
+      const addressBox = document.getElementById('deliveryAddressBox');
+      const addressInput = document.getElementById('deliveryAddress');
+      const pickupCard = document.getElementById('pickupCard');
+      const deliveryCard = document.getElementById('deliveryCard');
+
+      if (method === 'delivery') {
+        addressBox.classList.remove('hidden');
+        addressInput.required = true;
+        deliveryCard.classList.add('border-sky-500', 'bg-sky-50/50');
+        pickupCard.classList.remove('border-sky-500', 'bg-sky-50/50');
+      } else {
+        addressBox.classList.add('hidden');
+        addressInput.required = false;
+        pickupCard.classList.add('border-sky-500', 'bg-sky-50/50');
+        deliveryCard.classList.remove('border-sky-500', 'bg-sky-50/50');
+      }
+
+      recalculateCheckoutSummary();
+    }
+
+    function handleProofSelected(input) {
+      const fileLabel = document.getElementById('proofFileName');
+      if (input.files && input.files[0]) {
+        proofFileNameSelected = input.files[0].name;
+        fileLabel.textContent = `Comprobante adjunto: ${proofFileNameSelected}`;
+        fileLabel.classList.remove('hidden');
+      } else {
+        proofFileNameSelected = null;
+        fileLabel.classList.add('hidden');
+      }
+    }
+
+    function recalculateCheckoutSummary() {
+      const totalCopies = photoItems.reduce((sum, item) => sum + item.quantity, 0);
+      const subtotal = photoItems.reduce((sum, item) => {
+        const prod = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
+        return sum + prod.price * item.quantity;
+      }, 0);
+
+      const deliveryRadio = document.querySelector('input[name="deliveryMethod"]:checked');
+      const deliveryFee = deliveryRadio && deliveryRadio.value === 'delivery' ? DELIVERY_FEE_HNL : 0;
+      const grandTotal = subtotal + deliveryFee;
+
+      document.getElementById('checkoutCopiesCount').textContent = totalCopies;
+      document.getElementById('checkoutSubtotal').textContent = `L. ${subtotal.toFixed(2)}`;
+      document.getElementById('checkoutDeliveryFee').textContent = `L. ${deliveryFee.toFixed(2)}`;
+      document.getElementById('checkoutGrandTotal').textContent = `L. ${grandTotal.toFixed(2)}`;
+
+      return { totalCopies, subtotal, deliveryFee, grandTotal };
+    }
+
+    function sanitizeFolderSegment(str) {
+      return (str || 'Cliente')
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g, '')
+        .replace(/[^a-zA-Z0-9_-]+/g, '_')
+        .replace(/^_+|_+$/g, '') || 'Cliente';
+    }
+
+    function buildProductionBatches(orderNumber, customerName = lastConfirmedCustomerName) {
+      const safeCustomer = sanitizeFolderSegment(customerName);
+      const rootFolder = `${orderNumber}_${safeCustomer}`;
+      const batchesMap = {};
+
+      photoItems.forEach(item => {
+        const prod = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
+        const fin = PAPER_FINISHES.find(f => f.id === item.finishId) || PAPER_FINISHES[0];
+        const batchKey = `${prod.id}__${fin.id}`;
+        const subFolderName = `${prod.name.replace('×', 'x')}_${fin.name}`;
+        const folderPath = `${rootFolder}/${subFolderName}`;
+
+        if (!batchesMap[batchKey]) {
+          batchesMap[batchKey] = {
+            batch_key: batchKey,
+            root_folder: rootFolder,
+            subfolder_name: subFolderName,
+            folder_path: folderPath,
+            product_id: prod.id,
+            size_label: prod.name,
+            paper_finish: fin.id,
+            paper_finish_label: fin.name,
+            target_dimensions_px: `${prod.widthInches * prod.dpi}x${prod.heightInches * prod.dpi}`,
+            total_copies: 0,
+            items: []
+          };
+        }
+
+        const cleanBaseName = sanitizeFolderSegment(item.fileName.replace(/\.[^/.]+$/, ''));
+        const exportFileName = `${item.quantity}copias__${cleanBaseName}.jpg`;
+        const fullRelativePath = `${folderPath}/${exportFileName}`;
+
+        batchesMap[batchKey].total_copies += item.quantity;
+        batchesMap[batchKey].items.push({
+          item_id: item.id,
+          original_file_name: item.fileName,
+          print_ready_file_name: exportFileName,
+          full_folder_path: fullRelativePath,
+          quantity: item.quantity,
+          border_label: (item.crop_data.fit_mode === 'border' || item.crop_data.fit_mode === 'fit')
+            ? `Borde ${item.crop_data.border_mm || DEFAULT_BORDER_MM} mm (${item.crop_data.border_color_name || 'Blanco'})`
+            : 'Sin bordes (Full Bleed)',
+          overlay_text: item.crop_data.overlay_text && item.crop_data.overlay_text.text
+            ? item.crop_data.overlay_text.text.trim()
+            : null,
+          crop_data: item.crop_data
+        });
+      });
+
+      return Object.values(batchesMap);
+    }
+
+    function renderProductionBatchesUI(batches) {
+      const container = document.getElementById('productionBatchesContainer');
+      const countBadge = document.getElementById('productionBatchCountBadge');
+      const rootFolderTitle = document.getElementById('labRootFolderTitle');
+      if (!container) return;
+
+      if (rootFolderTitle && batches.length > 0) {
+        rootFolderTitle.textContent = `${batches[0].root_folder}/`;
+      }
+
+      if (countBadge) {
+        countBadge.textContent = `${batches.length} ${batches.length === 1 ? 'subcarpeta' : 'subcarpetas'}`;
+      }
+
+      container.innerHTML = batches.map(batch => `
+        <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
+          <div class="bg-slate-100 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200">
+            <div class="flex items-center gap-2 min-w-0">
+              <svg class="w-4 h-4 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
+              </svg>
+              <span class="text-xs font-extrabold text-slate-900 font-mono truncate">${batch.folder_path}/</span>
+              <span class="bg-sky-100 text-sky-800 text-[11px] font-bold px-2 py-0.5 rounded-md shrink-0">${batch.size_label} • ${batch.paper_finish_label}</span>
+            </div>
+            <span class="text-xs font-extrabold text-slate-900 bg-white border border-slate-200 px-2.5 py-0.5 rounded-lg">${batch.total_copies} ${batch.total_copies === 1 ? 'copia' : 'copias'}</span>
+          </div>
+
+          <div class="divide-y divide-slate-100">
+            ${batch.items.map(bItem => `
+              <div class="px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <div class="min-w-0 flex-1 pl-3 border-l-2 border-slate-200">
+                  <p class="font-bold text-slate-900 font-mono truncate" title="${bItem.full_folder_path}">📄 ${bItem.print_ready_file_name}</p>
+                  <p class="text-[11px] text-slate-500">
+                    ${bItem.quantity} ${bItem.quantity === 1 ? 'copia' : 'copias'} • ${bItem.border_label}${bItem.overlay_text ? ` • Texto: “${bItem.overlay_text}”` : ''}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onclick="downloadPrintReadyPhoto('${bItem.item_id}', '${bItem.print_ready_file_name}')"
+                  class="inline-flex items-center gap-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold px-2.5 py-1.5 rounded-lg transition shrink-0"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span>JPG 300 DPI</span>
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function renderItemToBlob(item) {
+      return new Promise(resolve => {
+        const product = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
+        const targetW = product.widthInches * product.dpi;
+        const targetH = product.heightInches * product.dpi;
+
+        const img = new Image();
+        img.onload = () => {
+          const exportCanvas = document.createElement('canvas');
+          renderRotatedPhotoOnCanvas(
+            exportCanvas,
+            img,
+            item.crop_data,
+            product.widthInches / product.heightInches,
+            product,
+            { widthPx: targetW, heightPx: targetH }
+          );
+          exportCanvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.96);
+        };
+        img.src = item.dataUrl;
+      });
+    }
+
+    function downloadPrintReadyPhoto(itemId, exportFileName) {
+      const item = photoItems.find(i => i.id === itemId);
+      if (!item) return;
+      renderItemToBlob(item).then(blob => {
+        if (!blob) return;
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.download = exportFileName;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+        showToast(`Archivo ${exportFileName} descargado a 300 DPI.`);
+      });
+    }
+
+    async function downloadOrderZipPackage() {
+      const batches = buildProductionBatches(lastConfirmedOrderNumber, lastConfirmedCustomerName);
+      if (batches.length === 0) return;
+
+      if (typeof JSZip === 'undefined') {
+        showToast('No se pudo cargar el compresor ZIP. Descarga los archivos individuales.');
+        return;
+      }
+
+      const btn = document.getElementById('downloadZipBtn');
+      const originalHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>Generando carpetas 300 DPI...</span>';
+      }
+
+      try {
+        const zip = new JSZip();
+        const rootFolderName = batches[0].root_folder;
+
+        for (const batch of batches) {
+          for (const bItem of batch.items) {
+            const item = photoItems.find(i => i.id === bItem.item_id);
+            if (!item) continue;
+            const blob = await renderItemToBlob(item);
+            if (blob) {
+              zip.file(bItem.full_folder_path, blob);
+            }
+          }
+        }
+
+        const jsonContent = document.getElementById('orderJsonOutput')?.textContent || '';
+        if (jsonContent) {
+          zip.file(`${rootFolderName}/orden_laboratorio.json`, jsonContent);
+        }
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        link.download = `${rootFolderName}.zip`;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        showToast(`Carpeta ${rootFolderName}.zip descargada con ${batches.length} subcarpetas.`);
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalHtml;
+        }
+      }
+    }
+
+    function submitOrder(e) {
+      e.preventDefault();
+
+      const customerName = document.getElementById('customerName').value.trim();
+      const customerPhone = document.getElementById('customerPhone').value.trim();
+      const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked').value;
+      const deliveryAddress = document.getElementById('deliveryAddress').value.trim();
+      const paymentMethod = 'transfer';
+
+      const { totalCopies, subtotal, deliveryFee, grandTotal } = recalculateCheckoutSummary();
+      const orderNumber = `W-${Math.floor(1000 + Math.random() * 9000)}`;
+      lastConfirmedOrderNumber = orderNumber;
+      lastConfirmedCustomerName = customerName;
+      const productionBatches = buildProductionBatches(orderNumber, customerName);
+      const rootFolderName = productionBatches.length > 0
+        ? productionBatches[0].root_folder
+        : `${orderNumber}_${sanitizeFolderSegment(customerName)}`;
+
+      const payload = {
+        order: {
+          order_number: orderNumber,
+          lab_root_folder: rootFolderName,
+          source: 'web',
+          customer_name: customerName,
+          customer_phone: `+504 ${customerPhone}`,
+          delivery_method: deliveryMethod,
+          delivery_address: deliveryMethod === 'delivery' ? deliveryAddress : null,
+          payment_method: paymentMethod,
+          payment_status: proofFileNameSelected ? 'verifying' : 'pending',
+          payment_proof_file: proofFileNameSelected,
+          currency: 'HNL',
+          subtotal: Number(subtotal.toFixed(2)),
+          delivery_fee: Number(deliveryFee.toFixed(2)),
+          total: Number(grandTotal.toFixed(2)),
+          created_at: new Date().toISOString()
+        },
+        production_batches: productionBatches,
+        order_items: photoItems.map(item => {
+          const prod = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
+          const fin = PAPER_FINISHES.find(f => f.id === item.finishId) || PAPER_FINISHES[0];
+          return {
+            file_name: item.fileName,
+            original_resolution: `${item.naturalWidth}x${item.naturalHeight}`,
+            product_id: prod.id,
+            size_label: prod.name,
+            paper_finish: fin.id,
+            paper_finish_label: fin.name,
+            quantity: item.quantity,
+            unit_price: prod.price,
+            line_total: Number((prod.price * item.quantity).toFixed(2)),
+            crop_data: item.crop_data
+          };
+        })
+      };
+
+      document.getElementById('checkoutForm').classList.add('hidden');
+      document.getElementById('orderConfirmationView').classList.remove('hidden');
+      document.getElementById('checkoutHeaderTitle').textContent = 'Orden creada con éxito';
+      document.getElementById('checkoutHeaderSubtitle').textContent = `Orden #${orderNumber} • Foto Estudio Centro`;
+      document.getElementById('generatedOrderNumber').textContent = `#${orderNumber}`;
+      document.getElementById('generatedOrderSummaryText').textContent =
+        `Cliente: ${customerName} • ${totalCopies} ${totalCopies === 1 ? 'copia' : 'copias'} • Total L. ${grandTotal.toFixed(2)}`;
+
+      renderProductionBatchesUI(productionBatches);
+      document.getElementById('orderJsonOutput').textContent = JSON.stringify(payload, null, 2);
+
+      showToast(`¡Orden #${orderNumber} creada con éxito!`);
+    }
+
+    function copyOrderJson() {
+      const output = document.getElementById('orderJsonOutput');
+      if (!output) return;
+      const tempArea = document.createElement('textarea');
+      tempArea.value = output.textContent;
+      document.body.appendChild(tempArea);
+      tempArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(tempArea);
+
+      const btn = document.getElementById('copyJsonBtn');
+      if (btn) {
+        btn.textContent = '¡Copiado!';
+        setTimeout(() => {
+          btn.textContent = 'Copiar JSON';
+        }, 2000);
+      }
+      showToast('JSON copiado al portapapeles.');
+    }
+
+    function startNewOrder() {
+      photoItems = [];
+      proofFileNameSelected = null;
+      const form = document.getElementById('checkoutForm');
+      if (form) form.reset();
+      const fileLabel = document.getElementById('proofFileName');
+      if (fileLabel) fileLabel.classList.add('hidden');
+      toggleDeliveryMethod();
+      renderAll();
+      closeCheckoutModal();
+      showToast('Listo para una nueva orden.');
+    }
+
+    let toastTimeout = null;
+    function showToast(message) {
+      const banner = document.getElementById('toastBanner');
+      const msgEl = document.getElementById('toastMessage');
+      if (!banner || !msgEl) return;
+      msgEl.textContent = message;
+      banner.classList.remove('hidden');
+      if (toastTimeout) clearTimeout(toastTimeout);
+      toastTimeout = setTimeout(() => {
+        banner.classList.add('hidden');
+      }, 3200);
+    }
+  </script>
+</body>
+</html>
