@@ -826,9 +826,26 @@
 
       <!-- Espacio de Trabajo del Laboratorio -->
       <div id="labOrdersWorkspace" class="hidden p-5 overflow-y-auto flex-1 space-y-4">
-        <div id="labConfigWarning" class="hidden bg-amber-50 border border-amber-300 rounded-xl p-4 text-xs text-amber-900 space-y-1">
-          <p class="font-bold">Falta conectar tus credenciales de Supabase en index.html</p>
-          <p>Abre <code>index.html</code> y pega tu <code>SUPABASE_URL</code> y <code>SUPABASE_ANON_KEY</code> al inicio del <code>&lt;script&gt;</code> para recibir las órdenes de tus clientes desde cualquier dispositivo.</p>
+        <div id="labConfigWarning" class="hidden bg-amber-50 border border-amber-300 rounded-2xl p-4 text-xs text-amber-950 space-y-3">
+          <div>
+            <p class="font-bold text-sm">Conectar credenciales de Supabase</p>
+            <p class="text-amber-800 mt-0.5">Pega aquí tu <strong>Project URL</strong> y tu <strong>Publishable / Anon Key</strong> de Supabase (no uses la Secret Key). Se guardarán en este navegador sin editar código.</p>
+          </div>
+          <form onsubmit="saveSupabaseCredentialsFromUI(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+            <div class="sm:col-span-5">
+              <label class="block text-[11px] font-bold mb-1">Project URL (https://...supabase.co)</label>
+              <input id="uiSupabaseUrlInput" type="url" required placeholder="https://tu-proyecto.supabase.co" class="w-full rounded-xl border border-amber-300 bg-white px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+            </div>
+            <div class="sm:col-span-5">
+              <label class="block text-[11px] font-bold mb-1">Publishable / Anon Public Key</label>
+              <input id="uiSupabaseKeyInput" type="text" required placeholder="sb_publishable_... o eyJ..." class="w-full rounded-xl border border-amber-300 bg-white px-3 py-2 text-xs font-mono text-slate-900 focus:outline-none focus:ring-2 focus:ring-amber-500" />
+            </div>
+            <div class="sm:col-span-2">
+              <button type="submit" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-xs py-2 px-3 rounded-xl transition">
+                Guardar
+              </button>
+            </div>
+          </form>
         </div>
 
         <!-- Pestañas de filtro por estado -->
@@ -856,30 +873,64 @@
 
   <!-- ==================== LÓGICA DE APLICACIÓN ==================== -->
   <script>
-    // ==================== CONFIGURACIÓN DE SUPABASE (PEGA AQUÍ TUS LLAVES) ====================
-    const SUPABASE_URL = 'PEGA_AQUI_TU_PROJECT_URL';
-    const SUPABASE_URL = 'https://txmnqxxxulrowbpkkmmh.supabase.co';
-    const SUPABASE_KEY = 'sb_publishable_yRC66EjpAC9UrP7EgLVxAQ_Yt6Xm6mC';
+    // ==================== CONFIGURACIÓN DE SUPABASE ====================
+    // Puedes pegar tus llaves aquí O pegarlas directo en el panel de Laboratorio sin editar este archivo.
+    const DEFAULT_SUPABASE_URL = `PEGA_AQUI_TU_PROJECT_URL`.replace(/\s+/g, '');
+    const DEFAULT_SUPABASE_ANON_KEY = `PEGA_AQUI_TU_ANON_PUBLIC_KEY`.replace(/\s+/g, '');
+    const SUPABASE_SCHEMA = 'foto_estudio';
     const SUPABASE_BUCKET = 'ordenes-fotos';
     const LAB_ACCESS_PIN = 'Master_Color_Elvin';
     const KIOSK_ACCESS_PIN = 'Master_Color_Elvin';
 
-    const isSupabaseConfigured =
-      typeof SUPABASE_URL === 'string' &&
-      SUPABASE_URL.startsWith('https://') &&
-      typeof SUPABASE_ANON_KEY === 'string' &&
-      SUPABASE_ANON_KEY !== 'sb_publishable_yRC66EjpAC9UrP7EgLVxAQ_Yt6Xm6mC' &&
-      SUPABASE_ANON_KEY.trim().length > 10 &&
-      typeof window.supabase !== 'undefined';
+    let SUPABASE_URL = (localStorage.getItem('mc_supabase_url') || DEFAULT_SUPABASE_URL).replace(/\s+/g, '');
+    let SUPABASE_ANON_KEY = (localStorage.getItem('mc_supabase_anon_key') || DEFAULT_SUPABASE_ANON_KEY).replace(/\s+/g, '');
 
+    let isSupabaseConfigured = false;
     let supabaseClient = null;
-    if (isSupabaseConfigured) {
-      try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL.trim(), SUPABASE_ANON_KEY.trim(), {
-          db: { schema: SUPABASE_SCHEMA }
-        });
-      } catch (e) {
-        console.error('Error inicializando Supabase:', e);
+
+    function initSupabaseClient() {
+      isSupabaseConfigured =
+        typeof SUPABASE_URL === 'string' &&
+        SUPABASE_URL.startsWith('https://') &&
+        typeof SUPABASE_ANON_KEY === 'string' &&
+        SUPABASE_ANON_KEY !== 'PEGA_AQUI_TU_ANON_PUBLIC_KEY' &&
+        SUPABASE_ANON_KEY.length > 10 &&
+        typeof window.supabase !== 'undefined';
+
+      if (isSupabaseConfigured) {
+        try {
+          supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+            db: { schema: SUPABASE_SCHEMA }
+          });
+        } catch (e) {
+          console.error('Error inicializando Supabase:', e);
+          isSupabaseConfigured = false;
+          supabaseClient = null;
+        }
+      }
+    }
+
+    initSupabaseClient();
+
+    function saveSupabaseCredentialsFromUI(e) {
+      e.preventDefault();
+      const urlVal = (document.getElementById('uiSupabaseUrlInput').value || '').replace(/\s+/g, '');
+      const keyVal = (document.getElementById('uiSupabaseKeyInput').value || '').replace(/\s+/g, '');
+      if (!urlVal.startsWith('https://') || keyVal.length < 15) {
+        showToast('Verifica que la URL empiece con https:// y que la llave esté completa.');
+        return;
+      }
+      localStorage.setItem('mc_supabase_url', urlVal);
+      localStorage.setItem('mc_supabase_anon_key', keyVal);
+      SUPABASE_URL = urlVal;
+      SUPABASE_ANON_KEY = keyVal;
+      initSupabaseClient();
+      if (isSupabaseConfigured && supabaseClient) {
+        showToast('¡Credenciales guardadas y conectadas a Supabase!');
+        fetchLabOrders();
+        startLabLiveMonitor();
+      } else {
+        showToast('No se pudo inicializar el cliente de Supabase. Revisa los datos.');
       }
     }
 
