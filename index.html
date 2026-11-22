@@ -91,6 +91,19 @@
         </div>
 
         <button
+          id="kioskSwitchHeaderBtn"
+          type="button"
+          onclick="enableKioskMode(true)"
+          class="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 px-3 py-2 rounded-xl text-xs font-bold border border-amber-200 transition"
+          title="Cambiar esta pantalla a Modo Kiosko en tienda"
+        >
+          <svg class="w-3.5 h-3.5 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+          </svg>
+          <span class="hidden sm:inline">Kiosko</span>
+        </button>
+
+        <button
           id="labAccessHeaderBtn"
           type="button"
           onclick="openLabPanelView()"
@@ -781,69 +794,6 @@
             </div>
           </div>
 
-          <div>
-            <span class="block text-xs font-bold text-slate-700 mb-2">Método de entrega</span>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label class="cursor-pointer border rounded-xl p-3.5 flex items-start gap-3 transition border-sky-500 bg-sky-50/50" id="pickupCard">
-                <input type="radio" name="deliveryMethod" value="pickup" checked onchange="toggleDeliveryMethod()" class="mt-1 accent-sky-600" />
-                <div>
-                  <span class="block text-sm font-bold text-slate-900">Recoger en tienda</span>
-                  <span class="block text-xs text-slate-500">Sin costo • Listo en ~45 min</span>
-                </div>
-              </label>
-
-              <label class="cursor-pointer border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 transition hover:border-slate-300" id="deliveryCard">
-                <input type="radio" name="deliveryMethod" value="delivery" onchange="toggleDeliveryMethod()" class="mt-1 accent-sky-600" />
-                <div>
-                  <span class="block text-sm font-bold text-slate-900">Envío a domicilio</span>
-                  <span class="block text-xs text-slate-500">Casco urbano (+ L. 60.00)</span>
-                </div>
-              </label>
-            </div>
-
-            <div id="deliveryAddressBox" class="hidden mt-3">
-              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="deliveryAddress">Dirección exacta y referencias *</label>
-              <textarea
-                id="deliveryAddress"
-                rows="2"
-                placeholder="Colonia, bloque, número de casa o punto de referencia..."
-                class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
-              ></textarea>
-            </div>
-          </div>
-
-          <div>
-            <span class="block text-xs font-bold text-slate-700 mb-2">Método de pago</span>
-            <div class="border border-sky-500 bg-sky-50/50 rounded-xl p-3.5 flex items-start gap-3">
-              <input type="hidden" name="paymentMethod" value="transfer" />
-              <div class="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center shrink-0 mt-0.5">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-              </div>
-              <div>
-                <span class="block text-sm font-bold text-slate-900">Transferencia bancaria (Pago anticipado)</span>
-                <span class="block text-xs text-slate-500">BAC / Atlántida / Ficohsa • Confirmación requerida para iniciar impresión</span>
-              </div>
-            </div>
-
-            <div id="transferProofBox" class="mt-3 bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2.5">
-              <div class="text-xs text-slate-600">
-                <p class="font-bold text-slate-800">Cuenta BAC Credomatic: 742891034 (Foto Estudio Centro)</p>
-                <p>Adjunta la captura del comprobante para iniciar impresión de inmediato *</p>
-              </div>
-              <input
-                id="paymentProofInput"
-                type="file"
-                required
-                accept="image/*,application/pdf"
-                onchange="handleProofSelected(this)"
-                class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-700 cursor-pointer"
-              />
-              <p id="proofFileName" class="text-xs font-medium text-emerald-700 hidden"></p>
-            </div>
-          </div>
-
           <div class="bg-slate-900 text-white rounded-2xl p-4 space-y-2">
             <div class="flex justify-between text-xs text-slate-300">
               <span>Subtotal de impresión (<span id="checkoutCopiesCount">0</span> copias)</span>
@@ -1040,7 +990,7 @@
   <script>
     // ==================== CONFIGURACIÓN DE SUPABASE (PEGA AQUÍ TUS LLAVES) ====================
     const SUPABASE_URL = 'https://txmnqxxxulrowbpkkmmh.supabase.co';
-    const SUPABASE_ANON_KEY = 'sb_publishable_yRC66EjpAC9UrP7EgLVxAQ_Yt6Xm6mC';
+    const SUPABASE_KEY = 'sb_publishable_yRC66EjpAC9UrP7EgLVxAQ_Yt6Xm6mC';
     const SUPABASE_SCHEMA = 'foto_estudio';
     const SUPABASE_BUCKET = 'ordenes-fotos';
     const LAB_ACCESS_PIN = '1234';
@@ -1183,38 +1133,38 @@
       if (fileInput) {
         fileInput.addEventListener('change', e => {
           if (e.target.files && e.target.files.length > 0) {
-            handleFilesSelected(Array.from(e.target.files));
-            fileInput.value = '';
-          }
-        });
-      }
+    function enableKioskMode(announce = false) {
+      isKioskMode = true;
 
-      if (dropZone) {
-        ['dragenter', 'dragover'].forEach(evtName => {
-          dropZone.addEventListener(evtName, e => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.classList.add('border-sky-500', 'bg-sky-50/40');
-          });
-        });
+      const storeBadge = document.getElementById('storeStatusBadge');
+      const kioskBadge = document.getElementById('kioskModeBadge');
+      const kioskSwitchBtn = document.getElementById('kioskSwitchHeaderBtn');
+      const labBtn = document.getElementById('labAccessHeaderBtn');
+      const subtitle = document.getElementById('headerSubtitleText');
+      const phoneLabel = document.getElementById('customerPhoneLabel');
+      const phoneInput = document.getElementById('customerPhone');
+      const webDelivery = document.getElementById('webDeliverySection');
+      const webPayment = document.getElementById('webPaymentSection');
+      const kioskPayment = document.getElementById('kioskPaymentSection');
+      const proofInput = document.getElementById('paymentProofInput');
+      const submitBtn = document.getElementById('submitOrderBtn');
 
-        ['dragleave', 'drop'].forEach(evtName => {
-          dropZone.addEventListener(evtName, e => {
-            e.preventDefault();
-            e.stopPropagation();
-            dropZone.classList.remove('border-sky-500', 'bg-sky-50/40');
-          });
-        });
+      if (storeBadge) storeBadge.classList.add('hidden');
+      if (kioskBadge) kioskBadge.classList.remove('hidden');
+      if (kioskSwitchBtn) kioskSwitchBtn.classList.add('hidden');
+      if (labBtn) labBtn.classList.add('hidden');
+      if (subtitle) subtitle.textContent = 'Autoservicio en Tienda • Envía tus fotos y paga en caja';
 
-        dropZone.addEventListener('drop', e => {
-          const files = e.dataTransfer && e.dataTransfer.files ? Array.from(e.dataTransfer.files) : [];
-          const imageFiles = files.filter(f => f.type.startsWith('image/'));
-          if (imageFiles.length > 0) {
-            handleFilesSelected(imageFiles);
-          } else {
-            showToast('Sube únicamente archivos de imagen (JPG, PNG o WEBP).');
-          }
-        });
+      if (phoneLabel) phoneLabel.textContent = 'Teléfono / WhatsApp (opcional)';
+      if (phoneInput) phoneInput.required = false;
+      if (webDelivery) webDelivery.classList.add('hidden');
+      if (webPayment) webPayment.classList.add('hidden');
+      if (kioskPayment) kioskPayment.classList.remove('hidden');
+      if (proofInput) proofInput.required = false;
+      if (submitBtn) submitBtn.innerHTML = '<span>Enviar orden y generar ticket</span>';
+
+      if (announce) {
+        showToast('Modo Kiosko activado • Los clientes enviarán su orden #K-XXXX para pagar en caja.');
       }
     }
 
@@ -3002,246 +2952,6 @@
       renderAll();
       closeCheckoutModal();
       showToast(isKioskMode ? 'Kiosko listo para el siguiente cliente.' : 'Listo para una nueva orden.');
-    }
-
-    function unlockLabPanel(e) {
-      e.preventDefault();
-      const pinInput = document.getElementById('labPinInput');
-      const pinError = document.getElementById('labPinError');
-      if (pinInput && pinInput.value.trim() === LAB_ACCESS_PIN) {
-        isLabUnlocked = true;
-        if (pinError) pinError.classList.add('hidden');
-        document.getElementById('labPinGate').classList.add('hidden');
-        document.getElementById('labOrdersWorkspace').classList.remove('hidden');
-        document.getElementById('labRefreshBtn').classList.remove('hidden');
-        fetchLabOrders();
-      } else if (pinError) {
-        pinError.classList.remove('hidden');
-      }
-    }
-
-    async function fetchLabOrders() {
-      const listEl = document.getElementById('labOrdersList');
-      const warnEl = document.getElementById('labConfigWarning');
-      const statusText = document.getElementById('labConnectionStatusText');
-
-      if (!supabaseClient) {
-        if (warnEl) warnEl.classList.remove('hidden');
-        if (statusText) statusText.textContent = 'Modo sin conexión • Configura SUPABASE_URL y SUPABASE_ANON_KEY';
-        if (listEl) {
-          listEl.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">Aún no has conectado tus llaves de Supabase.</div>';
-        }
-        return;
-      }
-
-      if (warnEl) warnEl.classList.add('hidden');
-      if (statusText) statusText.textContent = 'Sincronizando órdenes desde Supabase...';
-      if (listEl) {
-        listEl.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">Cargando órdenes recibidas...</div>';
-      }
-
-      const { data, error } = await supabaseClient
-        .from('orders')
-        .select('*')
-        .order('created_at', { ascending: false })
-        .limit(40);
-
-      if (error) {
-        if (statusText) statusText.textContent = 'Error al leer tabla orders';
-        if (listEl) {
-          listEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs text-rose-800">Error: ${error.message}</div>`;
-        }
-        return;
-      }
-
-      cachedLabOrders = data || [];
-      if (statusText) {
-        statusText.textContent = `${cachedLabOrders.length} ${cachedLabOrders.length === 1 ? 'orden recibida' : 'órdenes recibidas'} en la nube`;
-      }
-
-      if (cachedLabOrders.length === 0) {
-        listEl.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-8 text-center text-sm text-slate-500">Todavía no hay órdenes enviadas por clientes.</div>';
-        return;
-      }
-
-      listEl.innerHTML = cachedLabOrders.map(order => buildLabOrderCardHTML(order)).join('');
-    }
-
-    function buildLabOrderCardHTML(order) {
-      const batches = Array.isArray(order.batches_json) ? order.batches_json : [];
-      const createdDate = order.created_at ? new Date(order.created_at).toLocaleString('es-HN', { dateStyle: 'short', timeStyle: 'short' }) : '';
-      const cleanWaPhone = (order.customer_phone || '').replace(/[^0-9]/g, '');
-      const statusBadges = {
-        pending: 'bg-amber-100 text-amber-800 border-amber-200',
-        printing: 'bg-sky-100 text-sky-800 border-sky-200',
-        ready: 'bg-emerald-100 text-emerald-800 border-emerald-200'
-      };
-      const statusLabels = {
-        pending: 'Pendiente',
-        printing: 'Imprimiendo',
-        ready: 'Listo para entrega'
-      };
-      const currentStatus = order.status || 'pending';
-
-      let proofPublicUrl = null;
-      if (supabaseClient && order.payment_proof_path) {
-        const { data } = supabaseClient.storage.from(SUPABASE_BUCKET).getPublicUrl(order.payment_proof_path);
-        proofPublicUrl = data ? data.publicUrl : null;
-      }
-
-      return `
-        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
-          <div class="bg-slate-900 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-            <div class="min-w-0">
-              <div class="flex flex-wrap items-center gap-2">
-                <span class="text-sm font-extrabold text-sky-300 font-mono">${order.lab_root_folder}/</span>
-                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statusBadges[currentStatus] || statusBadges.pending}">
-                  ${statusLabels[currentStatus] || 'Pendiente'}
-                </span>
-              </div>
-              <p class="text-xs text-slate-300 mt-0.5">
-                Cliente: <strong class="text-white">${order.customer_name}</strong> • ${order.customer_phone} • ${createdDate} • Total: <strong class="text-emerald-300">L. ${Number(order.total || 0).toFixed(2)}</strong>
-              </p>
-            </div>
-
-            <div class="flex flex-wrap items-center gap-2">
-              ${proofPublicUrl ? `
-                <a
-                  href="${proofPublicUrl}"
-                  target="_blank"
-                  rel="noopener"
-                  class="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-2 rounded-xl transition"
-                >
-                  Ver comprobante
-                </a>
-              ` : ''}
-
-              ${cleanWaPhone ? `
-                <a
-                  href="https://wa.me/${cleanWaPhone}?text=${encodeURIComponent(`Hola ${order.customer_name}, te saludamos de Foto Estudio Centro. Tu orden ${order.order_number} ya está lista.`)}"
-                  target="_blank"
-                  rel="noopener"
-                  class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl transition"
-                >
-                  WhatsApp
-                </a>
-              ` : ''}
-
-              <button
-                type="button"
-                id="labZipBtn_${order.id}"
-                onclick="downloadCloudOrderZip('${order.id}')"
-                class="inline-flex items-center gap-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm transition"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Descargar ZIP carpetas</span>
-              </button>
-            </div>
-          </div>
-
-          <div class="p-4 space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
-              <span class="text-slate-600">
-                Entrega: <strong>${order.delivery_method === 'delivery' ? `Envío a domicilio (${order.delivery_address || ''})` : 'Recoger en tienda'}</strong> • ${order.total_copies} copias en ${batches.length} subcarpetas
-              </span>
-              <div class="flex items-center gap-1.5">
-                <button type="button" onclick="updateLabOrderStatus('${order.id}', 'printing')" class="px-2.5 py-1 rounded-lg border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold">Marcar Imprimiendo</button>
-                <button type="button" onclick="updateLabOrderStatus('${order.id}', 'ready')" class="px-2.5 py-1 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold">Marcar Listo</button>
-              </div>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
-              ${batches.map(b => `
-                <div class="border border-slate-200 rounded-xl p-3 bg-slate-50/70">
-                  <div class="flex items-center justify-between gap-2 mb-1.5">
-                    <span class="text-xs font-extrabold text-slate-900 font-mono truncate">📁 ${b.folder_path}/</span>
-                    <span class="text-[11px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded-md shrink-0">${b.total_copies} copias</span>
-                  </div>
-                  <ul class="space-y-1 text-[11px] text-slate-600">
-                    ${(b.items || []).map(it => `
-                      <li class="truncate font-mono">📄 ${it.print_ready_file_name} <span class="font-sans text-slate-500">(${it.border_label}${it.overlay_text ? ` • “${it.overlay_text}”` : ''})</span></li>
-                    `).join('')}
-                  </ul>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-      `;
-    }
-
-    async function updateLabOrderStatus(orderId, newStatus) {
-      if (!supabaseClient) return;
-      const { error } = await supabaseClient
-        .from('orders')
-        .update({ status: newStatus })
-        .eq('id', orderId);
-      if (!error) {
-        showToast('Estado de la orden actualizado.');
-        fetchLabOrders();
-      }
-    }
-
-    async function downloadCloudOrderZip(orderId) {
-      const order = cachedLabOrders.find(o => String(o.id) === String(orderId));
-      if (!order || !supabaseClient) return;
-
-      const btn = document.getElementById(`labZipBtn_${order.id}`);
-      const origHtml = btn ? btn.innerHTML : '';
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span>Descargando fotos...</span>';
-      }
-
-      try {
-        const zip = new JSZip();
-        const batches = Array.isArray(order.batches_json) ? order.batches_json : [];
-
-        for (const batch of batches) {
-          for (const bItem of (batch.items || [])) {
-            const { data: blob, error } = await supabaseClient.storage
-              .from(SUPABASE_BUCKET)
-              .download(bItem.full_folder_path);
-            if (!error && blob) {
-              zip.file(bItem.full_folder_path, blob);
-            }
-          }
-        }
-
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
-        const url = URL.createObjectURL(zipBlob);
-        const link = document.createElement('a');
-        link.download = `${order.lab_root_folder}.zip`;
-        link.href = url;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 1500);
-        showToast(`ZIP ${order.lab_root_folder}.zip descargado.`);
-      } catch (err) {
-        console.error(err);
-        showToast('Error al empaquetar las fotos desde Supabase.');
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = origHtml;
-        }
-      }
-    }
-
-    function startNewOrder() {
-      photoItems = [];
-      proofFileNameSelected = null;
-      const form = document.getElementById('checkoutForm');
-      if (form) form.reset();
-      const fileLabel = document.getElementById('proofFileName');
-      if (fileLabel) fileLabel.classList.add('hidden');
-      toggleDeliveryMethod();
-      renderAll();
-      closeCheckoutModal();
-      showToast('Listo para una nueva orden.');
     }
 
     let toastTimeout = null;
