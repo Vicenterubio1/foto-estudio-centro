@@ -2597,11 +2597,6 @@
       await fetchCashierOrders();
       if (isLabUnlocked) fetchLabOrders();
     }
-    }
-
-    function closeLabPanelModal() {
-      document.getElementById('labPanelModal').classList.add('hidden');
-    }
 
     function verifyLabPin(event) {
       event.preventDefault();
