@@ -2053,7 +2053,7 @@
           customer_name: customerName,
           customer_phone: customerPhone,
           customer_email: customerEmail || null,
-          delivery_method: isKioskMode ? 'kiosk_pickup' : deliveryMethod,
+          delivery_method: isKioskMode ? 'pickup' : deliveryMethod,
           customer_address: (!isKioskMode && deliveryMethod === 'shipping') ? customerAddress : null,
           order_notes: isKioskMode ? `[KIOSKO EN TIENDA - PAGO EN CAJA] ${orderNotes}`.trim() : (orderNotes || null),
           subtotal,
