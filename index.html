@@ -2530,6 +2530,22 @@
                   Entregado y liberar nube
                 </button>
               ` : ''}
+
+              ${order.status === 'entregado' ? `
+                <button
+                  type="button"
+                  id="deleteOrderBtn_${order.id}"
+                  data-confirm="false"
+                  onclick="deleteDeliveredOrderAndCloud('${order.id}')"
+                  class="px-3 py-2 rounded-xl bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 hover:border-rose-600 text-xs font-bold transition inline-flex items-center gap-1"
+                  title="Elimina la orden por completo y borra sus archivos de la nube"
+                >
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                  </svg>
+                  <span>Eliminar orden</span>
+                </button>
+              ` : ''}
             </div>
           </div>
 
@@ -2602,6 +2618,72 @@
         if (btn) {
           btn.disabled = false;
           btn.textContent = 'Entregado y liberar nube';
+        }
+      }
+    }
+
+    async function deleteDeliveredOrderAndCloud(orderId) {
+      const order = labOrdersCache.find((o) => o.id === orderId);
+      if (!order || !supabaseClient) return;
+
+      const btn = document.getElementById(`deleteOrderBtn_${orderId}`);
+      if (btn && btn.getAttribute('data-confirm') !== 'true') {
+        btn.setAttribute('data-confirm', 'true');
+        btn.classList.remove('bg-rose-50', 'text-rose-700');
+        btn.classList.add('bg-rose-600', 'text-white', 'border-rose-600');
+        btn.querySelector('span').textContent = '¿Confirmar borrado?';
+        setTimeout(() => {
+          const currentBtn = document.getElementById(`deleteOrderBtn_${orderId}`);
+          if (currentBtn && currentBtn.getAttribute('data-confirm') === 'true') {
+            currentBtn.setAttribute('data-confirm', 'false');
+            currentBtn.classList.add('bg-rose-50', 'text-rose-700');
+            currentBtn.classList.remove('bg-rose-600', 'text-white', 'border-rose-600');
+            currentBtn.querySelector('span').textContent = 'Eliminar orden';
+          }
+        }, 4000);
+        return;
+      }
+
+      if (btn) {
+        btn.disabled = true;
+        btn.querySelector('span').textContent = 'Eliminando...';
+      }
+
+      try {
+        const items = Array.isArray(order.items_json) ? order.items_json : [];
+        const pathsToDelete = items
+          .map((it) => it.storagePath)
+          .filter((p) => Boolean(p));
+
+        if (order.receipt_path && order.receipt_path !== 'PAGADO_EN_CAJA') {
+          pathsToDelete.push(order.receipt_path);
+        }
+
+        if (pathsToDelete.length > 0) {
+          const { error: removeErr } = await supabaseClient.storage
+            .from(LAB_STORAGE_BUCKET)
+            .remove(pathsToDelete);
+          if (removeErr) {
+            console.warn('Aviso al limpiar archivos en nube:', removeErr.message);
+          }
+        }
+
+        const { error: deleteErr } = await supabaseClient
+          .from('orders')
+          .delete()
+          .eq('id', orderId);
+
+        if (deleteErr) throw deleteErr;
+
+        showToast(`Orden #${order.order_code} eliminada de la lista y de la nube.`, 'success');
+        fetchLabOrders();
+      } catch (err) {
+        console.error(err);
+        showToast(`No se pudo eliminar la orden: ${err.message}`, 'error');
+        if (btn) {
+          btn.disabled = false;
+          btn.setAttribute('data-confirm', 'false');
+          btn.querySelector('span').textContent = 'Eliminar orden';
         }
       }
     }
