@@ -431,6 +431,18 @@
         <span>Laboratorio</span>
         <span id="labOrdersBadge" class="hidden px-1.5 py-0.2 text-[10px] rounded-full bg-slate-200 text-slate-700 font-bold">0</span>
       </button>
+      <span class="text-slate-300">•</span>
+      <button
+        id="cashierNavBtn"
+        type="button"
+        onclick="openCashierPanelView()"
+        class="hover:text-slate-600 transition cursor-pointer inline-flex items-center gap-1.5"
+        title="Ventana de cobro y check de pago para cajero"
+      >
+        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+        <span>Caja</span>
+        <span id="cashierPendingBadge" class="hidden px-1.5 py-0.2 text-[10px] rounded-full bg-amber-100 text-amber-800 font-bold">0</span>
+      </button>
     </div>
   </footer>
 
@@ -717,7 +729,14 @@
           >
             Actualizar
           </button>
-          <button type="button" onclick="closeLabPanelModal()" class="p-2 rounded-xl hover:bg-white/10 text-slate-300">
+          <button
+            type="button"
+            onclick="logoutLabSession()"
+            class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/30 text-xs font-semibold text-rose-200 transition"
+          >
+            Cerrar sesión
+          </button>
+          <button type="button" onclick="closeLabPanelModal()" class="p-2 rounded-xl hover:bg-white/10 text-slate-300" title="Cerrar y bloquear">
             <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
               <path d="M6 18L18 6M6 6l12 12" />
             </svg>
@@ -762,7 +781,81 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODAL: CONFIRMACIÓN DE ORDEN EXITOSA                                  -->
+  <!-- MODAL: VENTANA DE CAJERO (CHECK DE PAGO Y COBRO EN CAJA)              -->
+  <!-- ===================================================================== -->
+  <div id="cashierPanelModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-3xl w-full shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 bg-emerald-950 text-white flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500/20 border border-emerald-400/30 flex items-center justify-center text-emerald-300">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold">Ventana de Caja — Master Color</h3>
+            <p id="cashierConnectionStatus" class="text-xs text-emerald-200/80">Control de pagos y check de cobro</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button
+            type="button"
+            onclick="fetchCashierOrders()"
+            class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition"
+          >
+            Actualizar
+          </button>
+          <button
+            type="button"
+            onclick="logoutCashierSession()"
+            class="px-3 py-1.5 rounded-xl bg-rose-500/20 hover:bg-rose-500/35 border border-rose-400/30 text-xs font-semibold text-rose-200 transition"
+          >
+            Cerrar sesión
+          </button>
+          <button type="button" onclick="closeCashierPanelModal()" class="p-2 rounded-xl hover:bg-white/10 text-emerald-200" title="Cerrar y bloquear">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Compuerta de contraseña para cajero -->
+      <div id="cashierPinGate" class="p-8 text-center space-y-4">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-700 mx-auto flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <rect x="3" y="11" width="18" height="11" rx="2" />
+            <path d="M7 11V7a5 5 0 0110 0v4" />
+          </svg>
+        </div>
+        <div>
+          <h4 class="text-base font-bold text-slate-900">Acceso de Caja</h4>
+          <p class="text-xs text-slate-500 mt-1">Ingresa la contraseña para registrar checks de pago de clientes</p>
+        </div>
+        <form onsubmit="verifyCashierPin(event)" class="max-w-xs mx-auto flex gap-2">
+          <input
+            id="cashierPinInput"
+            type="password"
+            placeholder="Contraseña"
+            class="flex-1 text-center text-sm font-bold rounded-xl border border-slate-300 px-3 py-2.5 focus:outline-none focus:ring-2 focus:ring-emerald-500"
+          />
+          <button type="submit" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold">
+            Entrar
+          </button>
+        </form>
+      </div>
+
+      <!-- Lista de órdenes para el cajero -->
+      <div id="cashierOrdersContent" class="hidden p-6 overflow-y-auto space-y-4 bg-slate-50 flex-1">
+        <div class="flex flex-wrap items-center justify-between gap-2 bg-white p-3 rounded-2xl border border-slate-200">
+          <div id="cashierFilterTabs" class="flex items-center gap-2"></div>
+          <span id="cashierTotalUnpaidLabel" class="text-xs font-bold text-amber-800 bg-amber-50 border border-amber-200 px-3 py-1 rounded-full"></span>
+        </div>
+        <div id="cashierOrdersList" class="space-y-3"></div>
+      </div>
+    </div>
+  </div>
+
   <!-- ===================================================================== -->
   <div id="orderSuccessModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200 p-6 text-center space-y-4">
@@ -981,6 +1074,8 @@
     let dragStartY = 0;
     let paymentReceiptFile = null;
     let isLabUnlocked = false;
+    let isCashierUnlocked = false;
+    let currentCashierFilter = 'unpaid';
     let labOrdersCache = [];
     let currentLabStatusFilter = 'all';
     let isKioskMode = false;
@@ -2277,10 +2372,231 @@
         fetchLabOrders();
         startLabRealtimeSubscription();
       } else {
+        document.getElementById('labPinInput').value = '';
         document.getElementById('labPinGate').classList.remove('hidden');
         document.getElementById('labOrdersContent').classList.add('hidden');
         setTimeout(() => document.getElementById('labPinInput').focus(), 60);
       }
+    }
+
+    function logoutLabSession() {
+      isLabUnlocked = false;
+      document.getElementById('labPinInput').value = '';
+      document.getElementById('labPinGate').classList.remove('hidden');
+      document.getElementById('labOrdersContent').classList.add('hidden');
+      showToast('Sesión de laboratorio cerrada.', 'info');
+      setTimeout(() => document.getElementById('labPinInput').focus(), 60);
+    }
+
+    function closeLabPanelModal() {
+      // Bloquear sesión automáticamente al salir del panel de laboratorio
+      isLabUnlocked = false;
+      document.getElementById('labPinInput').value = '';
+      document.getElementById('labPanelModal').classList.add('hidden');
+    }
+
+    // =========================================================================
+    // VENTANA DE CAJERO (CHECK DE PAGO DE CLIENTES)
+    // =========================================================================
+    function openCashierPanelView() {
+      document.getElementById('cashierPanelModal').classList.remove('hidden');
+      if (isCashierUnlocked) {
+        document.getElementById('cashierPinGate').classList.add('hidden');
+        document.getElementById('cashierOrdersContent').classList.remove('hidden');
+        fetchCashierOrders();
+        startLabRealtimeSubscription();
+      } else {
+        document.getElementById('cashierPinInput').value = '';
+        document.getElementById('cashierPinGate').classList.remove('hidden');
+        document.getElementById('cashierOrdersContent').classList.add('hidden');
+        setTimeout(() => document.getElementById('cashierPinInput').focus(), 60);
+      }
+    }
+
+    function logoutCashierSession() {
+      isCashierUnlocked = false;
+      document.getElementById('cashierPinInput').value = '';
+      document.getElementById('cashierPinGate').classList.remove('hidden');
+      document.getElementById('cashierOrdersContent').classList.add('hidden');
+      showToast('Sesión de caja cerrada.', 'info');
+      setTimeout(() => document.getElementById('cashierPinInput').focus(), 60);
+    }
+
+    function closeCashierPanelModal() {
+      isCashierUnlocked = false;
+      document.getElementById('cashierPinInput').value = '';
+      document.getElementById('cashierPanelModal').classList.add('hidden');
+    }
+
+    function verifyCashierPin(event) {
+      event.preventDefault();
+      const entered = document.getElementById('cashierPinInput').value;
+      if (entered === LAB_ACCESS_PIN) {
+        isCashierUnlocked = true;
+        document.getElementById('cashierPinGate').classList.add('hidden');
+        document.getElementById('cashierOrdersContent').classList.remove('hidden');
+        fetchCashierOrders();
+        startLabRealtimeSubscription();
+      } else {
+        showToast('Contraseña incorrecta.', 'error');
+      }
+    }
+
+    function isOrderPaidInCashier(order) {
+      if (order.receipt_path === 'PAGADO_EN_CAJA') return true;
+      const isKioskOrder = order.delivery_method === 'kiosk_pickup' || String(order.order_code || '').startsWith('K-');
+      if (isKioskOrder && !order.receipt_path) return false;
+      return true;
+    }
+
+    function setCashierFilter(filterKey) {
+      currentCashierFilter = filterKey;
+      renderCashierOrdersList();
+    }
+
+    async function fetchCashierOrders() {
+      const statusEl = document.getElementById('cashierConnectionStatus');
+      const listEl = document.getElementById('cashierOrdersList');
+
+      if (!isSupabaseConfigured || !supabaseClient) {
+        statusEl.textContent = 'Sin conexión a Supabase configurada';
+        listEl.innerHTML = `<div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-xs">Configura Supabase desde el panel de Laboratorio primero.</div>`;
+        return;
+      }
+
+      statusEl.textContent = 'Actualizando cuentas...';
+      try {
+        const { data, error } = await supabaseClient
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(60);
+
+        if (error) throw error;
+        labOrdersCache = data || [];
+        renderCashierOrdersList();
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Error de conexión';
+        listEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-4 text-xs">${escapeHtml(err.message)}</div>`;
+      }
+    }
+
+    function renderCashierOrdersList() {
+      const statusEl = document.getElementById('cashierConnectionStatus');
+      const tabsEl = document.getElementById('cashierFilterTabs');
+      const totalUnpaidEl = document.getElementById('cashierTotalUnpaidLabel');
+      const listEl = document.getElementById('cashierOrdersList');
+      const badgeEl = document.getElementById('cashierPendingBadge');
+
+      const unpaidOrders = labOrdersCache.filter((o) => !isOrderPaidInCashier(o));
+      const paidOrders = labOrdersCache.filter((o) => isOrderPaidInCashier(o));
+
+      if (badgeEl) {
+        badgeEl.textContent = unpaidOrders.length;
+        badgeEl.classList.toggle('hidden', unpaidOrders.length === 0);
+      }
+
+      const unpaidSum = unpaidOrders.reduce((acc, o) => acc + Number(o.grand_total || 0), 0);
+      if (totalUnpaidEl) {
+        totalUnpaidEl.textContent = `Por cobrar en caja: ${formatCurrency(unpaidSum)} (${unpaidOrders.length})`;
+      }
+      if (statusEl) {
+        statusEl.textContent = `🟢 Caja activa • ${unpaidOrders.length} pendientes de check`;
+      }
+
+      if (tabsEl) {
+        tabsEl.innerHTML = `
+          <button
+            type="button"
+            onclick="setCashierFilter('unpaid')"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${currentCashierFilter === 'unpaid' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}"
+          >
+            Por cobrar (${unpaidOrders.length})
+          </button>
+          <button
+            type="button"
+            onclick="setCashierFilter('paid')"
+            class="px-3 py-1.5 rounded-xl text-xs font-bold transition ${currentCashierFilter === 'paid' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-700 hover:bg-slate-200'}"
+          >
+            Cobrados / Check (${paidOrders.length})
+          </button>
+        `;
+      }
+
+      const visibleList = currentCashierFilter === 'paid' ? paidOrders : unpaidOrders;
+      if (visibleList.length === 0) {
+        listEl.innerHTML = `
+          <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-sm text-slate-500">
+            ${currentCashierFilter === 'paid' ? 'Aún no hay órdenes marcadas como cobradas.' : '¡Todo al día! No hay órdenes pendientes de cobro.'}
+          </div>
+        `;
+        return;
+      }
+
+      listEl.innerHTML = visibleList.map((order) => {
+        const isPaid = isOrderPaidInCashier(order);
+        const isKioskOrder = order.delivery_method === 'kiosk_pickup' || String(order.order_code || '').startsWith('K-');
+        return `
+          <div class="bg-white rounded-2xl border ${isPaid ? 'border-emerald-200' : 'border-amber-300'} p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm font-extrabold text-slate-900">#${escapeHtml(order.order_code)}</span>
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${isKioskOrder ? 'bg-purple-100 text-purple-800' : 'bg-sky-100 text-sky-800'}">
+                  ${isKioskOrder ? '🏪 Kiosko' : '🌐 Web'}
+                </span>
+                ${isPaid ? `
+                  <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                    ✓ Pago verificado
+                  </span>
+                ` : `
+                  <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">
+                    ⏳ Pendiente de pago
+                  </span>
+                `}
+              </div>
+              <p class="text-sm font-bold text-slate-800">${escapeHtml(order.customer_name)} <span class="text-xs font-normal text-slate-500">• ${escapeHtml(order.customer_phone)}</span></p>
+              <p class="text-xs text-slate-500">${order.total_prints} copias • Total: <strong class="text-slate-900 text-sm">${formatCurrency(Number(order.grand_total))}</strong></p>
+            </div>
+
+            <div class="flex items-center gap-2">
+              ${!isPaid ? `
+                <button
+                  type="button"
+                  onclick="checkCashierPayment('${order.id}', '${escapeHtml(order.order_code)}')"
+                  class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-extrabold shadow-sm transition inline-flex items-center gap-1.5"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+                    <path d="M5 13l4 4L19 7" />
+                  </svg>
+                  Check pagado
+                </button>
+              ` : `
+                <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl">
+                  ✓ Cobrado
+                </span>
+              `}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function checkCashierPayment(orderId, orderCode) {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient
+        .from('orders')
+        .update({ receipt_path: 'PAGADO_EN_CAJA', status: 'imprimiendo' })
+        .eq('id', orderId);
+
+      if (error) {
+        showToast(`Error al marcar check de pago: ${error.message}`, 'error');
+        return;
+      }
+      showToast(`✓ Orden #${orderCode} marcada como pagada y enviada a impresión.`, 'success');
+      await fetchCashierOrders();
+      if (isLabUnlocked) fetchLabOrders();
+    }
     }
 
     function closeLabPanelModal() {
@@ -2358,6 +2674,16 @@
         lastKnownOrderCount = data.length;
 
         labOrdersCache = data || [];
+        if (isCashierUnlocked) {
+          renderCashierOrdersList();
+        } else {
+          const unpaidBadge = document.getElementById('cashierPendingBadge');
+          const unpaidCount = labOrdersCache.filter((o) => !isOrderPaidInCashier(o)).length;
+          if (unpaidBadge) {
+            unpaidBadge.textContent = unpaidCount;
+            unpaidBadge.classList.toggle('hidden', unpaidCount === 0);
+          }
+        }
         const pendingCount = labOrdersCache.filter((o) => o.status === 'pendiente').length;
         const printingCount = labOrdersCache.filter((o) => o.status === 'imprimiendo').length;
         const readyCount = labOrdersCache.filter((o) => o.status === 'listo').length;
