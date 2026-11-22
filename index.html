@@ -92,16 +92,25 @@
             id="kioskActiveBadge"
             type="button"
             onclick="openKioskPinModal()"
-            title="Clic para salir del Modo Kiosko (requiere contraseña)"
+            title="Clic para salir del Modo Kiosko fijo (requiere contraseña)"
             class="hidden inline-flex items-center gap-1.5 text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300 hover:bg-amber-200 transition cursor-pointer"
           >
             <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
-            Kiosko en Tienda • Salir
+            Kiosko Fijo • Salir
           </button>
         </div>
       </div>
 
       <div class="flex items-center gap-2 sm:gap-3">
+        <button
+          id="headerInStoreBtn"
+          type="button"
+          onclick="toggleCustomerInStoreMode()"
+          class="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition cursor-pointer"
+        >
+          <span>🏪</span>
+          <span id="headerInStoreBtnText">¿Estás en la tienda?</span>
+        </button>
         <span class="hidden md:inline-flex items-center gap-1.5 text-xs font-medium px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
           <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
           Calidad Laboratorio 300 DPI
@@ -235,8 +244,35 @@
 
             <hr class="border-slate-100" />
 
-            <!-- Selector de entrega -->
-            <div>
+            <!-- Pregunta rápida: ¿Estás en la tienda? (Kiosko desde el celular del cliente) -->
+            <div id="customerLocationSelectorBox">
+              <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
+                ¿Dónde te encuentras ahora?
+              </label>
+              <div class="grid grid-cols-2 gap-2">
+                <button
+                  type="button"
+                  id="locationRemoteBtn"
+                  onclick="setCustomerInStore(false)"
+                  class="p-2.5 rounded-xl border-2 border-brand-600 bg-brand-50 text-brand-800 text-xs font-bold text-left transition"
+                >
+                  <div>🌐 Desde casa</div>
+                  <div class="text-[11px] font-normal text-brand-600 mt-0.5">Transferencia</div>
+                </button>
+                <button
+                  type="button"
+                  id="locationInStoreBtn"
+                  onclick="setCustomerInStore(true)"
+                  class="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-bold text-left hover:bg-amber-50/60 transition"
+                >
+                  <div>🏪 En la tienda</div>
+                  <div class="text-[11px] font-normal text-amber-700 mt-0.5">Pago en caja</div>
+                </button>
+              </div>
+            </div>
+
+            <!-- Selector de entrega (visible cuando pide desde casa) -->
+            <div id="deliveryMethodSection">
               <label class="block text-xs font-bold uppercase tracking-wider text-slate-500 mb-2">
                 Método de entrega
               </label>
@@ -323,7 +359,7 @@
                 ></textarea>
               </div>
 
-              <!-- Pago por transferencia y comprobante (en Modo Kiosko se oculta y pasa a pago en caja) -->
+              <!-- Pago por transferencia y comprobante (en Modo Kiosko / En tienda se oculta y pasa a pago en caja) -->
               <div id="paymentProofSection" class="rounded-xl border border-slate-200 bg-slate-50 p-3.5 space-y-2.5">
                 <div class="flex items-center justify-between">
                   <span class="text-xs font-bold text-slate-800">Pago por Transferencia / Depósito</span>
@@ -361,7 +397,7 @@
                 </div>
               </div>
 
-              <!-- Aviso automático cuando está activo Modo Kiosko en Tienda -->
+              <!-- Aviso automático cuando está en tienda / Modo Kiosko -->
               <div id="kioskCashNotice" class="hidden rounded-xl border border-amber-300 bg-amber-50 p-3.5 text-amber-900 space-y-1">
                 <div class="text-xs font-extrabold flex items-center gap-1.5">
                   <span>🏪</span> Pago directo en caja del estudio
@@ -414,7 +450,7 @@
         type="button"
         onclick="openKioskPinModal()"
         class="hover:text-slate-600 transition cursor-pointer inline-flex items-center gap-1.5"
-        title="Activar o salir del Modo Kiosko en Tienda"
+        title="Bloquear o desbloquear esta tablet en Modo Kiosko fijo"
       >
         <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
         <span id="kioskBtnLabel">Modo Kiosko</span>
@@ -661,7 +697,7 @@
   </div>
 
   <!-- ===================================================================== -->
-  <!-- MODAL: CONTRASEÑA MODO KIOSKO EN TIENDA                               -->
+  <!-- MODAL: CONTRASEÑA MODO KIOSKO FIJO (TABLET EN TIENDA)                 -->
   <!-- ===================================================================== -->
   <div id="kioskPinModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 p-6 text-center space-y-4">
@@ -672,8 +708,8 @@
         </svg>
       </div>
       <div>
-        <h3 id="kioskModalTitle" class="text-base font-bold text-slate-900">Activar Modo Kiosko</h3>
-        <p id="kioskModalDesc" class="text-xs text-slate-500 mt-1">Ingresa la contraseña de Master Color para habilitar el autoservicio en tienda.</p>
+        <h3 id="kioskModalTitle" class="text-base font-bold text-slate-900">Activar Modo Kiosko Fijo</h3>
+        <p id="kioskModalDesc" class="text-xs text-slate-500 mt-1">Bloquea esta pantalla como estación fija en tienda con reinicio automático entre clientes.</p>
       </div>
       <form onsubmit="verifyKioskPin(event)" class="space-y-3">
         <div class="relative">
@@ -1110,6 +1146,7 @@
     let labOrdersCache = [];
     let currentLabStatusFilter = 'all';
     let isKioskMode = false;
+    let isCustomerInStore = false;
     let kioskResetTimer = null;
     let labRealtimeChannel = null;
     let staffAutoSyncInterval = null;
@@ -1582,12 +1619,14 @@
       const totalFiles = photos.length;
       badge.textContent = `${totalFiles} ${totalFiles === 1 ? 'foto' : 'fotos'}`;
 
+      const isStoreOrder = isKioskMode || isCustomerInStore;
+
       if (totalFiles === 0) {
         breakdownList.innerHTML = '<p class="text-slate-400 text-xs italic">Agrega fotos para calcular el total automáticamente.</p>';
         totalPrintsEl.textContent = '0';
         subtotalEl.textContent = formatCurrency(0);
-        shippingEl.textContent = deliveryMethod === 'shipping' ? formatCurrency(SHIPPING_FEE) : 'Gratis';
-        shippingEl.className = deliveryMethod === 'shipping' ? 'font-semibold text-slate-800' : 'font-semibold text-emerald-600';
+        shippingEl.textContent = (!isStoreOrder && deliveryMethod === 'shipping') ? formatCurrency(SHIPPING_FEE) : 'Gratis';
+        shippingEl.className = (!isStoreOrder && deliveryMethod === 'shipping') ? 'font-semibold text-slate-800' : 'font-semibold text-emerald-600';
         grandTotalEl.textContent = formatCurrency(0);
         submitBtn.disabled = true;
         return;
@@ -1615,7 +1654,7 @@
         </div>
       `).join('');
 
-      const shippingCost = deliveryMethod === 'shipping' ? SHIPPING_FEE : 0;
+      const shippingCost = (!isStoreOrder && deliveryMethod === 'shipping') ? SHIPPING_FEE : 0;
       const grandTotal = subtotal + shippingCost;
 
       totalPrintsEl.textContent = totalPrints;
@@ -2084,13 +2123,14 @@
       const customerEmail = document.getElementById('customerEmail').value.trim();
       const customerAddress = document.getElementById('customerAddress').value.trim();
       const orderNotes = document.getElementById('orderNotes').value.trim();
+      const isStoreOrder = isKioskMode || isCustomerInStore;
 
       if (!customerName || !customerPhone) {
         showToast('Por favor completa tu nombre y teléfono.', 'warning');
         return;
       }
 
-      if (!isKioskMode && !paymentReceiptFile) {
+      if (!isStoreOrder && !paymentReceiptFile) {
         showToast('Adjunta la imagen o PDF del comprobante de pago para enviar tu orden.', 'warning');
         return;
       }
@@ -2104,12 +2144,12 @@
       const originalBtnHTML = submitBtn.innerHTML;
       submitBtn.disabled = true;
 
-      const orderPrefix = isKioskMode ? 'K' : 'W';
+      const orderPrefix = isStoreOrder ? 'K' : 'W';
       const orderCode = `${orderPrefix}-${Math.floor(1000 + Math.random() * 9000)}`;
 
       try {
         let receiptStoragePath = null;
-        if (paymentReceiptFile) {
+        if (!isStoreOrder && paymentReceiptFile) {
           submitBtn.innerHTML = `<span class="animate-pulse">Subiendo comprobante...</span>`;
           const ext = paymentReceiptFile.name.split('.').pop() || 'jpg';
           receiptStoragePath = `${orderCode}/comprobante_pago.${ext}`;
@@ -2170,7 +2210,7 @@
           });
         }
 
-        const shippingCost = (!isKioskMode && deliveryMethod === 'shipping') ? SHIPPING_FEE : 0;
+        const shippingCost = (!isStoreOrder && deliveryMethod === 'shipping') ? SHIPPING_FEE : 0;
         const grandTotal = subtotal + shippingCost;
 
         submitBtn.innerHTML = `<span class="animate-pulse">Registrando orden en laboratorio...</span>`;
@@ -2180,9 +2220,9 @@
           customer_name: customerName,
           customer_phone: customerPhone,
           customer_email: customerEmail || null,
-          delivery_method: isKioskMode ? 'pickup' : deliveryMethod,
-          customer_address: (!isKioskMode && deliveryMethod === 'shipping') ? customerAddress : null,
-          order_notes: isKioskMode ? `[KIOSKO EN TIENDA - PAGO EN CAJA] ${orderNotes}`.trim() : (orderNotes || null),
+          delivery_method: isStoreOrder ? 'pickup' : deliveryMethod,
+          customer_address: (!isStoreOrder && deliveryMethod === 'shipping') ? customerAddress : null,
+          order_notes: isStoreOrder ? `[KIOSKO EN TIENDA - PAGO EN CAJA] ${orderNotes}`.trim() : (orderNotes || null),
           subtotal,
           shipping_cost: shippingCost,
           grand_total: grandTotal,
@@ -2199,18 +2239,18 @@
         if (dbErr) throw new Error(`Error al guardar orden en base de datos: ${dbErr.message}`);
 
         document.getElementById('successOrderCode').textContent = `ORDEN #${orderCode}`;
-        document.getElementById('successModalTitle').textContent = isKioskMode
+        document.getElementById('successModalTitle').textContent = isStoreOrder
           ? '¡Fotos enviadas al laboratorio!'
           : '¡Orden recibida con éxito!';
-        document.getElementById('successModalSubtitle').textContent = isKioskMode
+        document.getElementById('successModalSubtitle').textContent = isStoreOrder
           ? 'Pasa a caja con tu número de orden para cancelar e iniciar la impresión.'
           : 'Tus archivos a 300 DPI y comprobante ya están en nuestro laboratorio.';
 
         document.getElementById('successOrderSummaryBox').innerHTML = `
           <div class="flex justify-between"><span class="text-slate-500">Cliente:</span><span class="font-bold text-slate-900">${escapeHtml(customerName)}</span></div>
           <div class="flex justify-between"><span class="text-slate-500">Total impresiones:</span><span class="font-bold text-slate-900">${totalPrints} fotografías</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">Modalidad:</span><span class="font-bold text-slate-900">${isKioskMode ? 'Kiosko en Tienda (Pago en caja)' : (deliveryMethod === 'pickup' ? 'Retiro en tienda' : 'Envío a domicilio')}</span></div>
-          <div class="flex justify-between pt-1.5 border-t border-slate-200"><span class="text-slate-700 font-bold">Total ${isKioskMode ? 'a pagar en caja' : 'reportado'}:</span><span class="font-extrabold text-brand-700">${formatCurrency(grandTotal)}</span></div>
+          <div class="flex justify-between"><span class="text-slate-500">Modalidad:</span><span class="font-bold text-slate-900">${isStoreOrder ? 'En Tienda (Pago en caja)' : (deliveryMethod === 'pickup' ? 'Retiro en tienda' : 'Envío a domicilio')}</span></div>
+          <div class="flex justify-between pt-1.5 border-t border-slate-200"><span class="text-slate-700 font-bold">Total ${isStoreOrder ? 'a pagar en caja' : 'reportado'}:</span><span class="font-extrabold text-brand-700">${formatCurrency(grandTotal)}</span></div>
         `;
 
         document.getElementById('orderSuccessModal').classList.remove('hidden');
@@ -2241,6 +2281,65 @@
         document.getElementById('customerPhone').value = 'En tienda';
       }
       renderPhotosGrid();
+      recalculateOrderSummary();
+    }
+
+    // =========================================================================
+    // AUTOSERVICIO DESDE EL CELULAR DEL CLIENTE ("¿ESTÁS EN LA TIENDA?")
+    // =========================================================================
+    function toggleCustomerInStoreMode() {
+      if (isKioskMode) {
+        showToast('Esta pantalla está fijada en Modo Kiosko de tienda.', 'info');
+        return;
+      }
+      setCustomerInStore(!isCustomerInStore);
+    }
+
+    function setCustomerInStore(inStore) {
+      isCustomerInStore = Boolean(inStore);
+      const remoteBtn = document.getElementById('locationRemoteBtn');
+      const inStoreBtn = document.getElementById('locationInStoreBtn');
+      const headerBtn = document.getElementById('headerInStoreBtn');
+      const headerBtnText = document.getElementById('headerInStoreBtnText');
+      const deliverySection = document.getElementById('deliveryMethodSection');
+      const addressBox = document.getElementById('addressFieldContainer');
+      const addressInput = document.getElementById('customerAddress');
+      const paymentProofSection = document.getElementById('paymentProofSection');
+      const kioskCashNotice = document.getElementById('kioskCashNotice');
+
+      if (isCustomerInStore) {
+        if (inStoreBtn) {
+          inStoreBtn.className = 'p-2.5 rounded-xl border-2 border-amber-500 bg-amber-50 text-amber-900 text-xs font-bold text-left transition';
+        }
+        if (remoteBtn) {
+          remoteBtn.className = 'p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-bold text-left hover:bg-slate-50 transition';
+        }
+        if (headerBtn && headerBtnText) {
+          headerBtn.className = 'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-amber-500 text-white border border-amber-600 shadow-sm transition cursor-pointer';
+          headerBtnText.textContent = 'En tienda • Pago en caja';
+        }
+        if (deliverySection) deliverySection.classList.add('hidden');
+        if (addressBox) addressBox.classList.add('hidden');
+        if (addressInput) addressInput.required = false;
+        if (paymentProofSection) paymentProofSection.classList.add('hidden');
+        if (kioskCashNotice) kioskCashNotice.classList.remove('hidden');
+      } else {
+        if (remoteBtn) {
+          remoteBtn.className = 'p-2.5 rounded-xl border-2 border-brand-600 bg-brand-50 text-brand-800 text-xs font-bold text-left transition';
+        }
+        if (inStoreBtn) {
+          inStoreBtn.className = 'p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-bold text-left hover:bg-amber-50/60 transition';
+        }
+        if (headerBtn && headerBtnText) {
+          headerBtn.className = 'inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-300 transition cursor-pointer';
+          headerBtnText.textContent = '¿Estás en la tienda?';
+        }
+        if (deliverySection && !isKioskMode) deliverySection.classList.remove('hidden');
+        setDeliveryMethod(deliveryMethod);
+        if (paymentProofSection && !isKioskMode) paymentProofSection.classList.remove('hidden');
+        if (kioskCashNotice && !isKioskMode) kioskCashNotice.classList.add('hidden');
+      }
+
       recalculateOrderSummary();
     }
 
@@ -2305,14 +2404,20 @@
       const kioskBtnLabel = document.getElementById('kioskBtnLabel');
       if (kioskBtnLabel) kioskBtnLabel.textContent = 'Salir de Kiosko';
 
-      document.getElementById('deliveryShippingBtn').classList.add('hidden');
+      const locBox = document.getElementById('customerLocationSelectorBox');
+      if (locBox) locBox.classList.add('hidden');
+      const headerBtn = document.getElementById('headerInStoreBtn');
+      if (headerBtn) headerBtn.classList.add('hidden');
+
+      document.getElementById('deliveryMethodSection').classList.add('hidden');
       setDeliveryMethod('pickup');
       document.getElementById('paymentProofSection').classList.add('hidden');
       document.getElementById('kioskCashNotice').classList.remove('hidden');
       document.getElementById('customerEmailWrapper').classList.add('hidden');
       document.getElementById('customerPhone').value = 'En tienda';
 
-      showToast('Modo Kiosko en Tienda activado.', 'info');
+      recalculateOrderSummary();
+      showToast('Modo Kiosko Fijo en Tienda activado.', 'info');
     }
 
     function disableKioskMode() {
@@ -2325,15 +2430,18 @@
       const kioskBtnLabel = document.getElementById('kioskBtnLabel');
       if (kioskBtnLabel) kioskBtnLabel.textContent = 'Modo Kiosko';
 
-      document.getElementById('deliveryShippingBtn').classList.remove('hidden');
-      document.getElementById('paymentProofSection').classList.remove('hidden');
-      document.getElementById('kioskCashNotice').classList.add('hidden');
+      const locBox = document.getElementById('customerLocationSelectorBox');
+      if (locBox) locBox.classList.remove('hidden');
+      const headerBtn = document.getElementById('headerInStoreBtn');
+      if (headerBtn) headerBtn.classList.remove('hidden');
+
       document.getElementById('customerEmailWrapper').classList.remove('hidden');
       if (document.getElementById('customerPhone').value === 'En tienda') {
         document.getElementById('customerPhone').value = '';
       }
 
-      showToast('Has salido del Modo Kiosko.', 'info');
+      setCustomerInStore(isCustomerInStore);
+      showToast('Has salido del Modo Kiosko Fijo.', 'info');
     }
 
     function startKioskAutoResetCountdown() {
@@ -2619,7 +2727,7 @@
               <div class="flex flex-wrap items-center gap-2">
                 <span class="text-sm font-extrabold text-slate-900">#${escapeHtml(order.order_code)}</span>
                 <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full ${isKioskOrder ? 'bg-purple-100 text-purple-800' : 'bg-sky-100 text-sky-800'}">
-                  ${isKioskOrder ? '🏪 Kiosko' : '🌐 Web'}
+                  ${isKioskOrder ? '🏪 En Tienda' : '🌐 Web'}
                 </span>
                 ${isPaid ? `
                   <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
@@ -2843,7 +2951,7 @@
                 <span class="text-sm font-extrabold text-brand-700">#${escapeHtml(order.order_code)}</span>
                 ${isKioskOrder ? `
                   <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-purple-100 text-purple-800 border border-purple-200">
-                    🏪 Kiosko Tienda
+                    🏪 En Tienda
                   </span>
                 ` : `
                   <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200">
@@ -2867,7 +2975,7 @@
               </div>
               <h4 class="text-base font-bold text-slate-900 mt-1">${escapeHtml(order.customer_name)} • <span class="font-medium text-slate-600">${escapeHtml(order.customer_phone)}</span></h4>
               <p class="text-xs text-slate-500">
-                ${isKioskOrder ? 'Retiro en tienda (Kiosko)' : (order.delivery_method === 'pickup' ? 'Retiro en tienda' : `Envío: ${escapeHtml(order.customer_address || '')}`)}
+                ${isKioskOrder ? 'Retiro en tienda (Pago en caja)' : (order.delivery_method === 'pickup' ? 'Retiro en tienda' : `Envío: ${escapeHtml(order.customer_address || '')}`)}
                 • <strong>${order.total_prints} copias</strong> • Total: <strong class="text-slate-900">${formatCurrency(Number(order.grand_total))}</strong>
               </p>
               ${order.order_notes ? `<p class="text-xs text-amber-800 bg-amber-50 px-2.5 py-1 rounded-lg mt-1.5 inline-block">Nota: ${escapeHtml(order.order_notes)}</p>` : ''}
@@ -3194,6 +3302,9 @@
       recalculateOrderSummary();
 
       const params = new URLSearchParams(window.location.search);
+      if (params.get('tienda') === '1') {
+        setCustomerInStore(true);
+      }
       if (params.get('modo') === 'kiosko') {
         openKioskPinModal();
       }
