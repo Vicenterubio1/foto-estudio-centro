@@ -8,6 +8,8 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <!-- JSZip para empaquetar carpetas reales por Orden/Cliente/Tamaño_Papel -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <!-- Supabase JS Client v2 -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <!-- Google Fonts: Inter -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -84,6 +86,18 @@
           <span class="text-[11px] uppercase tracking-wider font-semibold text-slate-400">Moneda Local</span>
           <span class="text-xs font-semibold text-slate-700">Lempiras (HNL • L.)</span>
         </div>
+
+        <button
+          type="button"
+          onclick="openLabPanelView()"
+          class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 transition"
+          title="Acceso exclusivo para operador de laboratorio"
+        >
+          <svg class="w-3.5 h-3.5 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+          <span class="hidden sm:inline">Laboratorio</span>
+        </button>
 
         <button
           id="headerCartBtn"
@@ -771,107 +785,139 @@
               Volver a editar fotos
             </button>
             <button
+              id="submitOrderBtn"
               type="submit"
-              class="px-6 py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm transition"
+              class="px-6 py-3 rounded-xl text-sm font-bold bg-emerald-600 hover:bg-emerald-700 disabled:bg-slate-400 text-white shadow-sm transition inline-flex items-center gap-2"
             >
-              Confirmar y enviar orden
+              <span>Confirmar y enviar orden</span>
             </button>
           </div>
         </form>
 
-        <!-- VISTA 2: CONFIRMACIÓN PARA EL CLIENTE + RECEPCIÓN DE LABORATORIO POR CARPETAS -->
+        <!-- VISTA 2: CONFIRMACIÓN EXCLUSIVA PARA EL CLIENTE -->
         <div id="orderConfirmationView" class="hidden space-y-5">
-          <!-- A) Mensaje limpio y amigable para el CLIENTE -->
-          <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-5 text-center space-y-2">
-            <div class="w-12 h-12 rounded-full bg-emerald-600 text-white mx-auto flex items-center justify-center shadow-sm">
-              <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+          <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-6 text-center space-y-3">
+            <div class="w-14 h-14 rounded-full bg-emerald-600 text-white mx-auto flex items-center justify-center shadow-sm">
+              <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" />
               </svg>
             </div>
-            <span class="inline-block text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-0.5 rounded-full">
+            <span class="inline-block text-[11px] font-extrabold uppercase tracking-wider text-emerald-700 bg-emerald-100 px-3 py-1 rounded-full">
               ¡Orden creada con éxito!
             </span>
-            <h4 class="text-xl sm:text-2xl font-extrabold text-slate-900">
-              Tu número de orden es <span id="generatedOrderNumber" class="text-sky-700">W-2085</span>
+            <h4 class="text-2xl font-extrabold text-slate-900">
+              Orden <span id="generatedOrderNumber" class="text-sky-700">#W-2085</span>
             </h4>
-            <p id="generatedOrderSummaryText" class="text-xs sm:text-sm text-slate-600 max-w-lg mx-auto"></p>
-            <p class="text-xs text-emerald-800 font-medium pt-1">
-              Hemos recibido tu pedido y comprobante. Te avisaremos por WhatsApp en cuanto tus fotos estén listas.
-            </p>
-          </div>
-
-          <!-- B) Vista interna de RECEPCIÓN EN LABORATORIO (Estructura de carpetas) -->
-          <div class="border-2 border-slate-200 rounded-2xl overflow-hidden bg-slate-50/70">
-            <div class="bg-slate-900 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-3">
-              <div class="flex items-center gap-2.5">
-                <span class="inline-flex items-center justify-center w-8 h-8 rounded-lg bg-sky-500/20 text-sky-300 border border-sky-400/30">
-                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
-                  </svg>
-                </span>
-                <div>
-                  <span class="block text-[10px] font-bold uppercase tracking-wider text-sky-300">Recepción en Laboratorio • Árbol de carpetas</span>
-                  <h5 id="labRootFolderTitle" class="text-xs sm:text-sm font-extrabold text-white font-mono">W-2085_Cliente/</h5>
-                </div>
-              </div>
-
-              <button
-                type="button"
-                id="downloadZipBtn"
-                onclick="downloadOrderZipPackage()"
-                class="inline-flex items-center gap-2 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm transition shrink-0"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                <span>Descargar ZIP con carpetas (300 DPI)</span>
-              </button>
-            </div>
-
-            <div class="p-3.5 space-y-3">
-              <div class="flex items-center justify-between text-xs">
-                <span class="font-bold text-slate-700">Subcarpetas clasificadas por Tamaño y Papel:</span>
-                <span id="productionBatchCountBadge" class="text-[11px] font-bold bg-white text-sky-700 border border-sky-200 px-2.5 py-0.5 rounded-full">0 subcarpetas</span>
-              </div>
-
-              <div id="productionBatchesContainer" class="space-y-2.5">
-                <!-- Subcarpetas inyectadas dinámicamente -->
-              </div>
+            <p id="generatedOrderSummaryText" class="text-xs sm:text-sm text-slate-700 font-medium max-w-md mx-auto"></p>
+            <div class="bg-white/90 border border-emerald-200/80 rounded-xl p-3.5 max-w-md mx-auto text-xs text-slate-600 space-y-1">
+              <p class="font-bold text-slate-900">¿Qué sigue ahora?</p>
+              <p>Tus fotografías y comprobante ya fueron enviados al laboratorio. Te escribiremos por <strong>WhatsApp</strong> en cuanto tu pedido esté impreso y listo.</p>
             </div>
           </div>
 
-          <!-- Payload JSON listo para API / Supabase -->
-          <details class="bg-slate-50 border border-slate-200 rounded-xl p-3">
-            <summary class="cursor-pointer text-xs font-bold text-slate-700 flex items-center justify-between">
-              <span>Ver Payload JSON técnico para integración API / Minilab</span>
-              <button
-                type="button"
-                onclick="event.preventDefault(); copyOrderJson()"
-                id="copyJsonBtn"
-                class="text-xs font-bold text-sky-600 hover:text-sky-700 bg-white px-2.5 py-1 rounded-lg border border-slate-200"
-              >
-                Copiar JSON
-              </button>
-            </summary>
-            <pre id="orderJsonOutput" class="mt-3 bg-slate-950 text-emerald-300 text-[11px] leading-relaxed p-4 rounded-xl overflow-x-auto max-h-56 font-mono"></pre>
-          </details>
-
-          <div class="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-slate-100">
+          <div class="flex flex-wrap items-center justify-center gap-3 pt-1">
             <button
               type="button"
               onclick="startNewOrder()"
-              class="px-4 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200"
+              class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition"
             >
-              Crear otra orden
+              Hacer otro pedido
             </button>
             <button
               type="button"
               onclick="closeCheckoutModal()"
-              class="px-6 py-2.5 rounded-xl text-sm font-bold bg-slate-900 hover:bg-slate-800 text-white"
+              class="px-6 py-2.5 rounded-xl text-sm font-bold bg-slate-900 hover:bg-slate-800 text-white transition"
             >
-              Listo
+              Cerrar
             </button>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== 7. MODAL PANEL DE RECEPCIÓN DEL LABORATORIO ==================== -->
+  <div
+    id="labPanelModal"
+    class="fixed inset-0 z-50 hidden bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-3 sm:p-6"
+    role="dialog"
+    aria-modal="true"
+  >
+    <div class="bg-white w-full max-w-5xl rounded-2xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[94vh]">
+      <div class="bg-slate-900 text-white px-5 py-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-sky-500/20 text-sky-300 border border-sky-400/30 flex items-center justify-center">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 7a2 2 0 012-2h4l2 2h8a2 2 0 012 2v8a2 2 0 01-2 2H5a2 2 0 01-2-2V7z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-bold">Recepción de Laboratorio — Foto Estudio Centro</h3>
+            <p id="labConnectionStatusText" class="text-xs text-sky-300">Conectado a la nube • Carpetas listas para minilab</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button
+            id="labRefreshBtn"
+            type="button"
+            onclick="fetchLabOrders()"
+            class="hidden bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-2 rounded-xl transition"
+          >
+            Actualizar
+          </button>
+          <button
+            type="button"
+            onclick="closeLabPanelView()"
+            class="p-2 rounded-xl text-slate-300 hover:text-white hover:bg-white/10 transition"
+          >
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Pantalla de PIN del dueño -->
+      <div id="labPinGate" class="p-8 text-center max-w-sm mx-auto space-y-4">
+        <div class="w-12 h-12 rounded-2xl bg-slate-100 text-slate-800 mx-auto flex items-center justify-center">
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+          </svg>
+        </div>
+        <div>
+          <h4 class="text-base font-bold text-slate-900">Acceso exclusivo de laboratorio</h4>
+          <p class="text-xs text-slate-500 mt-1">Ingresa el PIN de operador para ver las órdenes y descargar carpetas.</p>
+        </div>
+        <form onsubmit="unlockLabPanel(event)" class="space-y-3">
+          <input
+            id="labPinInput"
+            type="password"
+            inputmode="numeric"
+            maxlength="8"
+            placeholder="PIN (ej. 1234)"
+            required
+            class="w-full text-center tracking-widest font-bold text-lg rounded-xl border border-slate-300 px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-sky-500"
+          />
+          <p id="labPinError" class="hidden text-xs font-semibold text-rose-600">PIN incorrecto. Intenta de nuevo.</p>
+          <button
+            type="submit"
+            class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold text-sm py-2.5 rounded-xl transition"
+          >
+            Entrar al panel
+          </button>
+        </form>
+      </div>
+
+      <!-- Listado de órdenes recibidas -->
+      <div id="labOrdersWorkspace" class="hidden p-5 overflow-y-auto space-y-4 flex-1 bg-slate-50">
+        <div id="labConfigWarning" class="hidden bg-amber-50 border border-amber-300 rounded-xl p-4 text-xs text-amber-900 space-y-1">
+          <p class="font-bold">Falta pegar tus llaves de Supabase en index.html</p>
+          <p>Busca <code class="bg-amber-100 px-1 rounded">SUPABASE_URL</code> y <code class="bg-amber-100 px-1 rounded">SUPABASE_ANON_KEY</code> al inicio del script y pega los valores de tu proyecto Supabase para recibir órdenes desde cualquier celular.</p>
+        </div>
+
+        <div id="labOrdersList" class="space-y-4">
+          <!-- Órdenes cargadas desde Supabase -->
         </div>
       </div>
     </div>
@@ -888,6 +934,27 @@
 
   <!-- ==================== LÓGICA DE APLICACIÓN ==================== -->
   <script>
+    // ==================== CONFIGURACIÓN DE SUPABASE (PEGA AQUÍ TUS LLAVES) ====================
+    const SUPABASE_URL = 'https://txmnqxxxulrowbpkkmmh.supabase.co';
+    const SUPABASE_ANON_KEY = 'sb_publishable_yRC66EjpAC9UrP7EgLVxAQ_Yt6Xm6mC';
+    const SUPABASE_SCHEMA = 'foto_estudio';
+    const SUPABASE_BUCKET = 'ordenes-fotos';
+    const LAB_ACCESS_PIN = '1234';
+
+    const isSupabaseConfigured =
+      SUPABASE_URL.startsWith('https://') &&
+      SUPABASE_ANON_KEY.length > 20 &&
+      typeof window.supabase !== 'undefined';
+
+    const supabaseClient = isSupabaseConfigured
+      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+          db: { schema: SUPABASE_SCHEMA }
+        })
+      : null;
+
+    let isLabUnlocked = false;
+    let cachedLabOrders = [];
+
     const PRINT_PRODUCTS = [
       { id: '4x6', name: '4×6', widthInches: 6, heightInches: 4, dpi: 300, price: 8.00 },
       { id: '5x7', name: '5×7', widthInches: 7, heightInches: 5, dpi: 300, price: 18.00 },
@@ -944,6 +1011,11 @@
       setupFileUploadListeners();
       setupCropDragEvents();
       renderAll();
+
+      const params = new URLSearchParams(window.location.search);
+      if (params.get('panel') === 'lab') {
+        openLabPanelView();
+      }
     });
 
     function populateBulkProductSelect() {
@@ -2004,36 +2076,39 @@
     }
 
     function toggleDeliveryMethod() {
-      const method = document.querySelector('input[name="deliveryMethod"]:checked').value;
+      const selected = document.querySelector('input[name="deliveryMethod"]:checked');
+      const isDelivery = selected && selected.value === 'delivery';
       const addressBox = document.getElementById('deliveryAddressBox');
       const addressInput = document.getElementById('deliveryAddress');
       const pickupCard = document.getElementById('pickupCard');
       const deliveryCard = document.getElementById('deliveryCard');
 
-      if (method === 'delivery') {
-        addressBox.classList.remove('hidden');
-        addressInput.required = true;
-        deliveryCard.classList.add('border-sky-500', 'bg-sky-50/50');
-        pickupCard.classList.remove('border-sky-500', 'bg-sky-50/50');
-      } else {
-        addressBox.classList.add('hidden');
-        addressInput.required = false;
-        pickupCard.classList.add('border-sky-500', 'bg-sky-50/50');
-        deliveryCard.classList.remove('border-sky-500', 'bg-sky-50/50');
+      if (addressBox) addressBox.classList.toggle('hidden', !isDelivery);
+      if (addressInput) addressInput.required = isDelivery;
+
+      if (pickupCard && deliveryCard) {
+        pickupCard.className = isDelivery
+          ? 'cursor-pointer border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 transition hover:border-slate-300'
+          : 'cursor-pointer border rounded-xl p-3.5 flex items-start gap-3 transition border-sky-500 bg-sky-50/50';
+        deliveryCard.className = isDelivery
+          ? 'cursor-pointer border rounded-xl p-3.5 flex items-start gap-3 transition border-sky-500 bg-sky-50/50'
+          : 'cursor-pointer border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 transition hover:border-slate-300';
       }
 
       recalculateCheckoutSummary();
     }
 
     function handleProofSelected(input) {
-      const fileLabel = document.getElementById('proofFileName');
-      if (input.files && input.files[0]) {
-        proofFileNameSelected = input.files[0].name;
-        fileLabel.textContent = `Comprobante adjunto: ${proofFileNameSelected}`;
-        fileLabel.classList.remove('hidden');
-      } else {
+      const label = document.getElementById('proofFileName');
+      if (!input || !input.files || input.files.length === 0) {
         proofFileNameSelected = null;
-        fileLabel.classList.add('hidden');
+        if (label) label.classList.add('hidden');
+        return;
+      }
+      proofFileNameSelected = input.files[0].name;
+      if (label) {
+        label.textContent = `Comprobante adjunto: ${proofFileNameSelected}`;
+        label.classList.remove('hidden');
       }
     }
 
@@ -2044,226 +2119,100 @@
         return sum + prod.price * item.quantity;
       }, 0);
 
-      const deliveryRadio = document.querySelector('input[name="deliveryMethod"]:checked');
-      const deliveryFee = deliveryRadio && deliveryRadio.value === 'delivery' ? DELIVERY_FEE_HNL : 0;
+      const selected = document.querySelector('input[name="deliveryMethod"]:checked');
+      const deliveryFee = selected && selected.value === 'delivery' ? DELIVERY_FEE_HNL : 0;
       const grandTotal = subtotal + deliveryFee;
 
-      document.getElementById('checkoutCopiesCount').textContent = totalCopies;
-      document.getElementById('checkoutSubtotal').textContent = `L. ${subtotal.toFixed(2)}`;
-      document.getElementById('checkoutDeliveryFee').textContent = `L. ${deliveryFee.toFixed(2)}`;
-      document.getElementById('checkoutGrandTotal').textContent = `L. ${grandTotal.toFixed(2)}`;
+      const copiesEl = document.getElementById('checkoutCopiesCount');
+      const subEl = document.getElementById('checkoutSubtotal');
+      const feeEl = document.getElementById('checkoutDeliveryFee');
+      const totalEl = document.getElementById('checkoutGrandTotal');
+
+      if (copiesEl) copiesEl.textContent = totalCopies;
+      if (subEl) subEl.textContent = `L. ${subtotal.toFixed(2)}`;
+      if (feeEl) feeEl.textContent = `L. ${deliveryFee.toFixed(2)}`;
+      if (totalEl) totalEl.textContent = `L. ${grandTotal.toFixed(2)}`;
 
       return { totalCopies, subtotal, deliveryFee, grandTotal };
     }
 
     function sanitizeFolderSegment(str) {
-      return (str || 'Cliente')
+      return String(str || 'Cliente')
         .normalize('NFD')
         .replace(/[\u0300-\u036f]/g, '')
         .replace(/[^a-zA-Z0-9_-]+/g, '_')
         .replace(/^_+|_+$/g, '') || 'Cliente';
     }
 
-    function buildProductionBatches(orderNumber, customerName = lastConfirmedCustomerName) {
-      const safeCustomer = sanitizeFolderSegment(customerName);
-      const rootFolder = `${orderNumber}_${safeCustomer}`;
-      const batchesMap = {};
+    function buildProductionBatches(orderNumber, customerName) {
+      const rootFolder = `${orderNumber}_${sanitizeFolderSegment(customerName)}`;
+      const batchMap = new Map();
 
-      photoItems.forEach(item => {
-        const prod = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
-        const fin = PAPER_FINISHES.find(f => f.id === item.finishId) || PAPER_FINISHES[0];
-        const batchKey = `${prod.id}__${fin.id}`;
-        const subFolderName = `${prod.name.replace('×', 'x')}_${fin.name}`;
-        const folderPath = `${rootFolder}/${subFolderName}`;
+      photoItems.forEach((item, index) => {
+        const product = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
+        const finish = PAPER_FINISHES.find(f => f.id === item.finishId) || PAPER_FINISHES[0];
+        const subFolder = `${sanitizeFolderSegment(product.id)}_${sanitizeFolderSegment(finish.name)}`;
+        const folderPath = `${rootFolder}/${subFolder}`;
 
-        if (!batchesMap[batchKey]) {
-          batchesMap[batchKey] = {
-            batch_key: batchKey,
+        const baseName = sanitizeFolderSegment(item.fileName.replace(/\.[^/.]+$/, ''));
+        const printReadyFileName = `${String(index + 1).padStart(2, '0')}_${item.quantity}copias__${baseName}.jpg`;
+        const fullFolderPath = `${folderPath}/${printReadyFileName}`;
+
+        const hasBorder = item.crop_data.fit_mode === 'border' || item.crop_data.fit_mode === 'fit';
+        const borderLabel = hasBorder
+          ? `Borde ${item.crop_data.border_mm || DEFAULT_BORDER_MM}mm (${item.crop_data.border_color_name || 'Blanco'})`
+          : 'Sin bordes';
+
+        if (!batchMap.has(subFolder)) {
+          batchMap.set(subFolder, {
+            batch_key: subFolder,
             root_folder: rootFolder,
-            subfolder_name: subFolderName,
+            subfolder: subFolder,
             folder_path: folderPath,
-            product_id: prod.id,
-            size_label: prod.name,
-            paper_finish: fin.id,
-            paper_finish_label: fin.name,
-            target_dimensions_px: `${prod.widthInches * prod.dpi}x${prod.heightInches * prod.dpi}`,
+            product_name: product.name,
+            finish_name: finish.name,
             total_copies: 0,
             items: []
-          };
+          });
         }
 
-        const cleanBaseName = sanitizeFolderSegment(item.fileName.replace(/\.[^/.]+$/, ''));
-        const exportFileName = `${item.quantity}copias__${cleanBaseName}.jpg`;
-        const fullRelativePath = `${folderPath}/${exportFileName}`;
-
-        batchesMap[batchKey].total_copies += item.quantity;
-        batchesMap[batchKey].items.push({
+        const batch = batchMap.get(subFolder);
+        batch.total_copies += item.quantity;
+        batch.items.push({
           item_id: item.id,
           original_file_name: item.fileName,
-          print_ready_file_name: exportFileName,
-          full_folder_path: fullRelativePath,
+          print_ready_file_name: printReadyFileName,
+          full_folder_path: fullFolderPath,
           quantity: item.quantity,
-          border_label: (item.crop_data.fit_mode === 'border' || item.crop_data.fit_mode === 'fit')
-            ? `Borde ${item.crop_data.border_mm || DEFAULT_BORDER_MM} mm (${item.crop_data.border_color_name || 'Blanco'})`
-            : 'Sin bordes (Full Bleed)',
+          border_label: borderLabel,
           overlay_text: item.crop_data.overlay_text && item.crop_data.overlay_text.text
             ? item.crop_data.overlay_text.text.trim()
-            : null,
-          crop_data: item.crop_data
+            : ''
         });
       });
 
-      return Object.values(batchesMap);
-    }
-
-    function renderProductionBatchesUI(batches) {
-      const container = document.getElementById('productionBatchesContainer');
-      const countBadge = document.getElementById('productionBatchCountBadge');
-      const rootFolderTitle = document.getElementById('labRootFolderTitle');
-      if (!container) return;
-
-      if (rootFolderTitle && batches.length > 0) {
-        rootFolderTitle.textContent = `${batches[0].root_folder}/`;
-      }
-
-      if (countBadge) {
-        countBadge.textContent = `${batches.length} ${batches.length === 1 ? 'subcarpeta' : 'subcarpetas'}`;
-      }
-
-      container.innerHTML = batches.map(batch => `
-        <div class="border border-slate-200 rounded-xl overflow-hidden bg-white shadow-xs">
-          <div class="bg-slate-100 px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2 border-b border-slate-200">
-            <div class="flex items-center gap-2 min-w-0">
-              <svg class="w-4 h-4 text-amber-500 shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                <path d="M2 6a2 2 0 012-2h5l2 2h5a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" />
-              </svg>
-              <span class="text-xs font-extrabold text-slate-900 font-mono truncate">${batch.folder_path}/</span>
-              <span class="bg-sky-100 text-sky-800 text-[11px] font-bold px-2 py-0.5 rounded-md shrink-0">${batch.size_label} • ${batch.paper_finish_label}</span>
-            </div>
-            <span class="text-xs font-extrabold text-slate-900 bg-white border border-slate-200 px-2.5 py-0.5 rounded-lg">${batch.total_copies} ${batch.total_copies === 1 ? 'copia' : 'copias'}</span>
-          </div>
-
-          <div class="divide-y divide-slate-100">
-            ${batch.items.map(bItem => `
-              <div class="px-3.5 py-2.5 flex flex-wrap items-center justify-between gap-2 text-xs">
-                <div class="min-w-0 flex-1 pl-3 border-l-2 border-slate-200">
-                  <p class="font-bold text-slate-900 font-mono truncate" title="${bItem.full_folder_path}">📄 ${bItem.print_ready_file_name}</p>
-                  <p class="text-[11px] text-slate-500">
-                    ${bItem.quantity} ${bItem.quantity === 1 ? 'copia' : 'copias'} • ${bItem.border_label}${bItem.overlay_text ? ` • Texto: “${bItem.overlay_text}”` : ''}
-                  </p>
-                </div>
-                <button
-                  type="button"
-                  onclick="downloadPrintReadyPhoto('${bItem.item_id}', '${bItem.print_ready_file_name}')"
-                  class="inline-flex items-center gap-1 bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 font-bold px-2.5 py-1.5 rounded-lg transition shrink-0"
-                >
-                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                  </svg>
-                  <span>JPG 300 DPI</span>
-                </button>
-              </div>
-            `).join('')}
-          </div>
-        </div>
-      `).join('');
+      return Array.from(batchMap.values());
     }
 
     function renderItemToBlob(item) {
       return new Promise(resolve => {
         const product = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
-        const targetW = product.widthInches * product.dpi;
-        const targetH = product.heightInches * product.dpi;
+        const ratio = product.widthInches / product.heightInches;
+        const widthPx = Math.round(product.widthInches * product.dpi);
+        const heightPx = Math.round(product.heightInches * product.dpi);
 
         const img = new Image();
         img.onload = () => {
           const exportCanvas = document.createElement('canvas');
-          renderRotatedPhotoOnCanvas(
-            exportCanvas,
-            img,
-            item.crop_data,
-            product.widthInches / product.heightInches,
-            product,
-            { widthPx: targetW, heightPx: targetH }
-          );
-          exportCanvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.96);
+          renderRotatedPhotoOnCanvas(exportCanvas, img, item.crop_data, ratio, product, { widthPx, heightPx });
+          exportCanvas.toBlob(blob => resolve(blob), 'image/jpeg', 0.95);
         };
+        img.onerror = () => resolve(null);
         img.src = item.dataUrl;
       });
     }
 
-    function downloadPrintReadyPhoto(itemId, exportFileName) {
-      const item = photoItems.find(i => i.id === itemId);
-      if (!item) return;
-      renderItemToBlob(item).then(blob => {
-        if (!blob) return;
-        const url = URL.createObjectURL(blob);
-        const link = document.createElement('a');
-        link.download = exportFileName;
-        link.href = url;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 1000);
-        showToast(`Archivo ${exportFileName} descargado a 300 DPI.`);
-      });
-    }
-
-    async function downloadOrderZipPackage() {
-      const batches = buildProductionBatches(lastConfirmedOrderNumber, lastConfirmedCustomerName);
-      if (batches.length === 0) return;
-
-      if (typeof JSZip === 'undefined') {
-        showToast('No se pudo cargar el compresor ZIP. Descarga los archivos individuales.');
-        return;
-      }
-
-      const btn = document.getElementById('downloadZipBtn');
-      const originalHtml = btn ? btn.innerHTML : '';
-      if (btn) {
-        btn.disabled = true;
-        btn.innerHTML = '<span>Generando carpetas 300 DPI...</span>';
-      }
-
-      try {
-        const zip = new JSZip();
-        const rootFolderName = batches[0].root_folder;
-
-        for (const batch of batches) {
-          for (const bItem of batch.items) {
-            const item = photoItems.find(i => i.id === bItem.item_id);
-            if (!item) continue;
-            const blob = await renderItemToBlob(item);
-            if (blob) {
-              zip.file(bItem.full_folder_path, blob);
-            }
-          }
-        }
-
-        const jsonContent = document.getElementById('orderJsonOutput')?.textContent || '';
-        if (jsonContent) {
-          zip.file(`${rootFolderName}/orden_laboratorio.json`, jsonContent);
-        }
-
-        const zipBlob = await zip.generateAsync({ type: 'blob' });
-        const url = URL.createObjectURL(zipBlob);
-        const link = document.createElement('a');
-        link.download = `${rootFolderName}.zip`;
-        link.href = url;
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-        setTimeout(() => URL.revokeObjectURL(url), 1500);
-        showToast(`Carpeta ${rootFolderName}.zip descargada con ${batches.length} subcarpetas.`);
-      } finally {
-        if (btn) {
-          btn.disabled = false;
-          btn.innerHTML = originalHtml;
-        }
-      }
-    }
-
-    function submitOrder(e) {
+    async function submitOrder(e) {
       e.preventDefault();
 
       const customerName = document.getElementById('customerName').value.trim();
@@ -2271,85 +2220,346 @@
       const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked').value;
       const deliveryAddress = document.getElementById('deliveryAddress').value.trim();
       const paymentMethod = 'transfer';
+      const proofInput = document.getElementById('paymentProofInput');
+      const proofFile = proofInput && proofInput.files ? proofInput.files[0] : null;
 
-      const { totalCopies, subtotal, deliveryFee, grandTotal } = recalculateCheckoutSummary();
-      const orderNumber = `W-${Math.floor(1000 + Math.random() * 9000)}`;
-      lastConfirmedOrderNumber = orderNumber;
-      lastConfirmedCustomerName = customerName;
-      const productionBatches = buildProductionBatches(orderNumber, customerName);
-      const rootFolderName = productionBatches.length > 0
-        ? productionBatches[0].root_folder
-        : `${orderNumber}_${sanitizeFolderSegment(customerName)}`;
+      const submitBtn = document.getElementById('submitOrderBtn');
+      const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+      if (submitBtn) {
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<span>Subiendo fotos al laboratorio...</span>';
+      }
 
-      const payload = {
-        order: {
-          order_number: orderNumber,
-          lab_root_folder: rootFolderName,
-          source: 'web',
-          customer_name: customerName,
-          customer_phone: `+504 ${customerPhone}`,
-          delivery_method: deliveryMethod,
-          delivery_address: deliveryMethod === 'delivery' ? deliveryAddress : null,
-          payment_method: paymentMethod,
-          payment_status: proofFileNameSelected ? 'verifying' : 'pending',
-          payment_proof_file: proofFileNameSelected,
-          currency: 'HNL',
-          subtotal: Number(subtotal.toFixed(2)),
-          delivery_fee: Number(deliveryFee.toFixed(2)),
-          total: Number(grandTotal.toFixed(2)),
-          created_at: new Date().toISOString()
-        },
-        production_batches: productionBatches,
-        order_items: photoItems.map(item => {
-          const prod = PRINT_PRODUCTS.find(p => p.id === item.productId) || PRINT_PRODUCTS[0];
-          const fin = PAPER_FINISHES.find(f => f.id === item.finishId) || PAPER_FINISHES[0];
-          return {
-            file_name: item.fileName,
-            original_resolution: `${item.naturalWidth}x${item.naturalHeight}`,
-            product_id: prod.id,
-            size_label: prod.name,
-            paper_finish: fin.id,
-            paper_finish_label: fin.name,
-            quantity: item.quantity,
-            unit_price: prod.price,
-            line_total: Number((prod.price * item.quantity).toFixed(2)),
-            crop_data: item.crop_data
-          };
-        })
-      };
+      try {
+        const { totalCopies, subtotal, deliveryFee, grandTotal } = recalculateCheckoutSummary();
+        const orderNumber = `W-${Math.floor(1000 + Math.random() * 9000)}`;
+        lastConfirmedOrderNumber = orderNumber;
+        lastConfirmedCustomerName = customerName;
+        const productionBatches = buildProductionBatches(orderNumber, customerName);
+        const rootFolderName = productionBatches.length > 0
+          ? productionBatches[0].root_folder
+          : `${orderNumber}_${sanitizeFolderSegment(customerName)}`;
 
-      document.getElementById('checkoutForm').classList.add('hidden');
-      document.getElementById('orderConfirmationView').classList.remove('hidden');
-      document.getElementById('checkoutHeaderTitle').textContent = 'Orden creada con éxito';
-      document.getElementById('checkoutHeaderSubtitle').textContent = `Orden #${orderNumber} • Foto Estudio Centro`;
-      document.getElementById('generatedOrderNumber').textContent = `#${orderNumber}`;
-      document.getElementById('generatedOrderSummaryText').textContent =
-        `Cliente: ${customerName} • ${totalCopies} ${totalCopies === 1 ? 'copia' : 'copias'} • Total L. ${grandTotal.toFixed(2)}`;
+        let proofStoragePath = null;
 
-      renderProductionBatchesUI(productionBatches);
-      document.getElementById('orderJsonOutput').textContent = JSON.stringify(payload, null, 2);
+        if (supabaseClient) {
+          if (proofFile) {
+            const safeProofExt = (proofFile.name.split('.').pop() || 'jpg').toLowerCase();
+            proofStoragePath = `${rootFolderName}/_comprobante_pago.${safeProofExt}`;
+            const { error: proofErr } = await supabaseClient.storage
+              .from(SUPABASE_BUCKET)
+              .upload(proofStoragePath, proofFile, { upsert: true });
+            if (proofErr) throw proofErr;
+          }
 
-      showToast(`¡Orden #${orderNumber} creada con éxito!`);
+          for (const batch of productionBatches) {
+            for (const bItem of batch.items) {
+              const item = photoItems.find(i => i.id === bItem.item_id);
+              if (!item) continue;
+              const blob = await renderItemToBlob(item);
+              if (blob) {
+                const { error: uploadErr } = await supabaseClient.storage
+                  .from(SUPABASE_BUCKET)
+                  .upload(bItem.full_folder_path, blob, {
+                    contentType: 'image/jpeg',
+                    upsert: true
+                  });
+                if (uploadErr) throw uploadErr;
+              }
+            }
+          }
+
+          const { error: dbErr } = await supabaseClient
+            .from('orders')
+            .insert({
+              order_number: orderNumber,
+              lab_root_folder: rootFolderName,
+              customer_name: customerName,
+              customer_phone: `+504 ${customerPhone}`,
+              delivery_method: deliveryMethod,
+              delivery_address: deliveryMethod === 'delivery' ? deliveryAddress : null,
+              payment_method: paymentMethod,
+              payment_status: proofStoragePath ? 'verifying' : 'pending',
+              payment_proof_path: proofStoragePath,
+              status: 'pending',
+              total_copies: totalCopies,
+              subtotal: Number(subtotal.toFixed(2)),
+              delivery_fee: Number(deliveryFee.toFixed(2)),
+              total: Number(grandTotal.toFixed(2)),
+              batches_json: productionBatches
+            });
+
+          if (dbErr) throw dbErr;
+        }
+
+        document.getElementById('checkoutForm').classList.add('hidden');
+        document.getElementById('orderConfirmationView').classList.remove('hidden');
+        document.getElementById('checkoutHeaderTitle').textContent = 'Orden creada con éxito';
+        document.getElementById('checkoutHeaderSubtitle').textContent = `Orden #${orderNumber} • Foto Estudio Centro`;
+        document.getElementById('generatedOrderNumber').textContent = `#${orderNumber}`;
+        document.getElementById('generatedOrderSummaryText').textContent =
+          `Cliente: ${customerName} • ${totalCopies} ${totalCopies === 1 ? 'copia' : 'copias'} • Total L. ${grandTotal.toFixed(2)}`;
+
+        showToast(`¡Orden #${orderNumber} creada con éxito!`);
+      } catch (err) {
+        console.error('Error enviando orden:', err);
+        showToast('No se pudo subir la orden a Supabase. Revisa tu conexión o las llaves.');
+      } finally {
+        if (submitBtn) {
+          submitBtn.disabled = false;
+          submitBtn.innerHTML = originalBtnHtml;
+        }
+      }
     }
 
-    function copyOrderJson() {
-      const output = document.getElementById('orderJsonOutput');
-      if (!output) return;
-      const tempArea = document.createElement('textarea');
-      tempArea.value = output.textContent;
-      document.body.appendChild(tempArea);
-      tempArea.select();
-      document.execCommand('copy');
-      document.body.removeChild(tempArea);
-
-      const btn = document.getElementById('copyJsonBtn');
-      if (btn) {
-        btn.textContent = '¡Copiado!';
-        setTimeout(() => {
-          btn.textContent = 'Copiar JSON';
-        }, 2000);
+    function openLabPanelView() {
+      document.getElementById('labPanelModal').classList.remove('hidden');
+      if (isLabUnlocked) {
+        document.getElementById('labPinGate').classList.add('hidden');
+        document.getElementById('labOrdersWorkspace').classList.remove('hidden');
+        document.getElementById('labRefreshBtn').classList.remove('hidden');
+        fetchLabOrders();
+      } else {
+        document.getElementById('labPinGate').classList.remove('hidden');
+        document.getElementById('labOrdersWorkspace').classList.add('hidden');
+        document.getElementById('labRefreshBtn').classList.add('hidden');
+        const pinInput = document.getElementById('labPinInput');
+        if (pinInput) {
+          pinInput.value = '';
+          setTimeout(() => pinInput.focus(), 50);
+        }
       }
-      showToast('JSON copiado al portapapeles.');
+    }
+
+    function closeLabPanelView() {
+      document.getElementById('labPanelModal').classList.add('hidden');
+    }
+
+    function unlockLabPanel(e) {
+      e.preventDefault();
+      const pinInput = document.getElementById('labPinInput');
+      const pinError = document.getElementById('labPinError');
+      if (pinInput && pinInput.value.trim() === LAB_ACCESS_PIN) {
+        isLabUnlocked = true;
+        if (pinError) pinError.classList.add('hidden');
+        document.getElementById('labPinGate').classList.add('hidden');
+        document.getElementById('labOrdersWorkspace').classList.remove('hidden');
+        document.getElementById('labRefreshBtn').classList.remove('hidden');
+        fetchLabOrders();
+      } else if (pinError) {
+        pinError.classList.remove('hidden');
+      }
+    }
+
+    async function fetchLabOrders() {
+      const listEl = document.getElementById('labOrdersList');
+      const warnEl = document.getElementById('labConfigWarning');
+      const statusText = document.getElementById('labConnectionStatusText');
+
+      if (!supabaseClient) {
+        if (warnEl) warnEl.classList.remove('hidden');
+        if (statusText) statusText.textContent = 'Modo sin conexión • Configura SUPABASE_URL y SUPABASE_ANON_KEY';
+        if (listEl) {
+          listEl.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">Aún no has conectado tus llaves de Supabase.</div>';
+        }
+        return;
+      }
+
+      if (warnEl) warnEl.classList.add('hidden');
+      if (statusText) statusText.textContent = 'Sincronizando órdenes desde Supabase...';
+      if (listEl) {
+        listEl.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">Cargando órdenes recibidas...</div>';
+      }
+
+      const { data, error } = await supabaseClient
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(40);
+
+      if (error) {
+        if (statusText) statusText.textContent = 'Error al leer tabla orders';
+        if (listEl) {
+          listEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs text-rose-800">Error: ${error.message}</div>`;
+        }
+        return;
+      }
+
+      cachedLabOrders = data || [];
+      if (statusText) {
+        statusText.textContent = `${cachedLabOrders.length} ${cachedLabOrders.length === 1 ? 'orden recibida' : 'órdenes recibidas'} en la nube`;
+      }
+
+      if (cachedLabOrders.length === 0) {
+        listEl.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-8 text-center text-sm text-slate-500">Todavía no hay órdenes enviadas por clientes.</div>';
+        return;
+      }
+
+      listEl.innerHTML = cachedLabOrders.map(order => buildLabOrderCardHTML(order)).join('');
+    }
+
+    function buildLabOrderCardHTML(order) {
+      const batches = Array.isArray(order.batches_json) ? order.batches_json : [];
+      const createdDate = order.created_at ? new Date(order.created_at).toLocaleString('es-HN', { dateStyle: 'short', timeStyle: 'short' }) : '';
+      const cleanWaPhone = (order.customer_phone || '').replace(/[^0-9]/g, '');
+      const statusBadges = {
+        pending: 'bg-amber-100 text-amber-800 border-amber-200',
+        printing: 'bg-sky-100 text-sky-800 border-sky-200',
+        ready: 'bg-emerald-100 text-emerald-800 border-emerald-200'
+      };
+      const statusLabels = {
+        pending: 'Pendiente',
+        printing: 'Imprimiendo',
+        ready: 'Listo para entrega'
+      };
+      const currentStatus = order.status || 'pending';
+
+      let proofPublicUrl = null;
+      if (supabaseClient && order.payment_proof_path) {
+        const { data } = supabaseClient.storage.from(SUPABASE_BUCKET).getPublicUrl(order.payment_proof_path);
+        proofPublicUrl = data ? data.publicUrl : null;
+      }
+
+      return `
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div class="bg-slate-900 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm font-extrabold text-sky-300 font-mono">${order.lab_root_folder}/</span>
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statusBadges[currentStatus] || statusBadges.pending}">
+                  ${statusLabels[currentStatus] || 'Pendiente'}
+                </span>
+              </div>
+              <p class="text-xs text-slate-300 mt-0.5">
+                Cliente: <strong class="text-white">${order.customer_name}</strong> • ${order.customer_phone} • ${createdDate} • Total: <strong class="text-emerald-300">L. ${Number(order.total || 0).toFixed(2)}</strong>
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              ${proofPublicUrl ? `
+                <a
+                  href="${proofPublicUrl}"
+                  target="_blank"
+                  rel="noopener"
+                  class="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-2 rounded-xl transition"
+                >
+                  Ver comprobante
+                </a>
+              ` : ''}
+
+              ${cleanWaPhone ? `
+                <a
+                  href="https://wa.me/${cleanWaPhone}?text=${encodeURIComponent(`Hola ${order.customer_name}, te saludamos de Foto Estudio Centro. Tu orden ${order.order_number} ya está lista.`)}"
+                  target="_blank"
+                  rel="noopener"
+                  class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl transition"
+                >
+                  WhatsApp
+                </a>
+              ` : ''}
+
+              <button
+                type="button"
+                id="labZipBtn_${order.id}"
+                onclick="downloadCloudOrderZip('${order.id}')"
+                class="inline-flex items-center gap-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm transition"
+              >
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                </svg>
+                <span>Descargar ZIP carpetas</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span class="text-slate-600">
+                Entrega: <strong>${order.delivery_method === 'delivery' ? `Envío a domicilio (${order.delivery_address || ''})` : 'Recoger en tienda'}</strong> • ${order.total_copies} copias en ${batches.length} subcarpetas
+              </span>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="updateLabOrderStatus('${order.id}', 'printing')" class="px-2.5 py-1 rounded-lg border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold">Marcar Imprimiendo</button>
+                <button type="button" onclick="updateLabOrderStatus('${order.id}', 'ready')" class="px-2.5 py-1 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold">Marcar Listo</button>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+              ${batches.map(b => `
+                <div class="border border-slate-200 rounded-xl p-3 bg-slate-50/70">
+                  <div class="flex items-center justify-between gap-2 mb-1.5">
+                    <span class="text-xs font-extrabold text-slate-900 font-mono truncate">📁 ${b.folder_path}/</span>
+                    <span class="text-[11px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded-md shrink-0">${b.total_copies} copias</span>
+                  </div>
+                  <ul class="space-y-1 text-[11px] text-slate-600">
+                    ${(b.items || []).map(it => `
+                      <li class="truncate font-mono">📄 ${it.print_ready_file_name} <span class="font-sans text-slate-500">(${it.border_label}${it.overlay_text ? ` • “${it.overlay_text}”` : ''})</span></li>
+                    `).join('')}
+                  </ul>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function updateLabOrderStatus(orderId, newStatus) {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
+      if (!error) {
+        showToast('Estado de la orden actualizado.');
+        fetchLabOrders();
+      }
+    }
+
+    async function downloadCloudOrderZip(orderId) {
+      const order = cachedLabOrders.find(o => String(o.id) === String(orderId));
+      if (!order || !supabaseClient) return;
+
+      const btn = document.getElementById(`labZipBtn_${order.id}`);
+      const origHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>Descargando fotos...</span>';
+      }
+
+      try {
+        const zip = new JSZip();
+        const batches = Array.isArray(order.batches_json) ? order.batches_json : [];
+
+        for (const batch of batches) {
+          for (const bItem of (batch.items || [])) {
+            const { data: blob, error } = await supabaseClient.storage
+              .from(SUPABASE_BUCKET)
+              .download(bItem.full_folder_path);
+            if (!error && blob) {
+              zip.file(bItem.full_folder_path, blob);
+            }
+          }
+        }
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        link.download = `${order.lab_root_folder}.zip`;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        showToast(`ZIP ${order.lab_root_folder}.zip descargado.`);
+      } catch (err) {
+        console.error(err);
+        showToast('Error al empaquetar las fotos desde Supabase.');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+      }
     }
 
     function startNewOrder() {
