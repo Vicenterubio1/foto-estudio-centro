@@ -73,11 +73,14 @@
         <div class="min-w-0">
           <div class="flex items-center gap-2">
             <h1 class="text-base sm:text-lg font-bold text-slate-900 truncate">Foto Estudio Centro</h1>
-            <span class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
+            <span id="storeStatusBadge" class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200">
               <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Abierto hoy
             </span>
+            <span id="kioskModeBadge" class="hidden inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-900 border border-amber-300">
+              Kiosko en Tienda
+            </span>
           </div>
-          <p class="text-xs text-slate-500 truncate">Laboratorio Digital • Impresión 300 DPI • Tegucigalpa</p>
+          <p id="headerSubtitleText" class="text-xs text-slate-500 truncate">Laboratorio Digital • Impresión 300 DPI • Tegucigalpa</p>
         </div>
       </div>
 
@@ -88,6 +91,7 @@
         </div>
 
         <button
+          id="labAccessHeaderBtn"
           type="button"
           onclick="openLabPanelView()"
           class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 px-3 py-2 rounded-xl text-xs font-bold border border-slate-200 transition"
@@ -684,7 +688,7 @@
             </div>
 
             <div>
-              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="customerPhone">WhatsApp para avisarte *</label>
+              <label id="customerPhoneLabel" class="block text-xs font-bold text-slate-700 mb-1.5" for="customerPhone">WhatsApp para avisarte *</label>
               <div class="flex rounded-xl border border-slate-300 overflow-hidden focus-within:ring-2 focus-within:ring-sky-500">
                 <span class="bg-slate-100 px-3 py-2.5 text-sm font-semibold text-slate-600 border-r border-slate-300 select-none">+504</span>
                 <input
@@ -694,6 +698,85 @@
                   placeholder="9988-7766"
                   class="w-full px-3.5 py-2.5 text-sm focus:outline-none"
                 />
+              </div>
+            </div>
+          </div>
+
+          <div id="webDeliverySection">
+            <span class="block text-xs font-bold text-slate-700 mb-2">Método de entrega</span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="cursor-pointer border rounded-xl p-3.5 flex items-start gap-3 transition border-sky-500 bg-sky-50/50" id="pickupCard">
+                <input type="radio" name="deliveryMethod" value="pickup" checked onchange="toggleDeliveryMethod()" class="mt-1 accent-sky-600" />
+                <div>
+                  <span class="block text-sm font-bold text-slate-900">Recoger en tienda</span>
+                  <span class="block text-xs text-slate-500">Sin costo • Listo en ~45 min</span>
+                </div>
+              </label>
+
+              <label class="cursor-pointer border border-slate-200 rounded-xl p-3.5 flex items-start gap-3 transition hover:border-slate-300" id="deliveryCard">
+                <input type="radio" name="deliveryMethod" value="delivery" onchange="toggleDeliveryMethod()" class="mt-1 accent-sky-600" />
+                <div>
+                  <span class="block text-sm font-bold text-slate-900">Envío a domicilio</span>
+                  <span class="block text-xs text-slate-500">Casco urbano (+ L. 60.00)</span>
+                </div>
+              </label>
+            </div>
+
+            <div id="deliveryAddressBox" class="hidden mt-3">
+              <label class="block text-xs font-bold text-slate-700 mb-1.5" for="deliveryAddress">Dirección exacta y referencias *</label>
+              <textarea
+                id="deliveryAddress"
+                rows="2"
+                placeholder="Colonia, bloque, número de casa o punto de referencia..."
+                class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500"
+              ></textarea>
+            </div>
+          </div>
+
+          <div>
+            <span class="block text-xs font-bold text-slate-700 mb-2">Método de pago</span>
+
+            <!-- Pago Web (Transferencia con comprobante) -->
+            <div id="webPaymentSection">
+              <div class="border border-sky-500 bg-sky-50/50 rounded-xl p-3.5 flex items-start gap-3">
+                <div class="w-8 h-8 rounded-lg bg-sky-600 text-white flex items-center justify-center shrink-0 mt-0.5">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                  </svg>
+                </div>
+                <div>
+                  <span class="block text-sm font-bold text-slate-900">Transferencia bancaria (Pago anticipado)</span>
+                  <span class="block text-xs text-slate-500">BAC / Atlántida / Ficohsa • Confirmación requerida para iniciar impresión</span>
+                </div>
+              </div>
+
+              <div id="transferProofBox" class="mt-3 bg-slate-50 border border-slate-200 rounded-xl p-3.5 space-y-2.5">
+                <div class="text-xs text-slate-600">
+                  <p class="font-bold text-slate-800">Cuenta BAC Credomatic: 742891034 (Foto Estudio Centro)</p>
+                  <p>Adjunta la captura del comprobante para iniciar impresión de inmediato *</p>
+                </div>
+                <input
+                  id="paymentProofInput"
+                  type="file"
+                  required
+                  accept="image/*,application/pdf"
+                  onchange="handleProofSelected(this)"
+                  class="block w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3.5 file:rounded-lg file:border-0 file:text-xs file:font-semibold file:bg-sky-600 file:text-white hover:file:bg-sky-700 cursor-pointer"
+                />
+                <p id="proofFileName" class="text-xs font-medium text-emerald-700 hidden"></p>
+              </div>
+            </div>
+
+            <!-- Pago Kiosko (En caja del mostrador) -->
+            <div id="kioskPaymentSection" class="hidden border border-amber-400 bg-amber-50/70 rounded-xl p-4 flex items-start gap-3">
+              <div class="w-9 h-9 rounded-lg bg-amber-500 text-slate-950 flex items-center justify-center shrink-0 mt-0.5">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+              </div>
+              <div>
+                <span class="block text-sm font-bold text-slate-900">Pago en caja (Mostrador de tienda)</span>
+                <span class="block text-xs text-slate-600 mt-0.5">Al confirmar tu orden recibirás tu ticket <strong>#K-XXXX</strong>. Pasa a caja para cancelar en efectivo o tarjeta y comenzar la impresión.</span>
               </div>
             </div>
           </div>
@@ -809,14 +892,18 @@
               Orden <span id="generatedOrderNumber" class="text-sky-700">#W-2085</span>
             </h4>
             <p id="generatedOrderSummaryText" class="text-xs sm:text-sm text-slate-700 font-medium max-w-md mx-auto"></p>
-            <div class="bg-white/90 border border-emerald-200/80 rounded-xl p-3.5 max-w-md mx-auto text-xs text-slate-600 space-y-1">
+            <div id="confirmationInstructionsBox" class="bg-white/90 border border-emerald-200/80 rounded-xl p-3.5 max-w-md mx-auto text-xs text-slate-600 space-y-1">
               <p class="font-bold text-slate-900">¿Qué sigue ahora?</p>
               <p>Tus fotografías y comprobante ya fueron enviados al laboratorio. Te escribiremos por <strong>WhatsApp</strong> en cuanto tu pedido esté impreso y listo.</p>
             </div>
+            <p id="kioskAutoResetNotice" class="hidden text-xs font-bold text-amber-800 bg-amber-100/90 border border-amber-300 rounded-lg px-3 py-1.5 inline-block">
+              Esta pantalla se reiniciará automáticamente para el siguiente cliente en <span id="kioskResetCountdown">20</span>s...
+            </p>
           </div>
 
           <div class="flex flex-wrap items-center justify-center gap-3 pt-1">
             <button
+              id="newOrderActionBtn"
               type="button"
               onclick="startNewOrder()"
               class="px-5 py-2.5 rounded-xl text-sm font-semibold text-slate-700 bg-slate-100 hover:bg-slate-200 transition"
@@ -824,6 +911,7 @@
               Hacer otro pedido
             </button>
             <button
+              id="closeConfirmationBtn"
               type="button"
               onclick="closeCheckoutModal()"
               class="px-6 py-2.5 rounded-xl text-sm font-bold bg-slate-900 hover:bg-slate-800 text-white transition"
@@ -916,6 +1004,22 @@
           <p>Busca <code class="bg-amber-100 px-1 rounded">SUPABASE_URL</code> y <code class="bg-amber-100 px-1 rounded">SUPABASE_ANON_KEY</code> al inicio del script y pega los valores de tu proyecto Supabase para recibir órdenes desde cualquier celular.</p>
         </div>
 
+        <!-- Barra de filtros por estado + indicador en vivo -->
+        <div class="flex flex-wrap items-center justify-between gap-3 bg-white border border-slate-200 rounded-2xl p-3">
+          <div id="labStatusFilterTabs" class="flex flex-wrap items-center gap-1.5">
+            <button type="button" onclick="setLabFilter('all')" data-filter="all" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition">Todas (0)</button>
+            <button type="button" onclick="setLabFilter('pending')" data-filter="pending" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Pendientes (0)</button>
+            <button type="button" onclick="setLabFilter('printing')" data-filter="printing" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Imprimiendo (0)</button>
+            <button type="button" onclick="setLabFilter('ready')" data-filter="ready" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Listas (0)</button>
+            <button type="button" onclick="setLabFilter('delivered')" data-filter="delivered" class="px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition">Entregadas (0)</button>
+          </div>
+
+          <div class="inline-flex items-center gap-2 text-[11px] font-semibold text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-full">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Escuchando órdenes nuevas</span>
+          </div>
+        </div>
+
         <div id="labOrdersList" class="space-y-4">
           <!-- Órdenes cargadas desde Supabase -->
         </div>
@@ -954,6 +1058,12 @@
 
     let isLabUnlocked = false;
     let cachedLabOrders = [];
+    let currentLabFilter = 'all';
+    let labRealtimeChannel = null;
+    let labPollingInterval = null;
+    let knownOrderIds = new Set();
+    let isKioskMode = false;
+    let kioskResetTimer = null;
 
     const PRINT_PRODUCTS = [
       { id: '4x6', name: '4×6', widthInches: 6, heightInches: 4, dpi: 300, price: 8.00 },
@@ -1013,10 +1123,42 @@
       renderAll();
 
       const params = new URLSearchParams(window.location.search);
-      if (params.get('panel') === 'lab') {
+      const modeParam = (params.get('modo') || params.get('mode') || '').toLowerCase();
+      if (modeParam === 'kiosko' || modeParam === 'kiosk') {
+        enableKioskMode();
+      } else if (params.get('panel') === 'lab') {
         openLabPanelView();
       }
     });
+
+    function enableKioskMode() {
+      isKioskMode = true;
+
+      const storeBadge = document.getElementById('storeStatusBadge');
+      const kioskBadge = document.getElementById('kioskModeBadge');
+      const labBtn = document.getElementById('labAccessHeaderBtn');
+      const subtitle = document.getElementById('headerSubtitleText');
+      const phoneLabel = document.getElementById('customerPhoneLabel');
+      const phoneInput = document.getElementById('customerPhone');
+      const webDelivery = document.getElementById('webDeliverySection');
+      const webPayment = document.getElementById('webPaymentSection');
+      const kioskPayment = document.getElementById('kioskPaymentSection');
+      const proofInput = document.getElementById('paymentProofInput');
+      const submitBtn = document.getElementById('submitOrderBtn');
+
+      if (storeBadge) storeBadge.classList.add('hidden');
+      if (kioskBadge) kioskBadge.classList.remove('hidden');
+      if (labBtn) labBtn.classList.add('hidden');
+      if (subtitle) subtitle.textContent = 'Autoservicio en Tienda • Envía tus fotos y paga en caja';
+
+      if (phoneLabel) phoneLabel.textContent = 'Teléfono / WhatsApp (opcional)';
+      if (phoneInput) phoneInput.required = false;
+      if (webDelivery) webDelivery.classList.add('hidden');
+      if (webPayment) webPayment.classList.add('hidden');
+      if (kioskPayment) kioskPayment.classList.remove('hidden');
+      if (proofInput) proofInput.required = false;
+      if (submitBtn) submitBtn.innerHTML = '<span>Enviar orden y generar ticket</span>';
+    }
 
     function populateBulkProductSelect() {
       const select = document.getElementById('bulkProductSelect');
@@ -2062,10 +2204,19 @@
         return;
       }
 
+      if (kioskResetTimer) {
+        clearInterval(kioskResetTimer);
+        kioskResetTimer = null;
+      }
+
       document.getElementById('checkoutForm').classList.remove('hidden');
       document.getElementById('orderConfirmationView').classList.add('hidden');
-      document.getElementById('checkoutHeaderTitle').textContent = 'Finalizar pedido en línea';
-      document.getElementById('checkoutHeaderSubtitle').textContent = 'Foto Estudio Centro • Sin necesidad de crear cuenta';
+      document.getElementById('checkoutHeaderTitle').textContent = isKioskMode
+        ? 'Confirmar orden en Kiosko'
+        : 'Finalizar pedido en línea';
+      document.getElementById('checkoutHeaderSubtitle').textContent = isKioskMode
+        ? 'Foto Estudio Centro • Pago en caja al finalizar'
+        : 'Foto Estudio Centro • Sin necesidad de crear cuenta';
 
       recalculateCheckoutSummary();
       document.getElementById('checkoutModal').classList.remove('hidden');
@@ -2217,22 +2368,27 @@
 
       const customerName = document.getElementById('customerName').value.trim();
       const customerPhone = document.getElementById('customerPhone').value.trim();
-      const deliveryMethod = document.querySelector('input[name="deliveryMethod"]:checked').value;
-      const deliveryAddress = document.getElementById('deliveryAddress').value.trim();
-      const paymentMethod = 'transfer';
+      const deliveryMethod = isKioskMode
+        ? 'kiosk_pickup'
+        : document.querySelector('input[name="deliveryMethod"]:checked').value;
+      const deliveryAddress = isKioskMode
+        ? ''
+        : document.getElementById('deliveryAddress').value.trim();
+      const paymentMethod = isKioskMode ? 'cash_counter' : 'transfer';
       const proofInput = document.getElementById('paymentProofInput');
-      const proofFile = proofInput && proofInput.files ? proofInput.files[0] : null;
+      const proofFile = (!isKioskMode && proofInput && proofInput.files) ? proofInput.files[0] : null;
 
       const submitBtn = document.getElementById('submitOrderBtn');
       const originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
       if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = '<span>Subiendo fotos al laboratorio...</span>';
+        submitBtn.innerHTML = '<span>Enviando fotos al laboratorio...</span>';
       }
 
       try {
         const { totalCopies, subtotal, deliveryFee, grandTotal } = recalculateCheckoutSummary();
-        const orderNumber = `W-${Math.floor(1000 + Math.random() * 9000)}`;
+        const orderPrefix = isKioskMode ? 'K' : 'W';
+        const orderNumber = `${orderPrefix}-${Math.floor(1000 + Math.random() * 9000)}`;
         lastConfirmedOrderNumber = orderNumber;
         lastConfirmedCustomerName = customerName;
         const productionBatches = buildProductionBatches(orderNumber, customerName);
@@ -2275,30 +2431,74 @@
               order_number: orderNumber,
               lab_root_folder: rootFolderName,
               customer_name: customerName,
-              customer_phone: `+504 ${customerPhone}`,
+              customer_phone: customerPhone ? `+504 ${customerPhone}` : 'En tienda (Kiosko)',
               delivery_method: deliveryMethod,
               delivery_address: deliveryMethod === 'delivery' ? deliveryAddress : null,
               payment_method: paymentMethod,
-              payment_status: proofStoragePath ? 'verifying' : 'pending',
+              payment_status: isKioskMode ? 'pay_at_counter' : (proofStoragePath ? 'verifying' : 'pending'),
               payment_proof_path: proofStoragePath,
               status: 'pending',
               total_copies: totalCopies,
               subtotal: Number(subtotal.toFixed(2)),
-              delivery_fee: Number(deliveryFee.toFixed(2)),
-              total: Number(grandTotal.toFixed(2)),
+              delivery_fee: isKioskMode ? 0 : Number(deliveryFee.toFixed(2)),
+              total: isKioskMode ? Number(subtotal.toFixed(2)) : Number(grandTotal.toFixed(2)),
               batches_json: productionBatches
             });
 
           if (dbErr) throw dbErr;
         }
 
+        const displayTotal = isKioskMode ? subtotal : grandTotal;
         document.getElementById('checkoutForm').classList.add('hidden');
         document.getElementById('orderConfirmationView').classList.remove('hidden');
-        document.getElementById('checkoutHeaderTitle').textContent = 'Orden creada con éxito';
+        document.getElementById('checkoutHeaderTitle').textContent = isKioskMode
+          ? '¡Orden enviada a caja!'
+          : 'Orden creada con éxito';
         document.getElementById('checkoutHeaderSubtitle').textContent = `Orden #${orderNumber} • Foto Estudio Centro`;
         document.getElementById('generatedOrderNumber').textContent = `#${orderNumber}`;
         document.getElementById('generatedOrderSummaryText').textContent =
-          `Cliente: ${customerName} • ${totalCopies} ${totalCopies === 1 ? 'copia' : 'copias'} • Total L. ${grandTotal.toFixed(2)}`;
+          `Cliente: ${customerName} • ${totalCopies} ${totalCopies === 1 ? 'copia' : 'copias'} • Total a pagar: L. ${displayTotal.toFixed(2)}`;
+
+        const instructionsBox = document.getElementById('confirmationInstructionsBox');
+        const autoResetNotice = document.getElementById('kioskAutoResetNotice');
+        const newOrderBtn = document.getElementById('newOrderActionBtn');
+        const closeBtn = document.getElementById('closeConfirmationBtn');
+
+        if (isKioskMode) {
+          if (instructionsBox) {
+            instructionsBox.innerHTML = `
+              <p class="font-bold text-slate-900">Siguiente paso: Pasa a caja</p>
+              <p>Menciona tu número de orden <strong class="text-sky-700">#${orderNumber}</strong> en mostrador para realizar tu pago de <strong>L. ${displayTotal.toFixed(2)}</strong> e iniciar la impresión de tus fotos.</p>
+            `;
+          }
+          if (newOrderBtn) newOrderBtn.textContent = 'Listo • Nuevo cliente';
+          if (closeBtn) closeBtn.classList.add('hidden');
+          if (autoResetNotice) {
+            autoResetNotice.classList.remove('hidden');
+            let secondsLeft = 20;
+            const countdownEl = document.getElementById('kioskResetCountdown');
+            if (countdownEl) countdownEl.textContent = secondsLeft;
+            kioskResetTimer = setInterval(() => {
+              secondsLeft -= 1;
+              if (countdownEl) countdownEl.textContent = secondsLeft;
+              if (secondsLeft <= 0) {
+                clearInterval(kioskResetTimer);
+                kioskResetTimer = null;
+                startNewOrder();
+              }
+            }, 1000);
+          }
+        } else {
+          if (instructionsBox) {
+            instructionsBox.innerHTML = `
+              <p class="font-bold text-slate-900">¿Qué sigue ahora?</p>
+              <p>Tus fotografías y comprobante ya fueron enviados al laboratorio. Te escribiremos por <strong>WhatsApp</strong> en cuanto tu pedido esté impreso y listo.</p>
+            `;
+          }
+          if (newOrderBtn) newOrderBtn.textContent = 'Hacer otro pedido';
+          if (closeBtn) closeBtn.classList.remove('hidden');
+          if (autoResetNotice) autoResetNotice.classList.add('hidden');
+        }
 
         showToast(`¡Orden #${orderNumber} creada con éxito!`);
       } catch (err) {
@@ -2320,6 +2520,7 @@
         document.getElementById('labOrdersWorkspace').classList.remove('hidden');
         document.getElementById('labRefreshBtn').classList.remove('hidden');
         fetchLabOrders();
+        startLabRealtimeMonitor();
       } else {
         document.getElementById('labPinGate').classList.remove('hidden');
         document.getElementById('labOrdersWorkspace').classList.add('hidden');
@@ -2334,6 +2535,473 @@
 
     function closeLabPanelView() {
       document.getElementById('labPanelModal').classList.add('hidden');
+      stopLabRealtimeMonitor();
+    }
+
+    function unlockLabPanel(e) {
+      e.preventDefault();
+      const pinInput = document.getElementById('labPinInput');
+      const pinError = document.getElementById('labPinError');
+      if (pinInput && pinInput.value.trim() === LAB_ACCESS_PIN) {
+        isLabUnlocked = true;
+        if (pinError) pinError.classList.add('hidden');
+        document.getElementById('labPinGate').classList.add('hidden');
+        document.getElementById('labOrdersWorkspace').classList.remove('hidden');
+        document.getElementById('labRefreshBtn').classList.remove('hidden');
+        fetchLabOrders();
+        startLabRealtimeMonitor();
+      } else if (pinError) {
+        pinError.classList.remove('hidden');
+      }
+    }
+
+    function playNewOrderChime() {
+      try {
+        const AudioCtx = window.AudioContext || window.webkitAudioContext;
+        if (!AudioCtx) return;
+        const ctx = new AudioCtx();
+        const notes = [587.33, 880]; // Re5 -> La5 suave
+        notes.forEach((freq, i) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.value = freq;
+          gain.gain.setValueAtTime(0.001, ctx.currentTime + i * 0.16);
+          gain.gain.exponentialRampToValueAtTime(0.18, ctx.currentTime + i * 0.16 + 0.03);
+          gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.16 + 0.35);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(ctx.currentTime + i * 0.16);
+          osc.stop(ctx.currentTime + i * 0.16 + 0.38);
+        });
+      } catch (e) {
+        // Ignorar si el navegador requiere interacción previa
+      }
+    }
+
+    function startLabRealtimeMonitor() {
+      if (!supabaseClient || !isLabUnlocked) return;
+      stopLabRealtimeMonitor();
+
+      // Canal Realtime de Supabase
+      labRealtimeChannel = supabaseClient
+        .channel('lab-orders-live')
+        .on(
+          'postgres_changes',
+          { event: 'INSERT', schema: SUPABASE_SCHEMA, table: 'orders' },
+          payload => {
+            const newOrder = payload && payload.new;
+            if (newOrder && !knownOrderIds.has(newOrder.id)) {
+              playNewOrderChime();
+              showToast(`🔔 Nueva orden recibida: #${newOrder.order_number} (${newOrder.customer_name})`);
+              fetchLabOrders(true);
+            }
+          }
+        )
+        .subscribe();
+
+      // Respaldo automático cada 20s por si Realtime no está habilitado en la tabla
+      labPollingInterval = setInterval(() => {
+        if (isLabUnlocked && !document.getElementById('labPanelModal').classList.contains('hidden')) {
+          fetchLabOrders(true);
+        }
+      }, 20000);
+    }
+
+    function stopLabRealtimeMonitor() {
+      if (labRealtimeChannel && supabaseClient) {
+        supabaseClient.removeChannel(labRealtimeChannel);
+        labRealtimeChannel = null;
+      }
+      if (labPollingInterval) {
+        clearInterval(labPollingInterval);
+        labPollingInterval = null;
+      }
+    }
+
+    function setLabFilter(filterKey) {
+      currentLabFilter = filterKey;
+      renderFilteredLabOrders();
+    }
+
+    async function fetchLabOrders(silent = false) {
+      const listEl = document.getElementById('labOrdersList');
+      const warnEl = document.getElementById('labConfigWarning');
+      const statusText = document.getElementById('labConnectionStatusText');
+
+      if (!supabaseClient) {
+        if (warnEl) warnEl.classList.remove('hidden');
+        if (statusText) statusText.textContent = 'Modo sin conexión • Configura SUPABASE_URL y SUPABASE_ANON_KEY';
+        if (listEl) {
+          listEl.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">Aún no has conectado tus llaves de Supabase.</div>';
+        }
+        return;
+      }
+
+      if (warnEl) warnEl.classList.add('hidden');
+      if (!silent) {
+        if (statusText) statusText.textContent = 'Sincronizando órdenes desde Supabase...';
+        if (listEl) {
+          listEl.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-6 text-center text-xs text-slate-500">Cargando órdenes recibidas...</div>';
+        }
+      }
+
+      const { data, error } = await supabaseClient
+        .from('orders')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(80);
+
+      if (error) {
+        if (statusText) statusText.textContent = 'Error al leer tabla orders';
+        if (listEl && !silent) {
+          listEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 rounded-2xl p-4 text-xs text-rose-800">Error: ${error.message}</div>`;
+        }
+        return;
+      }
+
+      const incoming = data || [];
+      if (knownOrderIds.size > 0 && silent) {
+        const brandNew = incoming.filter(o => !knownOrderIds.has(o.id));
+        if (brandNew.length > 0) {
+          playNewOrderChime();
+          showToast(`🔔 ${brandNew.length === 1 ? `Nueva orden #${brandNew[0].order_number}` : `${brandNew.length} órdenes nuevas`} recibidas.`);
+        }
+      }
+
+      cachedLabOrders = incoming;
+      knownOrderIds = new Set(cachedLabOrders.map(o => o.id));
+
+      if (statusText) {
+        statusText.textContent = `${cachedLabOrders.length} ${cachedLabOrders.length === 1 ? 'orden registrada' : 'órdenes registradas'} en la nube`;
+      }
+
+      renderFilteredLabOrders();
+    }
+
+    function renderFilteredLabOrders() {
+      const listEl = document.getElementById('labOrdersList');
+      if (!listEl) return;
+
+      const counts = {
+        all: cachedLabOrders.length,
+        pending: cachedLabOrders.filter(o => (o.status || 'pending') === 'pending').length,
+        printing: cachedLabOrders.filter(o => o.status === 'printing').length,
+        ready: cachedLabOrders.filter(o => o.status === 'ready').length,
+        delivered: cachedLabOrders.filter(o => o.status === 'delivered').length
+      };
+
+      const labelsMap = {
+        all: `Todas (${counts.all})`,
+        pending: `Pendientes (${counts.pending})`,
+        printing: `Imprimiendo (${counts.printing})`,
+        ready: `Listas (${counts.ready})`,
+        delivered: `Entregadas (${counts.delivered})`
+      };
+
+      document.querySelectorAll('#labStatusFilterTabs button').forEach(btn => {
+        const key = btn.getAttribute('data-filter');
+        btn.textContent = labelsMap[key] || key;
+        if (key === currentLabFilter) {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-900 text-white transition';
+        } else {
+          btn.className = 'px-3 py-1.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 transition';
+        }
+      });
+
+      const filtered = currentLabFilter === 'all'
+        ? cachedLabOrders
+        : cachedLabOrders.filter(o => (o.status || 'pending') === currentLabFilter);
+
+      if (filtered.length === 0) {
+        listEl.innerHTML = '<div class="bg-white border border-slate-200 rounded-2xl p-8 text-center text-sm text-slate-500">No hay órdenes en esta categoría.</div>';
+        return;
+      }
+
+      listEl.innerHTML = filtered.map(order => buildLabOrderCardHTML(order)).join('');
+    }
+
+    function buildLabOrderCardHTML(order) {
+      const batches = Array.isArray(order.batches_json) ? order.batches_json : [];
+      const createdDate = order.created_at ? new Date(order.created_at).toLocaleString('es-HN', { dateStyle: 'short', timeStyle: 'short' }) : '';
+      const cleanWaPhone = (order.customer_phone || '').replace(/[^0-9]/g, '');
+      const isKioskOrder = order.payment_method === 'cash_counter' || String(order.order_number || '').startsWith('K-');
+      const isPaidAtCounter = order.payment_status === 'paid_counter';
+      const statusBadges = {
+        pending: 'bg-amber-100 text-amber-800 border-amber-200',
+        printing: 'bg-sky-100 text-sky-800 border-sky-200',
+        ready: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+        delivered: 'bg-slate-200 text-slate-700 border-slate-300'
+      };
+      const statusLabels = {
+        pending: 'Pendiente',
+        printing: 'Imprimiendo',
+        ready: 'Listo para entrega',
+        delivered: 'Entregado'
+      };
+      const currentStatus = order.status || 'pending';
+      const isStorageCleaned = Boolean(order.storage_cleaned);
+
+      let proofPublicUrl = null;
+      if (supabaseClient && order.payment_proof_path && !isStorageCleaned) {
+        const { data } = supabaseClient.storage.from(SUPABASE_BUCKET).getPublicUrl(order.payment_proof_path);
+        proofPublicUrl = data ? data.publicUrl : null;
+      }
+
+      return `
+        <div class="bg-white border border-slate-200 rounded-2xl shadow-sm overflow-hidden">
+          <div class="bg-slate-900 text-white px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex flex-wrap items-center gap-2">
+                <span class="text-sm font-extrabold text-sky-300 font-mono">${order.lab_root_folder}/</span>
+                ${isKioskOrder ? `
+                  <span class="text-[11px] font-extrabold px-2.5 py-0.5 rounded-full border ${isPaidAtCounter ? 'bg-emerald-500/20 text-emerald-300 border-emerald-400/40' : 'bg-amber-500/20 text-amber-300 border-amber-400/40'}">
+                    ${isPaidAtCounter ? 'Kiosko • Pagado en caja' : 'Kiosko • Cobrar en caja'}
+                  </span>
+                ` : `
+                  <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-sky-500/20 text-sky-200 border border-sky-400/30">
+                    Web • Transferencia
+                  </span>
+                `}
+                <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full border ${statusBadges[currentStatus] || statusBadges.pending}">
+                  ${statusLabels[currentStatus] || 'Pendiente'}
+                </span>
+                ${isStorageCleaned ? `
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700">
+                    Nube liberada
+                  </span>
+                ` : ''}
+              </div>
+              <p class="text-xs text-slate-300 mt-0.5">
+                Cliente: <strong class="text-white">${order.customer_name}</strong> • ${order.customer_phone} • ${createdDate} • Total: <strong class="text-emerald-300">L. ${Number(order.total || 0).toFixed(2)}</strong>
+              </p>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              ${isKioskOrder && !isPaidAtCounter ? `
+                <button
+                  type="button"
+                  onclick="confirmCounterPayment('${order.id}')"
+                  class="bg-amber-400 hover:bg-amber-300 text-slate-950 text-xs font-extrabold px-3 py-2 rounded-xl transition"
+                >
+                  Confirmar pago en caja
+                </button>
+              ` : ''}
+
+              ${proofPublicUrl ? `
+                <a
+                  href="${proofPublicUrl}"
+                  target="_blank"
+                  rel="noopener"
+                  class="bg-white/10 hover:bg-white/20 text-white text-xs font-bold px-3 py-2 rounded-xl transition"
+                >
+                  Ver comprobante
+                </a>
+              ` : ''}
+
+              ${cleanWaPhone ? `
+                <a
+                  href="https://wa.me/${cleanWaPhone}?text=${encodeURIComponent(`Hola ${order.customer_name}, te saludamos de Foto Estudio Centro. Tu orden ${order.order_number} ya está lista.`)}"
+                  target="_blank"
+                  rel="noopener"
+                  class="bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold px-3 py-2 rounded-xl transition"
+                >
+                  WhatsApp
+                </a>
+              ` : ''}
+
+              ${!isStorageCleaned ? `
+                <button
+                  type="button"
+                  id="labZipBtn_${order.id}"
+                  onclick="downloadCloudOrderZip('${order.id}')"
+                  class="inline-flex items-center gap-1.5 bg-sky-500 hover:bg-sky-400 text-slate-950 text-xs font-extrabold px-3.5 py-2 rounded-xl shadow-sm transition"
+                >
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                  </svg>
+                  <span>Descargar ZIP carpetas</span>
+                </button>
+              ` : ''}
+            </div>
+          </div>
+
+          <div class="p-4 space-y-3">
+            <div class="flex flex-wrap items-center justify-between gap-2 text-xs">
+              <span class="text-slate-600">
+                Entrega: <strong>${order.delivery_method === 'kiosk_pickup' ? 'Kiosko en tienda' : order.delivery_method === 'delivery' ? `Envío a domicilio (${order.delivery_address || ''})` : 'Recoger en tienda'}</strong> • ${order.total_copies} copias en ${batches.length} subcarpetas
+              </span>
+              <div class="flex flex-wrap items-center gap-1.5">
+                <button type="button" onclick="updateLabOrderStatus('${order.id}', 'printing')" class="px-2.5 py-1 rounded-lg border border-sky-200 bg-sky-50 hover:bg-sky-100 text-sky-800 font-bold">Marcar Imprimiendo</button>
+                <button type="button" onclick="updateLabOrderStatus('${order.id}', 'ready')" class="px-2.5 py-1 rounded-lg border border-emerald-200 bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-bold">Marcar Listo</button>
+                ${!isStorageCleaned ? `
+                  <button
+                    type="button"
+                    id="labCleanBtn_${order.id}"
+                    onclick="deliverAndFreeStorage('${order.id}')"
+                    class="px-2.5 py-1 rounded-lg border border-slate-300 bg-slate-100 hover:bg-rose-50 hover:border-rose-300 hover:text-rose-700 text-slate-700 font-bold transition"
+                    title="Marca como entregado y borra las fotos de Supabase para liberar espacio"
+                  >
+                    Entregado y liberar nube
+                  </button>
+                ` : ''}
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2.5">
+              ${batches.map(b => `
+                <div class="border border-slate-200 rounded-xl p-3 bg-slate-50/70">
+                  <div class="flex items-center justify-between gap-2 mb-1.5">
+                    <span class="text-xs font-extrabold text-slate-900 font-mono truncate">📁 ${b.folder_path}/</span>
+                    <span class="text-[11px] font-bold bg-white border border-slate-200 px-2 py-0.5 rounded-md shrink-0">${b.total_copies} copias</span>
+                  </div>
+                  <ul class="space-y-1 text-[11px] text-slate-600">
+                    ${(b.items || []).map(it => `
+                      <li class="truncate font-mono">📄 ${it.print_ready_file_name} <span class="font-sans text-slate-500">(${it.border_label}${it.overlay_text ? ` • “${it.overlay_text}”` : ''})</span></li>
+                    `).join('')}
+                  </ul>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function confirmCounterPayment(orderId) {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient
+        .from('orders')
+        .update({ payment_status: 'paid_counter' })
+        .eq('id', orderId);
+      if (!error) {
+        showToast('Pago en caja confirmado.');
+        fetchLabOrders(true);
+      }
+    }
+
+    async function updateLabOrderStatus(orderId, newStatus) {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient
+        .from('orders')
+        .update({ status: newStatus })
+        .eq('id', orderId);
+      if (!error) {
+        showToast('Estado de la orden actualizado.');
+        fetchLabOrders(true);
+      }
+    }
+
+    async function deliverAndFreeStorage(orderId) {
+      const order = cachedLabOrders.find(o => String(o.id) === String(orderId));
+      if (!order || !supabaseClient) return;
+
+      const btn = document.getElementById(`labCleanBtn_${order.id}`);
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Liberando nube...';
+      }
+
+      try {
+        const pathsToDelete = [];
+        if (order.payment_proof_path) pathsToDelete.push(order.payment_proof_path);
+
+        const batches = Array.isArray(order.batches_json) ? order.batches_json : [];
+        batches.forEach(batch => {
+          (batch.items || []).forEach(it => {
+            if (it.full_folder_path) pathsToDelete.push(it.full_folder_path);
+          });
+        });
+
+        if (pathsToDelete.length > 0) {
+          const { error: removeErr } = await supabaseClient.storage
+            .from(SUPABASE_BUCKET)
+            .remove(pathsToDelete);
+          if (removeErr) throw removeErr;
+        }
+
+        const { error: dbErr } = await supabaseClient
+          .from('orders')
+          .update({ status: 'delivered', storage_cleaned: true })
+          .eq('id', orderId);
+        if (dbErr) throw dbErr;
+
+        showToast(`Orden ${order.order_number} entregada y ${pathsToDelete.length} archivos liberados de la nube.`);
+        fetchLabOrders(true);
+      } catch (err) {
+        console.error(err);
+        showToast(`No se pudo liberar almacenamiento: ${err.message || 'revisa políticas DELETE en Storage'}`);
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Entregado y liberar nube';
+        }
+      }
+    }
+
+    async function downloadCloudOrderZip(orderId) {
+      const order = cachedLabOrders.find(o => String(o.id) === String(orderId));
+      if (!order || !supabaseClient) return;
+
+      const btn = document.getElementById(`labZipBtn_${order.id}`);
+      const origHtml = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<span>Descargando fotos...</span>';
+      }
+
+      try {
+        const zip = new JSZip();
+        const batches = Array.isArray(order.batches_json) ? order.batches_json : [];
+
+        for (const batch of batches) {
+          for (const bItem of (batch.items || [])) {
+            const { data: blob, error } = await supabaseClient.storage
+              .from(SUPABASE_BUCKET)
+              .download(bItem.full_folder_path);
+            if (!error && blob) {
+              zip.file(bItem.full_folder_path, blob);
+            }
+          }
+        }
+
+        const zipBlob = await zip.generateAsync({ type: 'blob' });
+        const url = URL.createObjectURL(zipBlob);
+        const link = document.createElement('a');
+        link.download = `${order.lab_root_folder}.zip`;
+        link.href = url;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        setTimeout(() => URL.revokeObjectURL(url), 1500);
+        showToast(`ZIP ${order.lab_root_folder}.zip descargado.`);
+      } catch (err) {
+        console.error(err);
+        showToast('Error al empaquetar las fotos desde Supabase.');
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = origHtml;
+        }
+      }
+    }
+
+    function startNewOrder() {
+      if (kioskResetTimer) {
+        clearInterval(kioskResetTimer);
+        kioskResetTimer = null;
+      }
+      photoItems = [];
+      proofFileNameSelected = null;
+      const form = document.getElementById('checkoutForm');
+      if (form) form.reset();
+      const fileLabel = document.getElementById('proofFileName');
+      if (fileLabel) fileLabel.classList.add('hidden');
+      if (!isKioskMode) {
+        toggleDeliveryMethod();
+      }
+      renderAll();
+      closeCheckoutModal();
+      showToast(isKioskMode ? 'Kiosko listo para el siguiente cliente.' : 'Listo para una nueva orden.');
     }
 
     function unlockLabPanel(e) {
