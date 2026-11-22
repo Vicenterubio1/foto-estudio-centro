@@ -2303,7 +2303,8 @@
         showToast(`¡Orden #${orderNumber} creada con éxito!`);
       } catch (err) {
         console.error('Error enviando orden:', err);
-        showToast('No se pudo subir la orden a Supabase. Revisa tu conexión o las llaves.');
+        const detail = err && (err.message || err.error_description || JSON.stringify(err));
+        showToast(`Error Supabase: ${detail || 'Revisa bucket, políticas o esquema'}`);
       } finally {
         if (submitBtn) {
           submitBtn.disabled = false;
