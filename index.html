@@ -697,6 +697,35 @@
             </svg>
           </button>
         </div>
+        <div class="flex items-center gap-2 pt-1">
+          <button type="button" onclick="closeKioskPinModal()" class="flex-1 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700">
+            Cancelar
+          </button>
+          <button id="kioskModalSubmitBtn" type="submit" class="flex-1 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold shadow-sm">
+            Activar Kiosko
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: PANEL DE RECEPCIÓN DE LABORATORIO                              -->
+  <!-- ===================================================================== -->
+  <div id="labPanelModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-4xl w-full shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 bg-slate-900 text-white flex items-center justify-between shrink-0">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-xl bg-brand-600 flex items-center justify-center text-white">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+            </svg>
+          </div>
+          <div>
+            <h3 class="text-base font-bold">Recepción de Laboratorio — Master Color</h3>
+            <p id="labConnectionStatus" class="text-xs text-slate-400">Gestión de órdenes a 300 DPI</p>
+          </div>
+        </div>
         <div class="flex items-center gap-2">
           <button
             type="button"
