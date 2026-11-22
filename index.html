@@ -92,32 +92,6 @@
 
       <div class="flex items-center gap-2 shrink-0">
         <button
-          id="kioskSwitchHeaderBtn"
-          type="button"
-          onclick="openKioskPinModal()"
-          class="inline-flex items-center gap-1.5 bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200 text-xs font-semibold px-2.5 py-2 rounded-xl transition cursor-pointer"
-          title="Cambiar esta pantalla a Modo Kiosko en tienda"
-        >
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-          </svg>
-          <span>Kiosko</span>
-        </button>
-
-        <button
-          id="labAccessHeaderBtn"
-          type="button"
-          onclick="openLabPanelView()"
-          class="inline-flex items-center gap-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold px-2.5 py-2 rounded-xl transition cursor-pointer"
-          title="Acceso exclusivo para operador del laboratorio"
-        >
-          <svg class="w-4 h-4 text-slate-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
-          </svg>
-          <span class="hidden md:inline">Laboratorio</span>
-        </button>
-
-        <button
           id="openUploadHeaderBtn"
           type="button"
           onclick="document.getElementById('photoFileInput').click()"
@@ -213,6 +187,28 @@
 
     <!-- Cuadrícula de tarjetas de fotos -->
     <section id="photosGrid" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6"></section>
+
+    <!-- Pie discreto para accesos internos (Kiosko y Laboratorio) -->
+    <div class="pt-6 pb-2 flex items-center justify-between text-[11px] text-slate-400 border-t border-slate-200/70">
+      <span>© Master Color</span>
+      <div class="flex items-center gap-3">
+        <button
+          id="kioskSwitchFooterBtn"
+          type="button"
+          class="hover:text-slate-600 underline-offset-2 hover:underline transition cursor-pointer"
+        >
+          Modo Kiosko
+        </button>
+        <span>•</span>
+        <button
+          id="labAccessFooterBtn"
+          type="button"
+          class="hover:text-slate-600 underline-offset-2 hover:underline transition cursor-pointer"
+        >
+          Laboratorio
+        </button>
+      </div>
+    </div>
 
   </main>
 
@@ -915,6 +911,22 @@
     window.addEventListener('DOMContentLoaded', () => {
       setupFileUploadListeners();
       setupModalDragListeners();
+
+      const kioskBtn = document.getElementById('kioskSwitchFooterBtn');
+      const labBtn = document.getElementById('labAccessFooterBtn');
+      if (kioskBtn) {
+        kioskBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          openKioskPinModal();
+        });
+      }
+      if (labBtn) {
+        labBtn.addEventListener('click', (e) => {
+          e.preventDefault();
+          openLabPanelView();
+        });
+      }
+
       renderApp();
 
       const params = new URLSearchParams(window.location.search);
@@ -991,8 +1003,8 @@
       isKioskMode = true;
       const storeBadge = document.getElementById('storeStatusBadge');
       const kioskBadge = document.getElementById('kioskModeBadge');
-      const kioskSwitchBtn = document.getElementById('kioskSwitchHeaderBtn');
-      const labBtn = document.getElementById('labAccessHeaderBtn');
+      const kioskSwitchBtn = document.getElementById('kioskSwitchFooterBtn');
+      const labBtn = document.getElementById('labAccessFooterBtn');
       const phoneLabel = document.getElementById('customerPhoneLabel');
       const phoneInput = document.getElementById('customerPhone');
       const webDelivery = document.getElementById('webDeliverySection');
@@ -1028,8 +1040,8 @@
 
       const storeBadge = document.getElementById('storeStatusBadge');
       const kioskBadge = document.getElementById('kioskModeBadge');
-      const kioskSwitchBtn = document.getElementById('kioskSwitchHeaderBtn');
-      const labBtn = document.getElementById('labAccessHeaderBtn');
+      const kioskSwitchBtn = document.getElementById('kioskSwitchFooterBtn');
+      const labBtn = document.getElementById('labAccessFooterBtn');
       const phoneLabel = document.getElementById('customerPhoneLabel');
       const phoneInput = document.getElementById('customerPhone');
       const webDelivery = document.getElementById('webDeliverySection');
