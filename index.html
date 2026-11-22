@@ -195,7 +195,8 @@
         <button
           id="kioskSwitchFooterBtn"
           type="button"
-          class="hover:text-slate-600 underline-offset-2 hover:underline transition cursor-pointer"
+          onclick="openKioskPinModal()"
+          class="py-1 px-2 hover:text-slate-600 underline-offset-2 hover:underline transition cursor-pointer"
         >
           Modo Kiosko
         </button>
@@ -203,7 +204,8 @@
         <button
           id="labAccessFooterBtn"
           type="button"
-          class="hover:text-slate-600 underline-offset-2 hover:underline transition cursor-pointer"
+          onclick="openLabPanelView()"
+          class="py-1 px-2 hover:text-slate-600 underline-offset-2 hover:underline transition cursor-pointer"
         >
           Laboratorio
         </button>
@@ -863,15 +865,23 @@
     const KIOSK_ACCESS_PIN = 'Master_Color_Elvin';
 
     const isSupabaseConfigured =
+      typeof SUPABASE_URL === 'string' &&
       SUPABASE_URL.startsWith('https://') &&
-      SUPABASE_ANON_KEY.length > 20 &&
+      typeof SUPABASE_ANON_KEY === 'string' &&
+      SUPABASE_ANON_KEY !== 'PEGA_AQUI_TU_ANON_PUBLIC_KEY' &&
+      SUPABASE_ANON_KEY.trim().length > 10 &&
       typeof window.supabase !== 'undefined';
 
-    const supabaseClient = isSupabaseConfigured
-      ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+    let supabaseClient = null;
+    if (isSupabaseConfigured) {
+      try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL.trim(), SUPABASE_ANON_KEY.trim(), {
           db: { schema: SUPABASE_SCHEMA }
-        })
-      : null;
+        });
+      } catch (e) {
+        console.error('Error inicializando Supabase:', e);
+      }
+    }
 
     let isLabUnlocked = false;
     let cachedLabOrders = [];
@@ -909,22 +919,11 @@
 
     // ==================== INICIALIZACIÓN ====================
     window.addEventListener('DOMContentLoaded', () => {
-      setupFileUploadListeners();
-      setupModalDragListeners();
-
-      const kioskBtn = document.getElementById('kioskSwitchFooterBtn');
-      const labBtn = document.getElementById('labAccessFooterBtn');
-      if (kioskBtn) {
-        kioskBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          openKioskPinModal();
-        });
-      }
-      if (labBtn) {
-        labBtn.addEventListener('click', (e) => {
-          e.preventDefault();
-          openLabPanelView();
-        });
+      try {
+        setupFileUploadListeners();
+        setupModalDragListeners();
+      } catch (e) {
+        console.error('Error inicializando listeners:', e);
       }
 
       renderApp();
