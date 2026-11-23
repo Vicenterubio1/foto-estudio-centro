@@ -709,6 +709,85 @@
               class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 transition"
               title="Mostrar u ocultar contraseña"
             >
+              <svg id="labEyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
+            </button>
+          </div>
+          <button type="submit" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-sm">
+            Entrar
+          </button>
+        </form>
+      </div>
+
+      <!-- Contenido interno del panel de Laboratorio -->
+      <div id="labOrdersContent" class="hidden p-6 overflow-y-auto space-y-4 bg-slate-50 flex-1">
+        <!-- Sección: Órdenes autorizadas para impresión -->
+        <div id="labOrdersSection" class="space-y-4">
+          <div id="labStatusTabs" class="flex flex-wrap items-center gap-2 bg-white p-3 rounded-2xl border border-slate-200"></div>
+          <div id="labOrdersList" class="space-y-3"></div>
+        </div>
+
+        <!-- Sección: Gestor de Fotógrafos Profesionales -->
+        <div id="labPhotographersSection" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
+            <div>
+              <h4 class="text-sm font-extrabold text-slate-900">Registrar Nuevo Fotógrafo Profesional</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Asigna un usuario y contraseña individual para que acceda a la tarifa preferencial.</p>
+            </div>
+            <form onsubmit="createProPhotographer(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
+              <div class="sm:col-span-4">
+                <label for="newProFullName" class="block text-[11px] font-bold text-slate-600 mb-1">Nombre / Estudio *</label>
+                <input
+                  id="newProFullName"
+                  type="text"
+                  required
+                  placeholder="Ej: Estudio Carlos Méndez"
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div class="sm:col-span-3">
+                <label for="newProUsername" class="block text-[11px] font-bold text-slate-600 mb-1">Usuario *</label>
+                <input
+                  id="newProUsername"
+                  type="text"
+                  required
+                  placeholder="Ej: carlos.foto"
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div class="sm:col-span-3">
+                <label for="newProPassword" class="block text-[11px] font-bold text-slate-600 mb-1">Contraseña *</label>
+                <input
+                  id="newProPassword"
+                  type="text"
+                  required
+                  placeholder="Ej: Carlos2026*"
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div class="sm:col-span-2">
+                <button
+                  type="submit"
+                  id="createProBtn"
+                  class="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition"
+                >
+                  + Agregar
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-extrabold text-slate-900">Fotógrafos Registrados</h4>
+              <span id="proPhotographersCountLabel" class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-indigo-50 text-indigo-700">0 cuentas</span>
+            </div>
+            <div id="labPhotographersList" class="space-y-2.5"></div>
+          </div>
+        </div>
+
         <!-- Sección: Editor Visual de Productos y Tarifas (Aficionado y Fotógrafo Pro) -->
         <div id="labPricingSection" class="hidden space-y-4">
           <!-- Formulario para agregar nuevo producto / tamaño -->
