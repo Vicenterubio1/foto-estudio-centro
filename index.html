@@ -485,7 +485,7 @@
       <button
         id="cashierNavBtn"
         type="button"
-        onclick="openCashierPanelView()"
+        onclick="openCashierPanelView(); return false;"
         class="hover:text-slate-600 transition cursor-pointer inline-flex items-center gap-1.5"
         title="Ventana de cobro y check de pago para cajero"
       >
@@ -2816,6 +2816,254 @@
       }
     }
 
+    function logoutLabSession() {
+      isLabUnlocked = false;
+      stopStaffAutoSyncIfIdle();
+      const labInput = document.getElementById('labPinInput');
+      if (labInput) labInput.value = '';
+      document.getElementById('labOrdersContent').classList.add('hidden');
+      document.getElementById('labPinGate').classList.remove('hidden');
+      document.getElementById('labPanelModal').classList.add('hidden');
+      showToast('Sesión de Laboratorio cerrada y bloqueada.', 'info');
+    }
+
+    function closeLabPanelModal() {
+      isLabUnlocked = false;
+      stopStaffAutoSyncIfIdle();
+      const labInput = document.getElementById('labPinInput');
+      if (labInput) labInput.value = '';
+      document.getElementById('labOrdersContent').classList.add('hidden');
+      document.getElementById('labPinGate').classList.remove('hidden');
+      document.getElementById('labPanelModal').classList.add('hidden');
+    }
+
+    // =========================================================================
+    // GESTOR DE FOTÓGRAFOS PROFESIONALES (CREAR, ACTIVAR/PAUSAR Y ELIMINAR)
+    // =========================================================================
+    async function fetchLabPhotographers() {
+      const listEl = document.getElementById('labPhotographersList');
+      const countEl = document.getElementById('proPhotographersCountLabel');
+      if (!listEl) return;
+
+      if (!isSupabaseConfigured || !supabaseClient) {
+        listEl.innerHTML = `<p class="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-xl p-3">Conecta Supabase primero para administrar cuentas de fotógrafos.</p>`;
+        return;
+      }
+
+      listEl.innerHTML = `<p class="text-xs text-slate-400">Cargando fotógrafos...</p>`;
+      try {
+        const { data, error } = await supabaseClient
+          .from('photographers')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const rows = Array.isArray(data) ? data : [];
+        if (countEl) countEl.textContent = `${rows.length} ${rows.length === 1 ? 'cuenta' : 'cuentas'}`;
+
+        if (rows.length === 0) {
+          listEl.innerHTML = `<p class="text-xs text-slate-400 italic py-3 text-center">Aún no has registrado fotógrafos profesionales.</p>`;
+          return;
+        }
+
+        listEl.innerHTML = rows.map((p) => `
+          <div class="flex flex-wrap items-center justify-between gap-3 p-3 rounded-xl border ${p.active ? 'border-slate-200 bg-slate-50/70' : 'border-amber-200 bg-amber-50/40'}">
+            <div class="space-y-0.5">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-extrabold text-slate-900">${escapeHtml(p.full_name)}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${p.active ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-800'}">
+                  ${p.active ? 'Activo' : 'Suspendido'}
+                </span>
+              </div>
+              <p class="text-[11px] text-slate-600">
+                Usuario: <strong class="font-mono text-indigo-700">${escapeHtml(p.username)}</strong> •
+                Contraseña: <strong class="font-mono text-slate-800">${escapeHtml(p.password)}</strong>
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                onclick="toggleProPhotographerActive('${p.id}', ${!p.active})"
+                class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-[11px] font-bold text-slate-700 transition"
+              >
+                ${p.active ? 'Pausar' : 'Activar'}
+              </button>
+              <button
+                type="button"
+                onclick="deleteProPhotographer('${p.id}', '${escapeHtml(p.full_name)}')"
+                class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-[11px] font-bold transition"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+        listEl.innerHTML = `<p class="text-xs text-rose-700 bg-rose-50 border border-rose-200 rounded-xl p-3">Asegúrate de haber creado la tabla <b>foto_estudio.photographers</b> en Supabase. (${escapeHtml(err.message)})</p>`;
+      }
+    }
+
+    async function createProPhotographer(event) {
+      event.preventDefault();
+      if (!isSupabaseConfigured || !supabaseClient) {
+        showToast('Conecta Supabase primero.', 'warning');
+        return;
+      }
+
+      const fullName = document.getElementById('newProFullName').value.trim();
+      const username = document.getElementById('newProUsername').value.trim().toLowerCase();
+      const password = document.getElementById('newProPassword').value.trim();
+      const btn = document.getElementById('createProBtn');
+
+      if (!fullName || !username || !password) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+      try {
+        const { error } = await supabaseClient
+          .from('photographers')
+          .insert([{ full_name: fullName, username, password, active: true }]);
+
+        if (error) throw error;
+
+        document.getElementById('newProFullName').value = '';
+        document.getElementById('newProUsername').value = '';
+        document.getElementById('newProPassword').value = '';
+        showToast(`Fotógrafo "${fullName}" registrado.`, 'success');
+        fetchLabPhotographers();
+      } catch (err) {
+        showToast(`No se pudo registrar: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '+ Agregar';
+      }
+    }
+
+    async function toggleProPhotographerActive(id, nextState) {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient
+        .from('photographers')
+        .update({ active: nextState })
+        .eq('id', id);
+
+      if (error) {
+        showToast(`Error: ${error.message}`, 'error');
+        return;
+      }
+      showToast(nextState ? 'Cuenta activada.' : 'Cuenta suspendida.', 'info');
+      fetchLabPhotographers();
+    }
+
+    async function deleteProPhotographer(id, fullName) {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient
+        .from('photographers')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        showToast(`Error al eliminar: ${error.message}`, 'error');
+        return;
+      }
+      showToast(`Cuenta de "${fullName}" eliminada.`, 'info');
+      fetchLabPhotographers();
+    }
+
+    // =========================================================================
+    // VENTANA DE CAJA (CHECK DE PAGO PARA CAJERO)
+    // =========================================================================
+    function isOrderPaidInCashier(order) {
+      if (!order) return false;
+      const notes = String(order.order_notes || '');
+      return order.receipt_path === 'PAGADO_EN_CAJA' || notes.includes('[VERIFICADO_CAJA]') || order.status !== 'pendiente';
+    }
+
+    function openCashierPanelView() {
+      const modal = document.getElementById('cashierPanelModal');
+      if (!modal) return;
+      modal.classList.remove('hidden');
+      if (isCashierUnlocked) {
+        document.getElementById('cashierPinGate').classList.add('hidden');
+        document.getElementById('cashierOrdersContent').classList.remove('hidden');
+        fetchCashierOrders();
+        startLabRealtimeSubscription();
+      } else {
+        const pinInp = document.getElementById('cashierPinInput');
+        if (pinInp) pinInp.value = '';
+        document.getElementById('cashierPinGate').classList.remove('hidden');
+        document.getElementById('cashierOrdersContent').classList.add('hidden');
+        setTimeout(() => { if (pinInp) pinInp.focus(); }, 60);
+      }
+    }
+
+    function verifyCashierPin(event) {
+      event.preventDefault();
+      const entered = document.getElementById('cashierPinInput').value;
+      if (entered === LAB_ACCESS_PIN) {
+        isCashierUnlocked = true;
+        document.getElementById('cashierPinGate').classList.add('hidden');
+        document.getElementById('cashierOrdersContent').classList.remove('hidden');
+        fetchCashierOrders();
+        startLabRealtimeSubscription();
+      } else {
+        showToast('Contraseña incorrecta.', 'error');
+      }
+    }
+
+    function logoutCashierSession() {
+      isCashierUnlocked = false;
+      stopStaffAutoSyncIfIdle();
+      const inp = document.getElementById('cashierPinInput');
+      if (inp) inp.value = '';
+      document.getElementById('cashierOrdersContent').classList.add('hidden');
+      document.getElementById('cashierPinGate').classList.remove('hidden');
+      document.getElementById('cashierPanelModal').classList.add('hidden');
+      showToast('Sesión de Caja cerrada y bloqueada.', 'info');
+    }
+
+    function closeCashierPanelModal() {
+      isCashierUnlocked = false;
+      stopStaffAutoSyncIfIdle();
+      const inp = document.getElementById('cashierPinInput');
+      if (inp) inp.value = '';
+      document.getElementById('cashierOrdersContent').classList.add('hidden');
+      document.getElementById('cashierPinGate').classList.remove('hidden');
+      document.getElementById('cashierPanelModal').classList.add('hidden');
+    }
+
+    function setCashierFilter(filterKey) {
+      currentCashierFilter = filterKey;
+      renderCashierOrdersList();
+    }
+
+    async function fetchCashierOrders(silent = false) {
+      const statusEl = document.getElementById('cashierConnectionStatus');
+      const listEl = document.getElementById('cashierOrdersList');
+
+      if (!isSupabaseConfigured || !supabaseClient) {
+        if (statusEl) statusEl.textContent = 'Sin conexión a Supabase';
+        if (listEl) listEl.innerHTML = `<div class="bg-amber-50 border border-amber-200 rounded-xl p-4 text-xs text-amber-900">Conecta Supabase en el panel de Laboratorio primero.</div>`;
+        return;
+      }
+
+      if (!silent && statusEl) statusEl.textContent = 'Actualizando órdenes de caja...';
+      try {
+        const { data, error } = await supabaseClient
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false })
+          .limit(60);
+
+        if (error) throw error;
+        labOrdersCache = data || [];
+        renderCashierOrdersList();
+      } catch (err) {
+        if (!silent && statusEl) statusEl.textContent = `Error: ${err.message}`;
+      }
+    }
+
     function openLabPanelView() {
       document.getElementById('labPanelModal').classList.remove('hidden');
       if (isLabUnlocked) {
@@ -3019,6 +3267,7 @@
       listEl.innerHTML = visibleList.map((order) => {
         const isPaid = isOrderPaidInCashier(order);
         const isKioskOrder = order.delivery_method === 'kiosk_pickup' || String(order.order_code || '').startsWith('K-');
+        const hasTransferReceipt = Boolean(order.receipt_path && order.receipt_path !== 'PAGADO_EN_CAJA');
         return `
           <div class="bg-white rounded-2xl border ${isPaid ? 'border-emerald-200' : 'border-amber-300'} p-4 shadow-sm flex flex-wrap items-center justify-between gap-4">
             <div class="space-y-1">
@@ -3029,11 +3278,11 @@
                 </span>
                 ${isPaid ? `
                   <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
-                    ✓ Pago verificado
+                    ✓ Autorizado a Laboratorio
                   </span>
                 ` : `
                   <span class="text-[11px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-800">
-                    ⏳ Pendiente de pago
+                    ⏳ Retenido en Caja (No enviado a Lab)
                   </span>
                 `}
               </div>
@@ -3041,7 +3290,16 @@
               <p class="text-xs text-slate-500">${order.total_prints} copias • Total: <strong class="text-slate-900 text-sm">${formatCurrency(Number(order.grand_total))}</strong></p>
             </div>
 
-            <div class="flex items-center gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              ${hasTransferReceipt ? `
+                <button
+                  type="button"
+                  onclick="openReceiptFile('${escapeHtml(order.receipt_path)}')"
+                  class="px-3 py-2 rounded-xl bg-sky-50 hover:bg-sky-100 text-sky-700 border border-sky-200 text-xs font-bold transition"
+                >
+                  Ver comprobante
+                </button>
+              ` : ''}
               ${!isPaid ? `
                 <button
                   type="button"
@@ -3055,7 +3313,7 @@
                 </button>
               ` : `
                 <span class="text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-2 rounded-xl">
-                  ✓ Cobrado
+                  ✓ Cobrado y en Lab
                 </span>
               `}
             </div>
@@ -3066,16 +3324,27 @@
 
     async function checkCashierPayment(orderId, orderCode) {
       if (!supabaseClient) return;
+      const order = labOrdersCache.find((o) => o.id === orderId);
+      const currentNotes = String(order?.order_notes || '').trim();
+      const updatedNotes = currentNotes.includes('[VERIFICADO_CAJA]')
+        ? currentNotes
+        : `[VERIFICADO_CAJA] ${currentNotes}`.trim();
+      const nextReceiptPath = order?.receipt_path ? order.receipt_path : 'PAGADO_EN_CAJA';
+
       const { error } = await supabaseClient
         .from('orders')
-        .update({ receipt_path: 'PAGADO_EN_CAJA', status: 'imprimiendo' })
+        .update({
+          receipt_path: nextReceiptPath,
+          order_notes: updatedNotes,
+          status: 'imprimiendo'
+        })
         .eq('id', orderId);
 
       if (error) {
         showToast(`Error al marcar check de pago: ${error.message}`, 'error');
         return;
       }
-      showToast(`✓ Orden #${orderCode} marcada como pagada y enviada a impresión.`, 'success');
+      showToast(`✓ Orden #${orderCode} cobrada y liberada a Laboratorio.`, 'success');
       await fetchCashierOrders();
       if (isLabUnlocked) fetchLabOrders();
     }
@@ -3151,32 +3420,33 @@
         lastKnownOrderCount = data.length;
 
         labOrdersCache = data || [];
+        const authorizedLabOrders = labOrdersCache.filter((o) => isOrderPaidInCashier(o));
+        const heldInCashierCount = labOrdersCache.length - authorizedLabOrders.length;
+
         if (isCashierUnlocked) {
           renderCashierOrdersList();
         } else {
           const unpaidBadge = document.getElementById('cashierPendingBadge');
-          const unpaidCount = labOrdersCache.filter((o) => !isOrderPaidInCashier(o)).length;
           if (unpaidBadge) {
-            unpaidBadge.textContent = unpaidCount;
-            unpaidBadge.classList.toggle('hidden', unpaidCount === 0);
+            unpaidBadge.textContent = heldInCashierCount;
+            unpaidBadge.classList.toggle('hidden', heldInCashierCount === 0);
           }
         }
-        const pendingCount = labOrdersCache.filter((o) => o.status === 'pendiente').length;
-        const printingCount = labOrdersCache.filter((o) => o.status === 'imprimiendo').length;
-        const readyCount = labOrdersCache.filter((o) => o.status === 'listo').length;
-        const deliveredCount = labOrdersCache.filter((o) => o.status === 'entregado').length;
+        const pendingCount = authorizedLabOrders.filter((o) => o.status === 'pendiente').length;
+        const printingCount = authorizedLabOrders.filter((o) => o.status === 'imprimiendo').length;
+        const readyCount = authorizedLabOrders.filter((o) => o.status === 'listo').length;
+        const deliveredCount = authorizedLabOrders.filter((o) => o.status === 'entregado').length;
 
         const badge = document.getElementById('labOrdersBadge');
         const activeCount = pendingCount + printingCount + readyCount;
         badge.textContent = activeCount;
         badge.classList.toggle('hidden', activeCount === 0);
 
-        statusEl.textContent = `🟢 En vivo • ${activeCount} activas (${pendingCount} pendientes)`;
+        statusEl.textContent = `🟢 En vivo • ${activeCount} autorizadas (${heldInCashierCount} en espera de Caja)`;
 
         const filterDefs = [
-          { key: 'all', label: `Todas (${labOrdersCache.length})` },
-          { key: 'pendiente', label: `Pendientes (${pendingCount})` },
-          { key: 'imprimiendo', label: `Imprimiendo (${printingCount})` },
+          { key: 'all', label: `Autorizadas (${authorizedLabOrders.length})` },
+          { key: 'imprimiendo', label: `En impresión (${printingCount})` },
           { key: 'listo', label: `Listas (${readyCount})` },
           { key: 'entregado', label: `Entregadas (${deliveredCount})` }
         ];
@@ -3196,13 +3466,15 @@
         `).join('');
 
         const filteredOrders = currentLabStatusFilter === 'all'
-          ? labOrdersCache
-          : labOrdersCache.filter((o) => o.status === currentLabStatusFilter);
+          ? authorizedLabOrders
+          : authorizedLabOrders.filter((o) => o.status === currentLabStatusFilter);
 
         if (filteredOrders.length === 0) {
           listEl.innerHTML = `
             <div class="bg-white rounded-2xl border border-slate-200 p-8 text-center text-sm text-slate-500">
-              No hay órdenes en esta categoría.
+              ${heldInCashierCount > 0
+                ? `Hay ${heldInCashierCount} orden(es) esperando verificación de pago en Caja.`
+                : 'No hay órdenes autorizadas en esta categoría.'}
             </div>
           `;
           return;
