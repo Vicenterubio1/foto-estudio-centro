@@ -34,25 +34,16 @@
               ● Modo Local
             </span>
           </div>
-          <p id="brandSubtitle" class="text-xs text-slate-300">Pedidos de impresión a 300 DPI • Kiosko, Caja y Laboratorio</p>
+          <p id="brandSubtitle" class="text-xs text-slate-300 min-h-[16px]"></p>
         </div>
       </div>
 
       <div class="flex flex-wrap items-center gap-2">
-        <span id="proSessionBadge" class="hidden text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/40">
+        <span id="proSessionBadge" class="hidden text-xs font-semibold px-3 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30">
           ⭐ Tarifa Fotógrafo Pro Activa
         </span>
-        <button id="openProLoginBtn" onclick="openProLoginModal()" class="text-xs sm:text-sm font-medium px-3 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 transition">
-          Fotógrafo Pro
-        </button>
-        <button id="logoutProBtn" onclick="logoutProPhotographer()" class="hidden text-xs sm:text-sm font-medium px-3 py-2 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-200 border border-rose-500/30 transition">
+        <button id="logoutProBtn" onclick="logoutProPhotographer()" class="hidden text-xs font-medium px-2.5 py-1.5 rounded-xl bg-rose-600/20 hover:bg-rose-600/30 text-rose-200 border border-rose-500/30 transition">
           Salir Pro
-        </button>
-        <button onclick="openCashierPanelView()" class="text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 transition shadow-xs">
-          Caja
-        </button>
-        <button onclick="openLabPanelView('orders')" class="text-xs sm:text-sm font-semibold px-3 py-2 rounded-xl bg-sky-500 hover:bg-sky-400 text-slate-950 transition shadow-xs">
-          Laboratorio
         </button>
       </div>
     </div>
@@ -77,7 +68,7 @@
           </label>
         </div>
 
-        <div id="dropZone" onclick="document.getElementById('photoFileInput').click()" class="cursor-pointer border-2 border-dashed border-slate-300 hover:border-sky-400 bg-slate-50/70 hover:bg-sky-50/40 rounded-2xl p-6 text-center transition">
+        <div id="dropZone" onclick="document.getElementById('photoFileInput').click()" ondragover="handlePhotoDragOver(event)" ondragleave="handlePhotoDragLeave(event)" ondrop="handlePhotoDrop(event)" class="cursor-pointer border-2 border-dashed border-slate-300 hover:border-sky-400 bg-slate-50/70 hover:bg-sky-50/40 rounded-2xl p-6 text-center transition">
           <div class="text-3xl mb-2">🖼️</div>
           <p class="text-sm font-semibold text-slate-700">Haz clic o arrastra tus imágenes aquí</p>
           <p class="text-xs text-slate-500 mt-1">JPG, PNG, WEBP • Puedes configurar tamaño, papel, copias y encuadre en cada foto</p>
@@ -102,7 +93,7 @@
     <!-- Columna derecha: Datos del pedido, entrega y resumen -->
     <aside class="lg:col-span-5 space-y-6">
       <div class="bg-white rounded-3xl border border-slate-200 p-5 sm:p-6 shadow-xs space-y-5">
-        <h2 class="text-lg font-bold text-slate-900">3. Datos del cliente y entrega</h2>
+        <h2 id="customerSectionHeading" class="text-lg font-bold text-slate-900">3. Datos del cliente y entrega</h2>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
@@ -116,7 +107,7 @@
         </div>
 
         <!-- Modo de entrega / tienda -->
-        <div>
+        <div id="deliveryModeSection">
           <label class="block text-xs font-semibold text-slate-600 mb-2">Modalidad de pedido</label>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <button type="button" id="modeStoreBtn" onclick="setDeliveryMode('store')" class="p-3 rounded-2xl border-2 border-sky-600 bg-sky-50 text-left transition">
@@ -132,6 +123,10 @@
               <div class="text-[11px] text-slate-500 mt-0.5">Con costo de envío</div>
             </button>
           </div>
+        </div>
+
+        <div id="kioskCashierNotice" class="hidden rounded-2xl bg-sky-50 border border-sky-200 p-3.5 text-xs text-sky-900 font-medium">
+          🏪 <strong>Pedido en Tienda:</strong> Al enviar tu orden, pasa directo a <strong>Caja</strong> con tu nombre o código para realizar el pago y enviar tus fotos a impresión.
         </div>
 
         <div id="deliveryAddressBox" class="hidden">
@@ -156,7 +151,7 @@
             <span>Subtotal impresiones:</span>
             <span id="subtotalAmount" class="font-semibold text-slate-900">L 0.00</span>
           </div>
-          <div class="flex justify-between text-slate-600">
+          <div id="shippingRow" class="flex justify-between text-slate-600">
             <span>Costo de envío:</span>
             <span id="shippingAmount" class="font-semibold text-slate-900">L 0.00</span>
           </div>
@@ -177,11 +172,107 @@
 
   <!-- Pie de página -->
   <footer class="bg-white border-t border-slate-200 py-4 px-4 text-xs text-slate-500">
-    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
-      <span id="footerLabCopyright">© Laboratorio Fotográfico • Sistema de Impresión a 300 DPI</span>
-      <span>Flujo verificado: Cliente → Caja (Confirmación de Pago) → Laboratorio (ZIP 300 DPI)</span>
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+      <div class="flex flex-wrap items-center gap-2">
+        <span id="footerLabCopyright">© Laboratorio Fotográfico</span>
+        <span class="text-slate-300">•</span>
+        <button type="button" onclick="openDeveloperPromoModal()" class="inline-flex items-center gap-1.5 text-slate-500 hover:text-sky-700 transition font-medium">
+          <span>Desarrollado por <strong id="developerBrandFooter" class="text-slate-700">Tu Emprendimiento Digital</strong></span>
+          <span class="px-2 py-0.5 rounded-full bg-sky-50 text-sky-700 border border-sky-200/80 text-[10px] font-semibold">¿Quieres esta app para tu laboratorio?</span>
+        </button>
+      </div>
+
+      <!-- Accesos discretos en la esquina inferior derecha -->
+      <div class="flex flex-wrap items-center gap-2 ml-auto">
+        <button id="toggleKioskModeBtn" onclick="openKioskModeModal()" class="text-[11px] font-medium px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200/80 transition">
+          🖥️ Kiosko
+        </button>
+        <button id="openProLoginBtn" onclick="openProLoginModal()" class="text-[11px] font-medium px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200/80 transition">
+          Fotógrafo Pro
+        </button>
+        <button onclick="openCashierPanelView()" class="text-[11px] font-medium px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200/80 transition">
+          Caja
+        </button>
+        <button onclick="openLabPanelView('orders')" class="text-[11px] font-medium px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200/80 transition">
+          Laboratorio
+        </button>
+      </div>
     </div>
   </footer>
+
+  <!-- Modal Información del Producto / Publicidad del Desarrollador -->
+  <div id="developerPromoModal" class="hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="w-full max-w-lg rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-start justify-between gap-3">
+        <div>
+          <span class="inline-block text-[11px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full bg-sky-100 text-sky-800 mb-1">
+            Software para Laboratorios Fotográficos
+          </span>
+          <h3 id="devModalTitle" class="text-lg font-extrabold text-slate-900">Plataforma Integral de Pedidos a 300 DPI</h3>
+          <p id="devModalSubtitle" class="text-xs text-slate-500 mt-0.5">Desarrollado por <strong id="devBrandModalName" class="text-slate-800">Tu Emprendimiento Digital</strong></p>
+        </div>
+        <button onclick="closeDeveloperPromoModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700 shrink-0">✕</button>
+      </div>
+
+      <p class="text-xs sm:text-sm text-slate-600 leading-relaxed">
+        Moderniza tu estudio o laboratorio fotográfico eliminando las fotos comprimidas por chat y agilizando la producción desde la recepción hasta el minilab:
+      </p>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 text-xs">
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div class="font-bold text-slate-900">🖥️ Kiosko y Pedidos Web</div>
+          <p class="text-slate-500 mt-0.5">Tus clientes suben fotos, recortan, agregan bordes y envían órdenes desde tienda o celular.</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div class="font-bold text-slate-900">🖨️ Descarga ZIP a 300 DPI</div>
+          <p class="text-slate-500 mt-0.5">Archivos ordenados automáticamente por tamaño y papel listos para imprimir sin recortar.</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div class="font-bold text-slate-900">💳 Control Caja → Laboratorio</div>
+          <p class="text-slate-500 mt-0.5">Flujo verificado de pagos en mostrador o transferencia antes de pasar a impresión.</p>
+        </div>
+        <div class="p-3 rounded-2xl bg-slate-50 border border-slate-200/80">
+          <div class="font-bold text-slate-900">⭐ Tarifas Fotógrafo Pro</div>
+          <p class="text-slate-500 mt-0.5">Cuentas con precios preferenciales para fotógrafos aliados y marca blanca con tu logo.</p>
+        </div>
+      </div>
+
+      <div class="rounded-2xl bg-sky-50 border border-sky-200 p-4 flex flex-wrap items-center justify-between gap-3">
+        <div>
+          <div class="text-[11px] font-semibold text-sky-800">¿Te interesa implementar este sistema en tu estudio o laboratorio?</div>
+          <div id="devContactEmailDisplay" class="text-sm font-extrabold text-sky-950 mt-0.5">ventas@tuemprendimiento.com</div>
+        </div>
+        <a id="devContactMailtoBtn" href="mailto:ventas@tuemprendimiento.com?subject=Informaci%C3%B3n%20Sistema%20de%20Laboratorio%20Fotogr%C3%A1fico" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-xs transition">
+          ✉️ Solicitar información
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Modo Kiosko -->
+  <div id="kioskModeModal" class="hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between">
+        <h3 id="kioskModalTitle" class="text-base font-bold text-slate-900">Activar Modo Kiosko en Tienda</h3>
+        <button onclick="closeKioskModeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-700">✕</button>
+      </div>
+      <p id="kioskModalDesc" class="text-xs text-slate-500">
+        Fija la estación para autoservicio de clientes en mostrador (pasa directo a <strong>Caja</strong> al enviar) y oculta los botones administrativos hasta ingresar la contraseña operativa.
+      </p>
+      <div>
+        <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña Operativa</label>
+        <div class="relative">
+          <input id="kioskPinInput" type="password" placeholder="Ingresa la contraseña operativa" onkeydown="if(event.key==='Enter') confirmKioskModeToggle()" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm" />
+          <button type="button" onclick="togglePasswordVisibility('kioskPinInput')" aria-label="Mostrar u ocultar contraseña" class="absolute inset-y-0 right-2.5 flex items-center text-slate-500 hover:text-slate-800 text-sm">👁️</button>
+        </div>
+      </div>
+      <p id="kioskPinError" class="hidden text-xs text-rose-600 font-medium"></p>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeKioskModeModal()" class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-semibold">Cancelar</button>
+        <button id="kioskConfirmBtn" onclick="confirmKioskModeToggle()" class="px-5 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold">Activar Kiosko</button>
+      </div>
+    </div>
+  </div>
 
   <!-- Modal Editor de Encuadre y Edición -->
   <div id="cropEditorModal" class="hidden fixed inset-0 z-50 bg-slate-950/75 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
@@ -196,55 +287,106 @@
 
       <div class="p-6 space-y-5">
         <!-- Vista previa interactiva -->
-        <div class="w-full h-72 rounded-2xl bg-slate-100 border border-slate-200 flex items-center justify-center overflow-hidden relative">
-          <img id="cropPreviewImage" src="" alt="Vista previa" class="photo-preview-box max-h-64 max-w-full object-contain select-none" />
+        <div class="w-full h-80 rounded-2xl bg-slate-900/95 border border-slate-700 flex items-center justify-center overflow-hidden relative p-4 select-none">
+          <div id="cropAspectFrame" onpointerdown="startCropDrag(event)" onpointermove="moveCropDrag(event)" onpointerup="endCropDrag(event)" onpointercancel="endCropDrag(event)" class="relative box-border bg-white shadow-2xl overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing transition-all duration-150" style="width: 300px; height: 200px;">
+            <div id="cropInnerViewport" class="relative w-full h-full overflow-hidden flex items-center justify-center">
+              <img id="cropPreviewImage" src="" alt="Vista previa" draggable="false" class="photo-preview-box max-w-none max-h-none pointer-events-none" />
+              <div id="cropTopCaptionOverlay" class="hidden absolute top-0 left-0 right-0 text-center text-xs font-bold truncate px-2 py-1 z-10"></div>
+              <div id="cropPolaroidCaptionOverlay" class="hidden absolute bottom-0 left-0 right-0 text-center text-xs font-bold truncate px-2 py-1 z-10"></div>
+            </div>
+          </div>
+          <button type="button" onclick="resetCropEditorValues()" class="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold border border-slate-600">
+            ↺ Restablecer
+          </button>
+        </div>
+
+        <!-- Orientación y centrado -->
+        <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-slate-50 border border-slate-200 p-3 text-xs">
+          <div class="flex items-center gap-2">
+            <span class="font-bold text-slate-700">Orientación del marco:</span>
+            <button type="button" id="orientLandscapeBtn" onclick="setCropOrientation('landscape')" class="px-3 py-1.5 rounded-xl bg-sky-600 text-white font-bold">↔ Horizontal</button>
+            <button type="button" id="orientPortraitBtn" onclick="setCropOrientation('portrait')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-semibold">↕ Vertical</button>
+          </div>
+          <button type="button" onclick="fitPhotoToFrame()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold">
+            ⛶ Centrar
+          </button>
         </div>
 
         <!-- Controles deslizantes -->
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div>
-            <label id="zoomLabel" class="block font-semibold text-slate-700 mb-1">Zoom 100%</label>
-            <input id="cropZoomRange" type="range" min="100" max="250" value="100" oninput="updateCropPreviewTransform()" class="w-full" />
+            <label id="zoomLabel" for="cropZoomRange" class="block font-semibold text-slate-700 mb-1">Zoom 100% (arrastra la foto para mover)</label>
+            <input id="cropZoomRange" type="range" min="50" max="250" value="100" oninput="updateCropPreviewTransform()" class="w-full" />
           </div>
           <div>
-            <label class="block font-semibold text-slate-700 mb-1">Desplazamiento Horizontal</label>
-            <input id="cropPanXRange" type="range" min="-100" max="100" value="0" oninput="updateCropPreviewTransform()" class="w-full" />
-          </div>
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Desplazamiento Vertical</label>
-            <input id="cropPanYRange" type="range" min="-100" max="100" value="0" oninput="updateCropPreviewTransform()" class="w-full" />
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-          <div>
-            <label class="block font-semibold text-slate-700 mb-1">Filtro de color</label>
-            <select id="cropFilterSelect" onchange="updateCropPreviewTransform()" class="w-full px-3 py-2 rounded-xl border border-slate-300 bg-white">
+            <label for="cropFilterSelect" class="block font-semibold text-slate-700 mb-1">Filtro de color</label>
+            <select id="cropFilterSelect" onchange="updateCropPreviewTransform()" class="w-full px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white font-medium">
               <option value="none">Original</option>
               <option value="grayscale(100%)">Blanco y Negro</option>
-              <option value="sepia(85%)">Sepia Clásico</option>
-              <option value="saturate(135%)">Color Vibrante</option>
+              <option value="sepia(85%)">Sepia Vintage</option>
+              <option value="saturate(135%)">Color Vivo</option>
             </select>
           </div>
-          <div>
-            <label id="brightnessLabel" class="block font-semibold text-slate-700 mb-1">Brillo (100%)</label>
-            <input id="cropBrightnessRange" type="range" min="60" max="140" value="100" oninput="updateCropPreviewTransform()" class="w-full" />
-          </div>
-          <div>
-            <label id="contrastLabel" class="block font-semibold text-slate-700 mb-1">Contraste (100%)</label>
-            <input id="cropContrastRange" type="range" min="60" max="140" value="100" oninput="updateCropPreviewTransform()" class="w-full" />
-          </div>
         </div>
+        <input id="cropPanXRange" type="hidden" value="0" />
+        <input id="cropPanYRange" type="hidden" value="0" />
+        <input id="cropBrightnessRange" type="hidden" value="100" />
+        <input id="cropContrastRange" type="hidden" value="100" />
 
-        <!-- Rotación, espejo y dedicatoria -->
-        <div class="flex flex-wrap items-center justify-between gap-3">
-          <div class="flex flex-wrap items-center gap-2">
-            <button type="button" onclick="rotateCropPhoto(-90)" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold">↺ Girar -90°</button>
-            <button type="button" onclick="rotateCropPhoto(90)" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold">↻ Girar +90°</button>
-            <button type="button" onclick="toggleFlipCropPhoto()" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold">⇄ Espejo</button>
+        <!-- Rotación, espejo, bordes con color y textos -->
+        <div class="space-y-3 rounded-2xl bg-slate-50 border border-slate-200 p-3.5 text-xs">
+          <div class="flex flex-wrap items-center justify-between gap-2">
+            <div class="flex flex-wrap items-center gap-2">
+              <button type="button" onclick="toggleFlipCropPhoto()" class="px-3 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 font-semibold">⇄ Espejo</button>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="font-semibold text-slate-700">Estilo borde:</label>
+              <select id="cropBorderStyleSelect" onchange="updateCropPreviewTransform()" class="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white font-medium">
+                <option value="none">Sin borde</option>
+                <option value="classic">Borde ajustable</option>
+                <option value="polaroid">Estilo Polaroid</option>
+              </select>
+              <label id="cropBorderSizeLabel" class="font-semibold text-slate-700">Grosor (5 mm)</label>
+              <input id="cropBorderSizeRange" type="range" min="1" max="20" step="1" value="5" oninput="updateCropPreviewTransform()" class="w-24" />
+              <label class="font-semibold text-slate-700">Color borde:</label>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="setCropBorderColor('#ffffff')" title="Blanco" class="w-5 h-5 rounded-full border border-slate-400 bg-white cursor-pointer"></button>
+                <button type="button" onclick="setCropBorderColor('#0f172a')" title="Negro" class="w-5 h-5 rounded-full border border-slate-400 bg-slate-900 cursor-pointer"></button>
+                <button type="button" onclick="setCropBorderColor('#fef3c7')" title="Crema" class="w-5 h-5 rounded-full border border-slate-400 bg-amber-100 cursor-pointer"></button>
+                <button type="button" onclick="setCropBorderColor('#e11d48')" title="Rojo" class="w-5 h-5 rounded-full border border-slate-400 bg-rose-600 cursor-pointer"></button>
+                <input id="cropBorderColorInput" type="color" value="#ffffff" oninput="updateCropPreviewTransform()" title="Paleta de color" class="w-7 h-7 rounded cursor-pointer border border-slate-300 bg-white ml-0.5" />
+              </div>
+            </div>
           </div>
-          <div class="flex-1 min-w-[200px]">
-            <input id="cropCaptionInput" type="text" placeholder="Dedicatoria / pie de foto (opcional)" class="w-full px-3 py-2 rounded-xl border border-slate-300 text-xs" />
+
+          <!-- Frases rápidas y texto libre -->
+          <div class="space-y-2 pt-2 border-t border-slate-200">
+            <div class="flex flex-wrap items-center gap-1.5">
+              <span class="font-semibold text-slate-600 mr-1">Frases rápidas:</span>
+              <button type="button" onclick="applyQuickCaption('¡Feliz cumpleaños!')" class="px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold">🎂 Feliz cumpleaños</button>
+              <button type="button" onclick="applyQuickCaption('¡Felicidades!')" class="px-2.5 py-1 rounded-lg bg-sky-100 hover:bg-sky-200 text-sky-900 font-semibold">🎉 Felicidades</button>
+              <button type="button" onclick="applyQuickCaption('Te quiero mucho')" class="px-2.5 py-1 rounded-lg bg-rose-100 hover:bg-rose-200 text-rose-900 font-semibold">❤️ Te quiero mucho</button>
+              <button type="button" onclick="applyQuickCaption('¡Graduación!')" class="px-2.5 py-1 rounded-lg bg-emerald-100 hover:bg-emerald-200 text-emerald-900 font-semibold">🎓 Graduación</button>
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+              <input id="cropCaptionInput" type="text" oninput="updateCropPreviewTransform()" placeholder="Escribe un texto (ej. Feliz cumpleaños)..." class="flex-1 min-w-[200px] px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs" />
+              <select id="cropCaptionPosSelect" onchange="updateCropPreviewTransform()" class="px-2.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-medium">
+                <option value="bottom">Abajo</option>
+                <option value="top">Arriba</option>
+              </select>
+              <label id="cropCaptionSizeLabel" class="text-slate-600 font-medium">Tamaño (18px):</label>
+              <input id="cropCaptionSizeRange" type="range" min="12" max="36" step="1" value="18" oninput="updateCropPreviewTransform()" class="w-20" />
+              <label class="text-slate-600 font-medium">Color texto:</label>
+              <div class="flex items-center gap-1">
+                <button type="button" onclick="setCropCaptionColor('#1e293b')" title="Negro" class="w-5 h-5 rounded-full border border-slate-400 bg-slate-800 cursor-pointer"></button>
+                <button type="button" onclick="setCropCaptionColor('#ffffff')" title="Blanco" class="w-5 h-5 rounded-full border border-slate-400 bg-white cursor-pointer"></button>
+                <button type="button" onclick="setCropCaptionColor('#dc2626')" title="Rojo" class="w-5 h-5 rounded-full border border-slate-400 bg-red-600 cursor-pointer"></button>
+                <button type="button" onclick="setCropCaptionColor('#d97706')" title="Dorado" class="w-5 h-5 rounded-full border border-slate-400 bg-amber-600 cursor-pointer"></button>
+                <input id="cropCaptionColorInput" type="color" value="#1e293b" oninput="updateCropPreviewTransform()" title="Paleta de color" class="w-7 h-7 rounded cursor-pointer border border-slate-300 bg-white ml-0.5" />
+              </div>
+            </div>
           </div>
         </div>
 
@@ -271,7 +413,10 @@
         </div>
         <div>
           <label class="block text-xs font-semibold text-slate-700 mb-1">Contraseña</label>
-          <input id="proPasswordInput" type="password" placeholder="••••••••" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
+          <div class="relative">
+            <input id="proPasswordInput" type="password" placeholder="••••••••" onkeydown="if(event.key==='Enter') verifyProPhotographerLogin()" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm" />
+            <button type="button" onclick="togglePasswordVisibility('proPasswordInput')" aria-label="Mostrar u ocultar contraseña" class="absolute inset-y-0 right-2.5 flex items-center text-slate-500 hover:text-slate-800 text-sm">👁️</button>
+          </div>
         </div>
       </div>
       <p id="proLoginError" class="hidden text-xs text-rose-600 font-medium"></p>
@@ -296,7 +441,10 @@
       <div class="p-6 space-y-5">
         <div id="cashierAuthBox" class="max-w-md mx-auto bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3">
           <h4 class="text-sm font-bold text-slate-900">Contraseña Operativa de Caja</h4>
-          <input id="cashierPinInput" type="password" placeholder="Ingresa la contraseña operativa" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
+          <div class="relative">
+            <input id="cashierPinInput" type="password" placeholder="Ingresa la contraseña operativa" onkeydown="if(event.key==='Enter') verifyCashierPin()" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm" />
+            <button type="button" onclick="togglePasswordVisibility('cashierPinInput')" aria-label="Mostrar u ocultar contraseña" class="absolute inset-y-0 right-2.5 flex items-center text-slate-500 hover:text-slate-800 text-sm">👁️</button>
+          </div>
           <p id="cashierPinError" class="hidden text-xs text-rose-600 font-medium"></p>
           <button onclick="verifyCashierPin()" class="w-full py-2.5 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-bold">Desbloquear Caja</button>
         </div>
@@ -341,7 +489,10 @@
         <!-- Autenticación operativa -->
         <div id="labAuthBox" class="max-w-md mx-auto bg-slate-50 border border-slate-200 rounded-2xl p-5 space-y-3">
           <h4 class="text-sm font-bold text-slate-900">Contraseña Operativa de Laboratorio</h4>
-          <input id="labPinInput" type="password" placeholder="Ingresa la contraseña operativa" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
+          <div class="relative">
+            <input id="labPinInput" type="password" placeholder="Ingresa la contraseña operativa" onkeydown="if(event.key==='Enter') verifyLabPin()" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-slate-300 text-sm" />
+            <button type="button" onclick="togglePasswordVisibility('labPinInput')" aria-label="Mostrar u ocultar contraseña" class="absolute inset-y-0 right-2.5 flex items-center text-slate-500 hover:text-slate-800 text-sm">👁️</button>
+          </div>
           <p id="labPinError" class="hidden text-xs text-rose-600 font-medium"></p>
           <button onclick="verifyLabPin()" class="w-full py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold">Entrar a Laboratorio</button>
         </div>
@@ -369,7 +520,10 @@
           <div id="adminPasswordPromptBox" class="hidden max-w-md mx-auto bg-indigo-50 border border-indigo-200 rounded-2xl p-5 space-y-3">
             <h4 class="text-sm font-bold text-indigo-950">Acceso Administrar</h4>
             <p class="text-xs text-indigo-800">Ingresa la contraseña de administración para habilitar fotógrafos, tarifas, datos del estudio, cuentas bancarias y claves.</p>
-            <input id="adminPinInput" type="password" placeholder="Contraseña de administración" class="w-full px-3.5 py-2.5 rounded-xl border border-indigo-300 bg-white text-sm" />
+            <div class="relative">
+              <input id="adminPinInput" type="password" placeholder="Contraseña de administración" onkeydown="if(event.key==='Enter') verifyAdminPin()" class="w-full pl-3.5 pr-10 py-2.5 rounded-xl border border-indigo-300 bg-white text-sm" />
+              <button type="button" onclick="togglePasswordVisibility('adminPinInput')" aria-label="Mostrar u ocultar contraseña" class="absolute inset-y-0 right-2.5 flex items-center text-slate-500 hover:text-slate-800 text-sm">👁️</button>
+            </div>
             <p id="adminPinError" class="hidden text-xs text-rose-600 font-medium"></p>
             <div class="flex justify-end gap-2">
               <button onclick="document.getElementById('adminPasswordPromptBox').classList.add('hidden')" class="px-3.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-semibold">Cancelar</button>
@@ -428,6 +582,10 @@
                 <label class="block text-xs font-bold text-slate-700 mb-1">Costo de envío a domicilio (L)</label>
                 <input id="shippingCostInput" type="number" step="0.01" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
               </div>
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-bold text-slate-700 mb-1">Datos del laboratorio (Dirección, teléfono, WhatsApp u horario en el encabezado)</label>
+                <input id="studioInfoInput" type="text" placeholder="Ej. Barrio El Centro, 2da Ave • Tel/WhatsApp: 9988-7766 • Lun–Sáb 8:00 AM – 6:00 PM" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
+              </div>
             </div>
 
             <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
@@ -457,16 +615,12 @@
               </div>
             </div>
 
-            <div class="bg-slate-50 border border-slate-200 rounded-2xl p-4 space-y-3">
-              <h4 class="text-sm font-bold text-slate-900">Conexión Supabase (Opcional por Laboratorio)</h4>
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                <input id="supabaseUrlConfigInput" type="text" placeholder="https://xxxx.supabase.co" class="px-3 py-2 rounded-xl border border-slate-300 text-xs" />
-                <input id="supabaseKeyConfigInput" type="text" placeholder="Supabase Anon Key" class="px-3 py-2 rounded-xl border border-slate-300 text-xs" />
-                <input id="supabaseSchemaConfigInput" type="text" placeholder="Esquema (ej. foto_estudio)" class="px-3 py-2 rounded-xl border border-slate-300 text-xs" />
-              </div>
+            <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4 text-xs text-slate-600 space-y-1">
+              <div class="font-bold text-slate-800">Conexión de nube administrada por el proveedor del sistema</div>
+              <p>La conexión a Supabase de cada laboratorio cliente se administra desde la configuración central del proveedor o parámetros de despliegue, evitando cambios accidentales por parte del usuario final.</p>
             </div>
 
-            <button onclick="saveSecurityAndCloudSettings()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">Guardar Claves y Conexión</button>
+            <button onclick="saveSecurityAndCloudSettings()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">Guardar Claves de Acceso</button>
           </div>
         </div>
       </div>
@@ -475,67 +629,43 @@
 
   <script>
     // =========================================================================
-    // CONFIGURACIÓN INICIAL DE MARCA BLANCA Y NUBE
+    // CONFIGURACIÓN INICIAL DE MARCA BLANCA Y NUBE (CONTROLADA POR EL PROVEEDOR)
     // =========================================================================
     const DEFAULT_LAB_BRAND_NAME = 'Laboratorio Fotográfico';
-    const DEFAULT_SUPABASE_URL = '';
-    const DEFAULT_SUPABASE_ANON_KEY = '';
+    const DEFAULT_LAB_INFO_LINE = '';
+    const DEVELOPER_BRAND_NAME = 'Tu Emprendimiento Digital';
+    const DEVELOPER_CONTACT_EMAIL = 'ventas@tuemprendimiento.com';
+    const DEFAULT_SUPABASE_URL = 'https://txmnqxxxulrowbpkkmmh.supabase.co';
+    const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_yRC66EjpAC9UrP7EgLVxAQ_Yt6Xm6mC';
     const DEFAULT_SUPABASE_SCHEMA = 'foto_estudio';
+    const DEFAULT_SUPABASE_BUCKET = 'order-prints';
 
-    const DEFAULT_PRINT_SIZES = {
-      '4x6': { key: '4x6', label: '4x6" (10x15 cm)', widthIn: 4, heightIn: 6, price: 8.0, proPrice: 5.5 },
-      '5x7': { key: '5x7', label: '5x7" (13x18 cm)', widthIn: 5, heightIn: 7, price: 15.0, proPrice: 11.0 },
-      '6x8': { key: '6x8', label: '6x8" (15x20 cm)', widthIn: 6, heightIn: 8, price: 22.0, proPrice: 16.5 },
-      '8x10': { key: '8x10', label: '8x10" (20x25 cm)', widthIn: 8, heightIn: 10, price: 35.0, proPrice: 26.0 },
-      'wallet': { key: 'wallet', label: 'Set 4 Wallet', widthIn: 2.5, heightIn: 3.5, price: 12.0, proPrice: 8.5 }
+    // Catálogo de clientes laboratorios (puedes registrar aquí cada laboratorio y llamarlo con ?client=id)
+    const CLIENT_LAB_PROFILES = {
+      // 'cliente1': { labName: 'Foto Estudio Central', labInfo: 'Centro • Tel: 9988-7766', supabaseUrl: '', supabaseKey: '', supabaseSchema: 'foto_estudio' }
     };
 
-    const PAPER_FINISHES = ['Brillante', 'Mate', 'Lustre'];
+    const DEFAULT_PRINT_SIZES = {
+      '4x6': { key: '4x6', label: '4x6" (10×15 cm)', widthIn: 4, heightIn: 6, price: 8, proPrice: 6 },
+      '5x7': { key: '5x7', label: '5x7" (13×18 cm)', widthIn: 5, heightIn: 7, price: 18, proPrice: 14 },
+      '6x8': { key: '6x8', label: '6x8" (15×20 cm)', widthIn: 6, heightIn: 8, price: 28, proPrice: 22 },
+      '8x10': { key: '8x10', label: '8x10" (20×25 cm)', widthIn: 8, heightIn: 10, price: 45, proPrice: 35 },
+      'wallet': { key: 'wallet', label: 'Wallet (2.5×3.5")', widthIn: 2.5, heightIn: 3.5, price: 6, proPrice: 4.5 }
+    };
+
+    const PAPER_FINISHES = ['Brillante', 'Mate', 'Seda / Perlado'];
     const PHOTO_BORDERS = [
       { id: 'none', label: 'Sin borde' },
-      { id: 'classic', label: 'Borde blanco' },
+      { id: 'classic', label: 'Borde ajustable' },
       { id: 'polaroid', label: 'Estilo Polaroid' }
     ];
-
-    // Estado global
-    let printSizes = loadJsonStorage('lab_print_sizes_v1', DEFAULT_PRINT_SIZES);
-    let studioConfig = loadJsonStorage('lab_studio_config_v1', {
-      labName: DEFAULT_LAB_BRAND_NAME,
-      shippingCost: 65,
-      bankAccounts: [
-        { bank: 'BAC Honduras', account: '900-123456-7', holder: 'Cuenta de Ahorro • Estudio Central' }
-      ]
-    });
-    let securityPins = loadJsonStorage('lab_security_pins_v1', {
-      staffPin: 'Master_Color_Elvin',
-      adminPin: 'Admin_Lab_2026',
-      supabaseUrl: DEFAULT_SUPABASE_URL,
-      supabaseKey: DEFAULT_SUPABASE_ANON_KEY,
-      supabaseSchema: DEFAULT_SUPABASE_SCHEMA
-    });
-    let proPhotographers = loadJsonStorage('lab_pro_photographers_v1', [
-      { id: 'pro-1', name: 'Estudio Demo Pro', username: 'pro.demo', password: 'Pro2026*', active: true }
-    ]);
-    let ordersStore = loadJsonStorage('lab_orders_store_v1', []);
-
-    let uploadedPhotos = [];
-    let activeProPhotographer = null;
-    let deliveryMode = 'store';
-    let receiptDataUrl = '';
-    let editingPhotoId = null;
-
-    let isCashierAuthenticated = false;
-    let isLabAuthenticated = false;
-    let isAdminUnlocked = false;
-    let pendingAdminTab = 'orders';
-    let supabaseClient = null;
 
     function loadJsonStorage(key, fallback) {
       try {
         const raw = localStorage.getItem(key);
-        return raw ? JSON.parse(raw) : JSON.parse(JSON.stringify(fallback));
+        return raw ? JSON.parse(raw) : fallback;
       } catch (err) {
-        return JSON.parse(JSON.stringify(fallback));
+        return fallback;
       }
     }
 
@@ -543,100 +673,1133 @@
       try {
         localStorage.setItem(key, JSON.stringify(value));
       } catch (err) {
-        console.warn('No se pudo guardar en localStorage:', err);
+        console.warn('Error guardando en localStorage:', err);
       }
     }
 
+    function generateUuidV4() {
+      if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+        return window.crypto.randomUUID();
+      }
+      return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+        const r = (Math.random() * 16) | 0;
+        const v = c === 'x' ? r : (r & 0x3) | 0x8;
+        return v.toString(16);
+      });
+    }
+
+    function getClientNamespacePrefix() {
+      const params = new URLSearchParams(window.location.search);
+      const clientKey = (params.get('client') || '').trim();
+      const urlSchema = (params.get('sb_schema') || '').trim();
+      const profileSchema = clientKey && CLIENT_LAB_PROFILES[clientKey]?.supabaseSchema
+        ? CLIENT_LAB_PROFILES[clientKey].supabaseSchema
+        : '';
+      const activeNs = (urlSchema || profileSchema || clientKey || DEFAULT_SUPABASE_SCHEMA || 'foto_estudio')
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, '_');
+      return activeNs;
+    }
+
+    const CLIENT_STORAGE_NS = getClientNamespacePrefix();
+    const STORAGE_KEYS = {
+      printSizes: `${CLIENT_STORAGE_NS}_print_sizes_v1`,
+      studioConfig: `${CLIENT_STORAGE_NS}_studio_config_v1`,
+      securityPins: `${CLIENT_STORAGE_NS}_security_pins_v1`,
+      proPhotographers: `${CLIENT_STORAGE_NS}_pro_photographers_v1`,
+      ordersStore: `${CLIENT_STORAGE_NS}_orders_store_v1`
+    };
+
+    let printSizes = loadJsonStorage(STORAGE_KEYS.printSizes, { ...DEFAULT_PRINT_SIZES });
+    let studioConfig = loadJsonStorage(STORAGE_KEYS.studioConfig, {
+      labName: DEFAULT_LAB_BRAND_NAME,
+      labInfo: DEFAULT_LAB_INFO_LINE,
+      shippingCost: 75,
+      bankAccounts: [
+        { bank: 'BAC Credomatic', account: '7412-8890-12', holder: 'Cuenta de Cheques • Laboratorio Fotográfico' },
+        { bank: 'Banco Ficohsa', account: '2000-4512-90', holder: 'Cuenta de Ahorro • Laboratorio Fotográfico' }
+      ]
+    });
+    let securityPins = loadJsonStorage(STORAGE_KEYS.securityPins, {
+      staffPin: 'Master_Color_Elvin',
+      adminPin: 'Admin_Lab_2026',
+      supabaseUrl: DEFAULT_SUPABASE_URL,
+      supabaseKey: DEFAULT_SUPABASE_ANON_KEY,
+      supabaseSchema: CLIENT_STORAGE_NS
+    });
+    let proPhotographers = loadJsonStorage(STORAGE_KEYS.proPhotographers, [
+      { id: 'pro-demo-1', name: 'Estudio Pro Demo', username: 'pro.demo', password: '123', active: true }
+    ]);
+    let ordersStore = loadJsonStorage(STORAGE_KEYS.ordersStore, []);
+
+    let uploadedPhotos = [];
+    let deliveryMode = 'store';
+    let receiptDataUrl = '';
+    let activeProPhotographer = null;
+    let isKioskModeActive = false;
+    let isCashierAuthenticated = false;
+    let isLabAuthenticated = false;
+    let isAdminUnlocked = false;
+    let pendingAdminTab = 'orders';
+    let editingPhotoId = null;
+    let cropDragState = null;
+    let supabaseClient = null;
+    let toastTimeoutId = null;
+
     function showToast(message) {
       const banner = document.getElementById('toastBanner');
+      if (!banner) return;
       banner.textContent = message;
       banner.classList.remove('hidden');
-      clearTimeout(window.__toastTimer);
-      window.__toastTimer = setTimeout(() => {
+      if (toastTimeoutId) clearTimeout(toastTimeoutId);
+      toastTimeoutId = setTimeout(() => {
         banner.classList.add('hidden');
       }, 3200);
     }
 
-    // =========================================================================
-    // INICIALIZACIÓN DE MARCA Y SUPABASE
-    // =========================================================================
-    function applyUrlOverrides() {
-      try {
-        const params = new URLSearchParams(window.location.search);
-        const urlLab = params.get('lab') || params.get('estudio');
-        const sbUrl = params.get('sb_url');
-        const sbKey = params.get('sb_key');
-
-        if (urlLab && urlLab.trim()) {
-          studioConfig.labName = urlLab.trim();
-          saveJsonStorage('lab_studio_config_v1', studioConfig);
-        }
-        if (sbUrl && sbKey) {
-          securityPins.supabaseUrl = sbUrl.trim();
-          securityPins.supabaseKey = sbKey.trim();
-          saveJsonStorage('lab_security_pins_v1', securityPins);
-        }
-      } catch (err) {
-        console.warn('Error leyendo parámetros URL:', err);
-      }
+    function togglePasswordVisibility(inputId) {
+      const input = document.getElementById(inputId);
+      if (!input) return;
+      input.type = input.type === 'password' ? 'text' : 'password';
     }
 
-    function applyBrandingToUI() {
-      const name = (studioConfig.labName || DEFAULT_LAB_BRAND_NAME).trim();
-      document.getElementById('pageTitle').textContent = `${name} — Pedidos e Impresión a 300 DPI`;
-      document.getElementById('brandLabName').textContent = name;
-      document.getElementById('footerLabCopyright').textContent = `© ${name} • Sistema de Impresión a 300 DPI`;
+    function openDeveloperPromoModal() {
+      document.getElementById('developerPromoModal')?.classList.remove('hidden');
+    }
+
+    function closeDeveloperPromoModal() {
+      document.getElementById('developerPromoModal')?.classList.add('hidden');
+    }
+
+    function getOrientedDimensions(sizeObj, orientation) {
+      const w = Number(sizeObj?.widthIn) || 4;
+      const h = Number(sizeObj?.heightIn) || 6;
+      const minSide = Math.min(w, h);
+      const maxSide = Math.max(w, h);
+      if (orientation === 'portrait') {
+        return { widthIn: minSide, heightIn: maxSide };
+      }
+      return { widthIn: maxSide, heightIn: minSide };
+    }
+
+    function getPhotoCssTransform(photo) {
+      const zoom = (Number(photo.zoom) || 100) / 100;
+      const panX = Number(photo.panX) || 0;
+      const panY = Number(photo.panY) || 0;
+      const rot = Number(photo.rotation) || 0;
+      const flip = photo.flipX ? -1 : 1;
+      return `translate(${panX}%, ${panY}%) rotate(${rot}deg) scale(${zoom * flip}, ${zoom})`;
+    }
+
+    function getPhotoCssFilter(photo) {
+      const filter = photo.filter && photo.filter !== 'none' ? photo.filter : '';
+      return filter.trim();
+    }
+
+    function getCaptionPlacementForPhoto(photo, captionPos) {
+      const rot = (((Number(photo.rotation) || 0) % 360) + 360) % 360;
+      const isTop = captionPos === 'top';
+      if (rot === 90) {
+        return isTop
+          ? { side: 'right', style: 'top: 0; bottom: 0; right: 0; writing-mode: vertical-rl;', rotateDeg: 90 }
+          : { side: 'left', style: 'top: 0; bottom: 0; left: 0; writing-mode: vertical-rl;', rotateDeg: 90 };
+      }
+      if (rot === 270) {
+        return isTop
+          ? { side: 'left', style: 'top: 0; bottom: 0; left: 0; writing-mode: vertical-rl; transform: rotate(180deg);', rotateDeg: 270 }
+          : { side: 'right', style: 'top: 0; bottom: 0; right: 0; writing-mode: vertical-rl; transform: rotate(180deg);', rotateDeg: 270 };
+      }
+      if (rot === 180) {
+        return isTop
+          ? { side: 'bottom', style: 'bottom: 0; left: 0; right: 0; transform: rotate(180deg);', rotateDeg: 180 }
+          : { side: 'top', style: 'top: 0; left: 0; right: 0; transform: rotate(180deg);', rotateDeg: 180 };
+      }
+      return isTop
+        ? { side: 'top', style: 'top: 0; left: 0; right: 0;', rotateDeg: 0 }
+        : { side: 'bottom', style: 'bottom: 0; left: 0; right: 0;', rotateDeg: 0 };
+    }
+
+    function getPhotoDpiStatus(photo) {
+      const sz = printSizes[photo.sizeKey] || { widthIn: 4, heightIn: 6 };
+      const dim = getOrientedDimensions(sz, photo.orientation || 'landscape');
+      const isRotated90 = Math.abs((Number(photo.rotation) || 0) % 180) === 90;
+      const natW = isRotated90 ? (Number(photo.natHeight) || 800) : (Number(photo.natWidth) || 1200);
+      const natH = isRotated90 ? (Number(photo.natWidth) || 1200) : (Number(photo.natHeight) || 800);
+      const effectiveDpi = Math.round(Math.min(natW / (dim.widthIn || 4), natH / (dim.heightIn || 6)));
+
+      if (effectiveDpi >= 250) {
+        return {
+          dpi: effectiveDpi,
+          label: `✓ ${effectiveDpi} DPI • Óptima`,
+          badgeClass: 'bg-emerald-50 text-emerald-700 border-emerald-200'
+        };
+      }
+      if (effectiveDpi >= 180) {
+        return {
+          dpi: effectiveDpi,
+          label: `⚠ ${effectiveDpi} DPI • Aceptable`,
+          badgeClass: 'bg-amber-50 text-amber-700 border-amber-200'
+        };
+      }
+      return {
+        dpi: effectiveDpi,
+        label: `⚠ ${effectiveDpi} DPI • Baja resolución`,
+        badgeClass: 'bg-rose-50 text-rose-700 border-rose-200'
+      };
+    }
+
+    // =========================================================================
+    // ADAPTADOR DE ESQUEMA SUPABASE (foto_estudio.orders)
+    // =========================================================================
+    function normalizeOrderFromSupabaseRow(row) {
+      let parsedItems = [];
+      try {
+        if (Array.isArray(row.items_json)) parsedItems = row.items_json;
+        else if (typeof row.items_json === 'string' && row.items_json.trim()) parsedItems = JSON.parse(row.items_json);
+        else if (Array.isArray(row.items)) parsedItems = row.items;
+      } catch (e) {
+        parsedItems = [];
+      }
+
+      const mappedItems = parsedItems.map((it, idx) => {
+        const sizeKey = it.sizeKey || '4x6';
+        const sz = printSizes[sizeKey] || { label: it.sizeLabel || sizeKey, widthIn: 4, heightIn: 6 };
+        const borderType = it.border || (it.whiteBorder ? 'classic' : 'none');
+        return {
+          ...it,
+          name: it.name || it.originalName || it.fileName || `foto_${idx + 1}.jpg`,
+          fileName: it.fileName || `${String(idx + 1).padStart(2, '0')}_${(it.originalName || 'foto').replace(/\.[^.]+$/, '')}_${it.quantity || it.copies || 1}copias.jpg`,
+          sizeKey,
+          sizeLabel: it.sizeLabel || sz.label,
+          widthIn: it.widthIn || sz.widthIn,
+          heightIn: it.heightIn || sz.heightIn,
+          finish: it.finish || it.paperLabel || (it.paperKey === 'matte' ? 'Mate' : it.paperKey === 'silk' ? 'Seda / Perlado' : 'Brillante'),
+          copies: Number(it.copies ?? it.quantity) || 1,
+          unitPrice: Number(it.unitPrice) || 0,
+          border: borderType,
+          borderSizeMm: Number(it.borderSizeMm ?? it.borderWidthMm) || 5,
+          borderColor: it.borderColor || '#ffffff',
+          orientation: it.orientation || 'landscape',
+          caption: it.caption || '',
+          captionPos: it.captionPos || 'bottom',
+          captionSize: Number(it.captionSize) || 18,
+          captionColor: it.captionColor || '#1e293b',
+          dataUrl: it.dataUrl || it.publicUrl || '',
+          storagePath: it.storagePath || ''
+        };
+      });
+
+      const isKiosk = (row.order_notes || '').includes('KIOSKO') || row.receipt_path === 'PAGADO_EN_CAJA';
+      const isPaid =
+        row.payment_status === 'paid' ||
+        (row.order_notes || '').includes('[VERIFICADO_CAJA]') ||
+        ['imprimiendo', 'ready_to_print', 'completed'].includes(row.status);
+
+      const proMatch = (row.order_notes || '').match(/\[PRO:([^\]]+)\]/);
+
+      return {
+        id: row.id,
+        order_code: row.order_code || row.order_number || ('ORD-' + String(row.id).slice(0, 6)),
+        created_at: row.created_at || new Date().toISOString(),
+        customer_name: row.customer_name || 'Cliente',
+        customer_phone: row.customer_phone || '',
+        delivery_mode: isKiosk ? 'store' : (row.delivery_method === 'delivery' ? 'delivery' : 'pickup'),
+        delivery_address: row.delivery_address || row.customer_address || '',
+        photographer_name: row.photographer_name || (proMatch ? proMatch[1] : ''),
+        subtotal: Number(row.subtotal) || 0,
+        shipping: Number(row.shipping_cost ?? row.delivery_fee) || 0,
+        total: Number(row.grand_total ?? row.total) || 0,
+        receipt_url: row.receipt_url || (row.receipt_path && row.receipt_path !== 'PAGADO_EN_CAJA' ? row.receipt_path : ''),
+        payment_status: isPaid ? 'paid' : 'pending_cashier',
+        lab_status: row.status || (isPaid ? 'imprimiendo' : 'waiting_payment'),
+        order_notes: row.order_notes || '',
+        items: mappedItems
+      };
+    }
+
+    function buildSupabaseOrderPayload(orderObj) {
+      const isStoreKiosk = orderObj.delivery_mode === 'store';
+      const totalCopies = (orderObj.items || []).reduce((acc, it) => acc + (Number(it.copies) || 1), 0);
+      const notesParts = [];
+      if (isStoreKiosk) notesParts.push('[KIOSKO EN TIENDA - PAGO EN CAJA]');
+      if (orderObj.photographer_name) notesParts.push(`[PRO:${orderObj.photographer_name}]`);
+
+      const serializedItems = (orderObj.items || []).map((it, idx) => {
+        const paperKey = (it.finish || '').toLowerCase().includes('mate')
+          ? 'matte'
+          : (it.finish || '').toLowerCase().includes('seda')
+          ? 'silk'
+          : 'glossy';
+        const folderName = `${it.sizeKey}_${paperKey}`;
+        const safeOrig = (it.name || `foto_${idx + 1}.jpg`).replace(/[^a-zA-Z0-9._-]/g, '_');
+        const baseNoExt = safeOrig.replace(/\.[^.]+$/, '');
+        const fileName = `${String(idx + 1).padStart(2, '0')}_${baseNoExt}_${it.copies}copias.jpg`;
+        const storagePath = `${orderObj.order_code}/${folderName}/${fileName}`;
+
+        return {
+          index: idx + 1,
+          caption: it.caption || '',
+          captionPos: it.captionPos || 'bottom',
+          captionSize: it.captionSize || 18,
+          captionColor: it.captionColor || '#1e293b',
+          sizeKey: it.sizeKey,
+          fileName,
+          paperKey,
+          quantity: Number(it.copies) || 1,
+          copies: Number(it.copies) || 1,
+          lineTotal: (Number(it.unitPrice) || 0) * (Number(it.copies) || 1),
+          sizeLabel: it.sizeLabel,
+          unitPrice: Number(it.unitPrice) || 0,
+          folderName,
+          paperLabel: it.finish,
+          border: it.border || 'none',
+          borderColor: it.borderColor || '#ffffff',
+          orientation: it.orientation || 'landscape',
+          storagePath,
+          whiteBorder: (it.border || 'none') !== 'none',
+          customerTier: orderObj.photographer_name ? 'pro' : 'amateur',
+          originalName: it.name,
+          borderWidthMm: Number(it.borderSizeMm) || 5,
+          zoom: it.zoom ?? 100,
+          panX: it.panX ?? 0,
+          panY: it.panY ?? 0,
+          rotation: it.rotation ?? 0,
+          flipX: !!it.flipX,
+          filter: it.filter || 'none'
+        };
+      });
+
+      return {
+        id: orderObj.id,
+        order_code: orderObj.order_code,
+        customer_name: orderObj.customer_name,
+        customer_phone: orderObj.customer_phone,
+        delivery_method: orderObj.delivery_mode === 'delivery' ? 'delivery' : 'pickup',
+        delivery_address: orderObj.delivery_address || null,
+        customer_address: orderObj.delivery_address || null,
+        payment_method: isStoreKiosk ? 'cash_counter' : 'bank_transfer',
+        payment_status: 'verifying',
+        status: 'pending_cashier',
+        subtotal: Number(orderObj.subtotal).toFixed(2),
+        delivery_fee: Number(orderObj.shipping).toFixed(2),
+        shipping_cost: Number(orderObj.shipping).toFixed(2),
+        grand_total: Number(orderObj.total).toFixed(2),
+        total_prints: totalCopies,
+        order_notes: notesParts.join(' '),
+        receipt_path: isStoreKiosk ? 'PAGADO_EN_CAJA' : (orderObj.receipt_url || null),
+        storage_cleaned: false,
+        items_json: JSON.stringify(serializedItems)
+      };
+    }
+
+    function initBrandingAndCloud() {
+      const params = new URLSearchParams(window.location.search);
+      const clientKey = params.get('client');
+      if (clientKey && CLIENT_LAB_PROFILES[clientKey]) {
+        const profile = CLIENT_LAB_PROFILES[clientKey];
+        if (profile.labName) studioConfig.labName = profile.labName;
+        if (profile.labInfo) studioConfig.labInfo = profile.labInfo;
+        if (profile.supabaseUrl) securityPins.supabaseUrl = profile.supabaseUrl;
+        if (profile.supabaseKey) securityPins.supabaseKey = profile.supabaseKey;
+        if (profile.supabaseSchema) securityPins.supabaseSchema = profile.supabaseSchema;
+      }
+
+      const urlLabName = params.get('lab');
+      const urlLabInfo = params.get('lab_info');
+      if (urlLabName) studioConfig.labName = urlLabName;
+      if (urlLabInfo) studioConfig.labInfo = urlLabInfo;
+      if (params.get('sb_url')) securityPins.supabaseUrl = params.get('sb_url');
+      if (params.get('sb_key')) securityPins.supabaseKey = params.get('sb_key');
+      if (params.get('sb_schema')) securityPins.supabaseSchema = params.get('sb_schema');
+
+      applyStudioBrandingUI();
+      initSupabaseConnection();
+      renderBankAccountsForCustomer();
+    }
+
+    function applyStudioBrandingUI() {
+      const name = studioConfig.labName || DEFAULT_LAB_BRAND_NAME;
+      const labInfo = (studioConfig.labInfo || '').trim();
+      const brandEl = document.getElementById('brandLabName');
+      const subtitleEl = document.getElementById('brandSubtitle');
+      const footerEl = document.getElementById('footerLabCopyright');
+      const titleEl = document.getElementById('pageTitle');
+      const devFooterEl = document.getElementById('developerBrandFooter');
+      const devModalEl = document.getElementById('devBrandModalName');
+      const devEmailEl = document.getElementById('devContactEmailDisplay');
+      const devMailtoBtn = document.getElementById('devContactMailtoBtn');
+
+      if (brandEl) brandEl.textContent = name;
+      if (subtitleEl) subtitleEl.textContent = labInfo;
+      if (footerEl) footerEl.textContent = `© ${name}`;
+      if (titleEl) titleEl.textContent = `${name} — Pedidos e Impresión a 300 DPI`;
+      if (devFooterEl) devFooterEl.textContent = DEVELOPER_BRAND_NAME;
+      if (devModalEl) devModalEl.textContent = DEVELOPER_BRAND_NAME;
+      if (devEmailEl) devEmailEl.textContent = DEVELOPER_CONTACT_EMAIL;
+      if (devMailtoBtn) {
+        devMailtoBtn.href = `mailto:${DEVELOPER_CONTACT_EMAIL}?subject=${encodeURIComponent('Información Sistema de Laboratorio Fotográfico')}`;
+      }
     }
 
     function initSupabaseConnection() {
       const badge = document.getElementById('cloudStatusBadge');
       const url = (securityPins.supabaseUrl || '').trim();
       const key = (securityPins.supabaseKey || '').trim();
+      const schema = (securityPins.supabaseSchema || DEFAULT_SUPABASE_SCHEMA).trim();
 
-      if (!url || !key || !window.supabase || typeof window.supabase.createClient !== 'function') {
-        supabaseClient = null;
+      if (url && key && window.supabase && typeof window.supabase.createClient === 'function') {
+        try {
+          supabaseClient = window.supabase.createClient(url, key, {
+            db: { schema }
+          });
+          if (badge) {
+            badge.textContent = '● Nube Conectada';
+            badge.className = 'text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30';
+          }
+          refreshOrdersFromCloud(true);
+          return;
+        } catch (err) {
+          console.warn('No se pudo inicializar Supabase:', err);
+        }
+      }
+
+      supabaseClient = null;
+      if (badge) {
         badge.textContent = '● Modo Local';
         badge.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30';
+      }
+    }
+
+    function handlePhotoDragOver(event) {
+      event.preventDefault();
+      const zone = document.getElementById('dropZone');
+      if (zone) zone.classList.add('border-sky-500', 'bg-sky-50');
+    }
+
+    function handlePhotoDragLeave(event) {
+      event.preventDefault();
+      const zone = document.getElementById('dropZone');
+      if (zone) zone.classList.remove('border-sky-500', 'bg-sky-50');
+    }
+
+    function handlePhotoDrop(event) {
+      event.preventDefault();
+      handlePhotoDragLeave(event);
+      const files = Array.from(event.dataTransfer?.files || []).filter((f) => f.type.startsWith('image/'));
+      if (files.length > 0) {
+        processSelectedImageFiles(files);
+      }
+    }
+
+    function handlePhotoFilesSelected(event) {
+      const input = event.target;
+      const files = Array.from(input?.files || []).filter((f) => f.type.startsWith('image/'));
+      if (files.length > 0) {
+        processSelectedImageFiles(files);
+      }
+      if (input) input.value = '';
+    }
+
+    function readFileAsDataUrl(file) {
+      return new Promise((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = () => resolve(URL.createObjectURL(file));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    async function processSelectedImageFiles(files) {
+      showToast(`Procesando ${files.length} fotografía(s)...`);
+      const loadedItems = await Promise.all(
+        files.map(async (file) => {
+          const dataUrl = await readFileAsDataUrl(file);
+          return new Promise((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              const defaultSizeKey = printSizes['4x6'] ? '4x6' : Object.keys(printSizes)[0];
+              const natW = img.naturalWidth || 1200;
+              const natH = img.naturalHeight || 800;
+              const autoRotateToLandscape = natH > natW ? 90 : 0;
+              resolve({
+                id: 'ph-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
+                name: file.name,
+                dataUrl,
+                natWidth: natW,
+                natHeight: natH,
+                sizeKey: defaultSizeKey,
+                orientation: 'landscape',
+                finish: 'Brillante',
+                border: 'none',
+                borderSizeMm: 5,
+                borderColor: '#ffffff',
+                copies: 1,
+                zoom: 100,
+                panX: 0,
+                panY: 0,
+                rotation: autoRotateToLandscape,
+                flipX: false,
+                filter: 'none',
+                brightness: 100,
+                contrast: 100,
+                caption: '',
+                captionPos: 'bottom',
+                captionSize: 18,
+                captionColor: '#1e293b'
+              });
+            };
+            img.onerror = () => resolve(null);
+            img.src = dataUrl;
+          });
+        })
+      );
+
+      const validItems = loadedItems.filter(Boolean);
+      uploadedPhotos.push(...validItems);
+      renderPhotosList();
+      updateOrderTotals();
+      if (validItems.length > 0) {
+        showToast(`${validItems.length} fotografía(s) agregada(s) en horizontal.`);
+      }
+    }
+
+    function getUnitPriceForSize(sizeKey) {
+      const sz = printSizes[sizeKey] || Object.values(printSizes)[0] || { price: 8, proPrice: 6 };
+      if (activeProPhotographer) {
+        return Number(sz.proPrice ?? sz.price) || 0;
+      }
+      return Number(sz.price) || 0;
+    }
+
+    function renderPhotosList() {
+      const container = document.getElementById('photosListContainer');
+      const countBadge = document.getElementById('photosCountBadge');
+      if (!container) return;
+
+      if (countBadge) {
+        const totalCopies = uploadedPhotos.reduce((acc, p) => acc + (Number(p.copies) || 1), 0);
+        countBadge.textContent = `${uploadedPhotos.length} foto(s) • ${totalCopies} copia(s)`;
+      }
+
+      if (uploadedPhotos.length === 0) {
+        container.innerHTML = `
+          <div id="emptyPhotosState" class="text-center py-10 text-slate-400 text-sm">
+            Aún no has agregado fotografías. Sube una o varias imágenes para comenzar.
+          </div>
+        `;
         return;
       }
 
-      try {
-        const schema = (securityPins.supabaseSchema || 'foto_estudio').trim();
-        supabaseClient = window.supabase.createClient(url, key, {
-          db: { schema }
-        });
-        badge.textContent = '● Supabase Conectado';
-        badge.className = 'text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30';
-        refreshOrdersFromCloud();
-      } catch (err) {
-        console.error('Error conectando a Supabase:', err);
-        supabaseClient = null;
-        badge.textContent = '● Modo Local';
-        badge.className = 'text-xs px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-400/30';
-      }
+      const sizeOptionsHtml = Object.values(printSizes)
+        .map((sz) => {
+          const unitPrice = activeProPhotographer ? Number(sz.proPrice ?? sz.price) : Number(sz.price);
+          return `<option value="${sz.key}">${sz.label} — L ${unitPrice.toFixed(2)}</option>`;
+        })
+        .join('');
+
+      container.innerHTML = uploadedPhotos
+        .map((photo) => {
+          const unitPrice = getUnitPriceForSize(photo.sizeKey);
+          const lineTotal = unitPrice * (Number(photo.copies) || 1);
+          const dpiInfo = getPhotoDpiStatus(photo);
+          const sz = printSizes[photo.sizeKey] || { widthIn: 4, heightIn: 6 };
+          const dim = getOrientedDimensions(sz, photo.orientation || 'landscape');
+          const aspectRatioCss = `${dim.widthIn} / ${dim.heightIn}`;
+          const hasBorder = photo.border && photo.border !== 'none';
+          const borderMm = Number(photo.borderSizeMm ?? 5);
+          const paperWidthMm = (dim.widthIn || 6) * 25.4;
+          const borderPadPx = hasBorder ? Math.max(2, Math.round((144 * borderMm) / paperWidthMm)) : 0;
+          const borderBg = hasBorder ? (photo.borderColor || '#ffffff') : '#0f172a';
+          const isCardRot90 = Math.abs((Number(photo.rotation) || 0) % 180) === 90;
+          const cardEffW = isCardRot90 ? (photo.natHeight || 800) : (photo.natWidth || 1200);
+          const cardEffH = isCardRot90 ? (photo.natWidth || 1200) : (photo.natHeight || 800);
+          const cardBoxW = 144 - borderPadPx * 2;
+          const cardBoxH = Math.max(40, Math.round(144 * (dim.heightIn / (dim.widthIn || 1))) - borderPadPx * 2);
+          const cardImgRatio = cardEffW / (cardEffH || 1);
+          const cardBoxRatio = cardBoxW / (cardBoxH || 1);
+          let cardBaseW = cardBoxW;
+          let cardBaseH = cardBoxH;
+          if (cardImgRatio > cardBoxRatio) {
+            cardBaseH = cardBoxH;
+            cardBaseW = cardBoxH * cardImgRatio;
+          } else {
+            cardBaseW = cardBoxW;
+            cardBaseH = cardBoxW / cardImgRatio;
+          }
+          const thumbW = isCardRot90 ? Math.round(cardBaseH) : Math.round(cardBaseW);
+          const thumbH = isCardRot90 ? Math.round(cardBaseW) : Math.round(cardBaseH);
+          const cardCapPlacement = getCaptionPlacementForPhoto(photo, photo.captionPos || 'bottom');
+
+          return `
+            <div class="rounded-2xl border border-slate-200 p-4 bg-slate-50/40 flex flex-col sm:flex-row gap-4 items-start">
+              <!-- Miniatura ajustada a la proporción y orientación -->
+              <div class="w-full sm:w-36 shrink-0 flex flex-col items-center gap-2">
+                <div style="aspect-ratio: ${aspectRatioCss}; background-color: ${borderBg}; padding: ${borderPadPx}px;" class="w-36 box-border rounded-xl overflow-hidden shadow-xs border border-slate-300 relative flex items-center justify-center">
+                  <div class="relative w-full h-full overflow-hidden flex items-center justify-center">
+                    <img src="${photo.dataUrl}" alt="${photo.name}" style="width: ${thumbW}px; height: ${thumbH}px; transform: ${getPhotoCssTransform(photo)}; filter: ${getPhotoCssFilter(photo)};" class="max-w-none max-h-none pointer-events-none" />
+                    ${photo.caption ? `<span style="color: ${photo.captionColor || '#1e293b'}; background-color: ${photo.border === 'polaroid' ? (photo.borderColor || '#ffffff') : 'transparent'}; ${cardCapPlacement.style}" class="absolute text-[9px] font-bold flex items-center justify-center text-center truncate px-1 py-0.5">${photo.caption}</span>` : ''}
+                  </div>
+                </div>
+                <button type="button" onclick="openCropEditor('${photo.id}')" class="w-36 py-1.5 px-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition">
+                  ✂️ Editar / Encuadrar
+                </button>
+              </div>
+
+              <!-- Controles de impresión -->
+              <div class="flex-1 w-full space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <div class="text-xs font-bold text-slate-900 truncate max-w-[230px]" title="${photo.name}">${photo.name}</div>
+                    <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                      <span class="text-[11px] text-slate-500">${photo.natWidth}×${photo.natHeight} px • ${photo.orientation === 'portrait' ? 'Vertical' : 'Horizontal'}</span>
+                      <span class="text-[11px] font-semibold px-2 py-0.5 rounded-full border ${dpiInfo.badgeClass}">${dpiInfo.label}</span>
+                    </div>
+                  </div>
+                  <button type="button" onclick="removePhoto('${photo.id}')" class="text-xs text-rose-600 hover:text-rose-700 font-semibold px-2 py-1 rounded-lg hover:bg-rose-50">
+                    Eliminar
+                  </button>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs">
+                  <div class="col-span-2">
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Tamaño de papel</label>
+                    <select onchange="updatePhotoField('${photo.id}', 'sizeKey', this.value)" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 bg-white font-medium">
+                      ${sizeOptionsHtml.replace(`value="${photo.sizeKey}"`, `value="${photo.sizeKey}" selected`)}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Acabado</label>
+                    <select onchange="updatePhotoField('${photo.id}', 'finish', this.value)" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 bg-white font-medium">
+                      ${PAPER_FINISHES.map((fin) => `<option value="${fin}" ${photo.finish === fin ? 'selected' : ''}>${fin}</option>`).join('')}
+                    </select>
+                  </div>
+
+                  <div>
+                    <label class="block text-[11px] font-semibold text-slate-600 mb-1">Copias</label>
+                    <input type="number" min="1" max="500" value="${photo.copies}" onchange="updatePhotoField('${photo.id}', 'copies', this.value)" class="w-full px-2.5 py-2 rounded-xl border border-slate-300 bg-white font-bold text-center" />
+                  </div>
+                </div>
+
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-slate-200/70 text-xs">
+                  <div class="flex items-center gap-2">
+                    <select onchange="updatePhotoField('${photo.id}', 'border', this.value)" class="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white text-xs font-medium">
+                      ${PHOTO_BORDERS.map((b) => `<option value="${b.id}" ${photo.border === b.id ? 'selected' : ''}>${b.label}</option>`).join('')}
+                    </select>
+                    <button type="button" onclick="togglePhotoOrientationQuick('${photo.id}')" class="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold">
+                      ${photo.orientation === 'portrait' ? '↕ Vertical' : '↔ Horizontal'}
+                    </button>
+                  </div>
+                  <div class="font-extrabold text-slate-900">
+                    Subtotal: <span class="text-sky-700">L ${lineTotal.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        })
+        .join('');
     }
 
-    async function refreshOrdersFromCloud() {
-      if (supabaseClient) {
-        try {
-          const { data, error } = await supabaseClient
-            .from('orders')
-            .select('*')
-            .order('created_at', { ascending: false });
-          if (!error && Array.isArray(data)) {
-            ordersStore = data;
-            saveJsonStorage('lab_orders_store_v1', ordersStore);
-          }
-        } catch (err) {
-          console.warn('Usando órdenes locales tras error de consulta:', err);
-        }
+    function updatePhotoField(photoId, field, value) {
+      const photo = uploadedPhotos.find((p) => p.id === photoId);
+      if (!photo) return;
+      if (field === 'copies') {
+        photo.copies = Math.max(1, Math.min(500, parseInt(value, 10) || 1));
+      } else if (field === 'sizeKey') {
+        photo.sizeKey = value;
+        photo.orientation = 'landscape';
+        photo.rotation = (photo.natHeight || 800) > (photo.natWidth || 1200) ? 90 : 0;
+        photo.zoom = 100;
+        photo.panX = 0;
+        photo.panY = 0;
+      } else {
+        photo[field] = value;
       }
-      if (isCashierAuthenticated) renderCashierOrders();
-      if (isLabAuthenticated) renderLabOrders();
+      renderPhotosList();
+      updateOrderTotals();
+    }
+
+    function togglePhotoOrientationQuick(photoId) {
+      const photo = uploadedPhotos.find((p) => p.id === photoId);
+      if (!photo) return;
+      const nextOrientation = photo.orientation === 'portrait' ? 'landscape' : 'portrait';
+      photo.orientation = nextOrientation;
+      const isNativePortrait = (photo.natHeight || 800) > (photo.natWidth || 1200);
+      photo.rotation = nextOrientation === 'landscape'
+        ? (isNativePortrait ? 90 : 0)
+        : (isNativePortrait ? 0 : 90);
+      photo.panX = 0;
+      photo.panY = 0;
+      renderPhotosList();
+    }
+
+    function removePhoto(photoId) {
+      uploadedPhotos = uploadedPhotos.filter((p) => p.id !== photoId);
+      renderPhotosList();
+      updateOrderTotals();
     }
 
     // =========================================================================
-    // FOTÓGRAFO PRO
+    // EDITOR INTERACTIVO DE ENCUADRE, BORDES Y TEXTOS
+    // =========================================================================
+    function openCropEditor(photoId) {
+      const photo = uploadedPhotos.find((p) => p.id === photoId);
+      if (!photo) return;
+      editingPhotoId = photoId;
+
+      const sz = printSizes[photo.sizeKey] || { label: '4x6"' };
+      const subtitle = document.getElementById('cropEditorSubtitle');
+      if (subtitle) subtitle.textContent = `${photo.name} • Tamaño ${sz.label}`;
+
+      const previewImg = document.getElementById('cropPreviewImage');
+      if (previewImg) previewImg.src = photo.dataUrl;
+
+      document.getElementById('cropZoomRange').value = photo.zoom ?? 100;
+      document.getElementById('cropPanXRange').value = photo.panX ?? 0;
+      document.getElementById('cropPanYRange').value = photo.panY ?? 0;
+      document.getElementById('cropFilterSelect').value = photo.filter || 'none';
+      document.getElementById('cropBrightnessRange').value = photo.brightness ?? 100;
+      document.getElementById('cropContrastRange').value = photo.contrast ?? 100;
+      document.getElementById('cropBorderStyleSelect').value = photo.border || 'none';
+      document.getElementById('cropBorderSizeRange').value = photo.borderSizeMm ?? 5;
+      document.getElementById('cropBorderColorInput').value = photo.borderColor || '#ffffff';
+      document.getElementById('cropCaptionInput').value = photo.caption || '';
+      document.getElementById('cropCaptionPosSelect').value = photo.captionPos || 'bottom';
+      document.getElementById('cropCaptionSizeRange').value = photo.captionSize ?? 18;
+      document.getElementById('cropCaptionColorInput').value = photo.captionColor || '#1e293b';
+
+      updateOrientationButtonsUI(photo.orientation || 'landscape');
+      updateCropPreviewTransform();
+      document.getElementById('cropEditorModal').classList.remove('hidden');
+    }
+
+    function closeCropEditor() {
+      editingPhotoId = null;
+      cropDragState = null;
+      document.getElementById('cropEditorModal').classList.add('hidden');
+    }
+
+    function updateOrientationButtonsUI(orientation) {
+      const landBtn = document.getElementById('orientLandscapeBtn');
+      const portBtn = document.getElementById('orientPortraitBtn');
+      if (!landBtn || !portBtn) return;
+      if (orientation === 'portrait') {
+        portBtn.className = 'px-3 py-1.5 rounded-xl bg-sky-600 text-white font-bold';
+        landBtn.className = 'px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-semibold';
+      } else {
+        landBtn.className = 'px-3 py-1.5 rounded-xl bg-sky-600 text-white font-bold';
+        portBtn.className = 'px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-semibold';
+      }
+    }
+
+    function setCropOrientation(orientation) {
+      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
+      if (!photo) return;
+      photo.orientation = orientation;
+      const isNativePortrait = (photo.natHeight || 800) > (photo.natWidth || 1200);
+      photo.rotation = orientation === 'landscape'
+        ? (isNativePortrait ? 90 : 0)
+        : (isNativePortrait ? 0 : 90);
+      document.getElementById('cropPanXRange').value = 0;
+      document.getElementById('cropPanYRange').value = 0;
+      updateOrientationButtonsUI(orientation);
+      updateCropPreviewTransform();
+    }
+
+    function fitPhotoToFrame() {
+      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
+      if (!photo) return;
+      document.getElementById('cropZoomRange').value = 100;
+      document.getElementById('cropPanXRange').value = 0;
+      document.getElementById('cropPanYRange').value = 0;
+      updateCropPreviewTransform();
+    }
+
+    function resetCropEditorValues() {
+      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
+      if (!photo) return;
+      photo.orientation = 'landscape';
+      photo.rotation = (photo.natHeight || 800) > (photo.natWidth || 1200) ? 90 : 0;
+      photo.flipX = false;
+      document.getElementById('cropZoomRange').value = 100;
+      document.getElementById('cropPanXRange').value = 0;
+      document.getElementById('cropPanYRange').value = 0;
+      document.getElementById('cropFilterSelect').value = 'none';
+      document.getElementById('cropBrightnessRange').value = 100;
+      document.getElementById('cropContrastRange').value = 100;
+      document.getElementById('cropBorderStyleSelect').value = 'none';
+      document.getElementById('cropBorderSizeRange').value = 5;
+      document.getElementById('cropBorderColorInput').value = '#ffffff';
+      document.getElementById('cropCaptionInput').value = '';
+      document.getElementById('cropCaptionSizeRange').value = 18;
+      updateOrientationButtonsUI('landscape');
+      updateCropPreviewTransform();
+    }
+
+    function toggleFlipCropPhoto() {
+      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
+      if (!photo) return;
+      photo.flipX = !photo.flipX;
+      updateCropPreviewTransform();
+    }
+
+    function setCropBorderColor(hexColor) {
+      const input = document.getElementById('cropBorderColorInput');
+      if (input) input.value = hexColor;
+      const borderSel = document.getElementById('cropBorderStyleSelect');
+      if (borderSel && borderSel.value === 'none') {
+        borderSel.value = 'classic';
+      }
+      updateCropPreviewTransform();
+    }
+
+    function setCropCaptionColor(hexColor) {
+      const input = document.getElementById('cropCaptionColorInput');
+      if (input) input.value = hexColor;
+      updateCropPreviewTransform();
+    }
+
+    function applyQuickCaption(text) {
+      const input = document.getElementById('cropCaptionInput');
+      if (!input) return;
+      input.value = text;
+      const borderSel = document.getElementById('cropBorderStyleSelect');
+      if (borderSel && borderSel.value === 'none') {
+        borderSel.value = 'polaroid';
+      }
+      updateCropPreviewTransform();
+    }
+
+    function startCropDrag(event) {
+      cropDragState = {
+        startX: event.clientX,
+        startY: event.clientY,
+        initPanX: Number(document.getElementById('cropPanXRange').value) || 0,
+        initPanY: Number(document.getElementById('cropPanYRange').value) || 0
+      };
+    }
+
+    function moveCropDrag(event) {
+      if (!cropDragState) return;
+      const dx = ((event.clientX - cropDragState.startX) / 260) * 100;
+      const dy = ((event.clientY - cropDragState.startY) / 220) * 100;
+      const nextX = Math.max(-100, Math.min(100, Math.round(cropDragState.initPanX + dx)));
+      const nextY = Math.max(-100, Math.min(100, Math.round(cropDragState.initPanY + dy)));
+      document.getElementById('cropPanXRange').value = nextX;
+      document.getElementById('cropPanYRange').value = nextY;
+      updateCropPreviewTransform();
+    }
+
+    function endCropDrag() {
+      cropDragState = null;
+    }
+
+    function updateCropPreviewTransform() {
+      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
+      if (!photo) return;
+
+      const zoom = Number(document.getElementById('cropZoomRange').value) || 100;
+      const panX = Number(document.getElementById('cropPanXRange').value) || 0;
+      const panY = Number(document.getElementById('cropPanYRange').value) || 0;
+      const filter = document.getElementById('cropFilterSelect').value || 'none';
+      const borderStyle = document.getElementById('cropBorderStyleSelect').value || 'none';
+      const borderSizeMm = Number(document.getElementById('cropBorderSizeRange').value) || 5;
+      const borderColor = document.getElementById('cropBorderColorInput').value || '#ffffff';
+      const caption = document.getElementById('cropCaptionInput').value || '';
+      const captionPos = document.getElementById('cropCaptionPosSelect').value || 'bottom';
+      const captionSize = Number(document.getElementById('cropCaptionSizeRange').value) || 18;
+      const captionColor = document.getElementById('cropCaptionColorInput').value || '#1e293b';
+
+      document.getElementById('zoomLabel').textContent = `Zoom ${zoom}% (arrastra la foto para mover)`;
+      document.getElementById('cropBorderSizeLabel').textContent = `Grosor (${borderSizeMm} mm)`;
+      document.getElementById('cropCaptionSizeLabel').textContent = `Tamaño (${captionSize}px):`;
+
+      const sz = printSizes[photo.sizeKey] || { widthIn: 4, heightIn: 6 };
+      const dim = getOrientedDimensions(sz, photo.orientation || 'landscape');
+      const maxBoxW = 360;
+      const maxBoxH = 260;
+      const ratio = dim.widthIn / (dim.heightIn || 1);
+      let frameW = maxBoxW;
+      let frameH = Math.round(maxBoxW / ratio);
+      if (frameH > maxBoxH) {
+        frameH = maxBoxH;
+        frameW = Math.round(maxBoxH * ratio);
+      }
+
+      const frame = document.getElementById('cropAspectFrame');
+      const previewImg = document.getElementById('cropPreviewImage');
+      if (frame && previewImg) {
+        frame.style.width = `${frameW}px`;
+        frame.style.height = `${frameH}px`;
+
+        const hasBorder = borderStyle !== 'none';
+        const paperWidthMm = (dim.widthIn || 6) * 25.4;
+        const padPx = hasBorder ? Math.max(2, Math.round((frameW * borderSizeMm) / paperWidthMm)) : 0;
+        frame.style.backgroundColor = hasBorder ? borderColor : '#0f172a';
+        frame.style.padding = `${padPx}px`;
+
+        const innerW = Math.max(20, frameW - padPx * 2);
+        const innerH = Math.max(20, frameH - padPx * 2);
+        const isRot90 = Math.abs((Number(photo.rotation) || 0) % 180) === 90;
+        const effW = isRot90 ? (photo.natHeight || 800) : (photo.natWidth || 1200);
+        const effH = isRot90 ? (photo.natWidth || 1200) : (photo.natHeight || 800);
+        const imgRatio = effW / (effH || 1);
+        const innerRatio = innerW / (innerH || 1);
+
+        let baseW = innerW;
+        let baseH = innerH;
+        if (imgRatio > innerRatio) {
+          baseH = innerH;
+          baseW = innerH * imgRatio;
+        } else {
+          baseW = innerW;
+          baseH = innerW / imgRatio;
+        }
+
+        if (isRot90) {
+          previewImg.style.width = `${Math.round(baseH)}px`;
+          previewImg.style.height = `${Math.round(baseW)}px`;
+        } else {
+          previewImg.style.width = `${Math.round(baseW)}px`;
+          previewImg.style.height = `${Math.round(baseH)}px`;
+        }
+
+        const tempPhoto = {
+          zoom,
+          panX,
+          panY,
+          rotation: photo.rotation || 0,
+          flipX: photo.flipX || false,
+          filter
+        };
+        previewImg.style.transform = getPhotoCssTransform(tempPhoto);
+        previewImg.style.filter = getPhotoCssFilter(tempPhoto);
+      }
+
+      const topOverlay = document.getElementById('cropTopCaptionOverlay');
+      const bottomOverlay = document.getElementById('cropPolaroidCaptionOverlay');
+      if (topOverlay && bottomOverlay) {
+        topOverlay.classList.add('hidden');
+        bottomOverlay.classList.add('hidden');
+        if (caption.trim()) {
+          const placement = getCaptionPlacementForPhoto(photo, captionPos);
+          bottomOverlay.textContent = caption;
+          bottomOverlay.setAttribute('style', `font-size: ${captionSize}px; color: ${captionColor}; background-color: ${borderStyle === 'polaroid' ? borderColor : 'transparent'}; ${placement.style}`);
+          bottomOverlay.className = 'absolute font-bold flex items-center justify-center text-center truncate px-2 py-1 z-10';
+        }
+      }
+    }
+
+    function saveCropEditorChanges() {
+      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
+      if (!photo) return;
+      photo.zoom = Number(document.getElementById('cropZoomRange').value) || 100;
+      photo.panX = Number(document.getElementById('cropPanXRange').value) || 0;
+      photo.panY = Number(document.getElementById('cropPanYRange').value) || 0;
+      photo.filter = document.getElementById('cropFilterSelect').value || 'none';
+      photo.brightness = Number(document.getElementById('cropBrightnessRange').value) || 100;
+      photo.contrast = Number(document.getElementById('cropContrastRange').value) || 100;
+      photo.border = document.getElementById('cropBorderStyleSelect').value || 'none';
+      photo.borderSizeMm = Number(document.getElementById('cropBorderSizeRange').value) || 5;
+      photo.borderColor = document.getElementById('cropBorderColorInput').value || '#ffffff';
+      photo.caption = document.getElementById('cropCaptionInput').value || '';
+      photo.captionPos = document.getElementById('cropCaptionPosSelect').value || 'bottom';
+      photo.captionSize = Number(document.getElementById('cropCaptionSizeRange').value) || 18;
+      photo.captionColor = document.getElementById('cropCaptionColorInput').value || '#1e293b';
+
+      closeCropEditor();
+      renderPhotosList();
+      showToast('Edición de fotografía guardada.');
+    }
+
+    // =========================================================================
+    // MODALIDAD DE ENTREGA, TOTALES Y ENVÍO DE ORDEN
+    // =========================================================================
+    function setDeliveryMode(mode) {
+      deliveryMode = isKioskModeActive ? 'store' : mode;
+      const buttons = {
+        store: document.getElementById('modeStoreBtn'),
+        pickup: document.getElementById('modePickupBtn'),
+        delivery: document.getElementById('modeDeliveryBtn')
+      };
+
+      Object.entries(buttons).forEach(([key, btn]) => {
+        if (!btn) return;
+        if (key === deliveryMode) {
+          btn.className = 'p-3 rounded-2xl border-2 border-sky-600 bg-sky-50 text-left transition';
+        } else {
+          btn.className = 'p-3 rounded-2xl border border-slate-200 bg-white text-left hover:border-slate-300 transition';
+        }
+      });
+
+      const addrBox = document.getElementById('deliveryAddressBox');
+      const bankBox = document.getElementById('bankTransferBox');
+      if (addrBox) addrBox.classList.toggle('hidden', deliveryMode !== 'delivery');
+      if (bankBox) bankBox.classList.toggle('hidden', deliveryMode === 'store');
+
+      updateOrderTotals();
+    }
+
+    function renderBankAccountsForCustomer() {
+      const list = document.getElementById('bankAccountsList');
+      if (!list) return;
+      const accounts = studioConfig.bankAccounts || [];
+      if (accounts.length === 0) {
+        list.innerHTML = `<div class="text-slate-500">Solicita los datos bancarios en mostrador o WhatsApp.</div>`;
+        return;
+      }
+      list.innerHTML = accounts
+        .map(
+          (acc) => `
+          <div class="p-2.5 rounded-xl bg-white border border-slate-200">
+            <div class="font-bold text-slate-900">${acc.bank}: <span class="text-sky-700">${acc.account}</span></div>
+            <div class="text-[11px] text-slate-500">${acc.holder || ''}</div>
+          </div>
+        `
+        )
+        .join('');
+    }
+
+    async function handleReceiptSelected(event) {
+      const file = event.target?.files?.[0];
+      if (!file) return;
+      receiptDataUrl = await readFileAsDataUrl(file);
+      const label = document.getElementById('receiptFileName');
+      if (label) label.textContent = `✓ Comprobante adjunto: ${file.name}`;
+    }
+
+    function updateOrderTotals() {
+      const subtotal = uploadedPhotos.reduce((sum, p) => {
+        return sum + getUnitPriceForSize(p.sizeKey) * (Number(p.copies) || 1);
+      }, 0);
+      const shipping = !isKioskModeActive && deliveryMode === 'delivery' && uploadedPhotos.length > 0 ? (Number(studioConfig.shippingCost) || 0) : 0;
+      const total = subtotal + shipping;
+
+      document.getElementById('subtotalAmount').textContent = `L ${subtotal.toFixed(2)}`;
+      document.getElementById('shippingAmount').textContent = `L ${shipping.toFixed(2)}`;
+      document.getElementById('totalAmount').textContent = `L ${total.toFixed(2)}`;
+    }
+
+    async function submitCustomerOrder() {
+      if (uploadedPhotos.length === 0) {
+        showToast('Agrega al menos una fotografía antes de enviar.');
+        return;
+      }
+      const effectiveMode = isKioskModeActive ? 'store' : deliveryMode;
+      const customerName = (document.getElementById('customerNameInput').value || '').trim();
+      const customerPhone = (document.getElementById('customerPhoneInput').value || '').trim();
+      const deliveryAddress = (document.getElementById('deliveryAddressInput').value || '').trim();
+
+      if (!customerName || !customerPhone) {
+        showToast('Ingresa tu nombre completo y teléfono.');
+        return;
+      }
+      if (effectiveMode === 'delivery' && !deliveryAddress) {
+        showToast('Ingresa la dirección de entrega a domicilio.');
+        return;
+      }
+      if (effectiveMode !== 'store' && !receiptDataUrl) {
+        showToast('Adjunta el comprobante de transferencia o depósito.');
+        return;
+      }
+
+      const subtotal = uploadedPhotos.reduce((sum, p) => sum + getUnitPriceForSize(p.sizeKey) * (Number(p.copies) || 1), 0);
+      const shipping = effectiveMode === 'delivery' ? (Number(studioConfig.shippingCost) || 0) : 0;
+      const total = subtotal + shipping;
+      const orderCode = (effectiveMode === 'store' ? 'K-' : 'ORD-') + Math.floor(1000 + Math.random() * 9000);
+
+      const newOrder = {
+        id: generateUuidV4(),
+        order_code: orderCode,
+        created_at: new Date().toISOString(),
+        customer_name: customerName,
+        customer_phone: customerPhone,
+        delivery_mode: effectiveMode,
+        delivery_address: effectiveMode === 'delivery' ? deliveryAddress : '',
+        photographer_name: activeProPhotographer ? activeProPhotographer.name : '',
+        subtotal,
+        shipping,
+        total,
+        receipt_url: effectiveMode === 'store' ? '' : (receiptDataUrl || ''),
+        payment_status: 'pending_cashier',
+        lab_status: 'waiting_payment',
+        items: uploadedPhotos.map((p) => {
+          const sz = printSizes[p.sizeKey] || { label: p.sizeKey, widthIn: 4, heightIn: 6 };
+          return {
+            ...p,
+            sizeLabel: sz.label,
+            widthIn: sz.widthIn,
+            heightIn: sz.heightIn,
+            unitPrice: getUnitPriceForSize(p.sizeKey)
+          };
+        })
+      };
+
+      ordersStore.unshift(newOrder);
+      saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
+
+      if (supabaseClient) {
+        try {
+          const sbPayload = buildSupabaseOrderPayload(newOrder);
+          const parsedItems = JSON.parse(sbPayload.items_json);
+          for (let i = 0; i < newOrder.items.length; i++) {
+            try {
+              const rendered300 = await renderEditedItemTo300DPIDataUrl(newOrder.items[i]);
+              const res = await fetch(rendered300);
+              const blob = await res.blob();
+              const storagePath = parsedItems[i].storagePath;
+              const { error: upErr } = await supabaseClient.storage
+                .from(DEFAULT_SUPABASE_BUCKET)
+                .upload(storagePath, blob, { contentType: 'image/jpeg', upsert: true });
+              if (!upErr) {
+                const { data: pubData } = supabaseClient.storage
+                  .from(DEFAULT_SUPABASE_BUCKET)
+                  .getPublicUrl(storagePath);
+                if (pubData?.publicUrl) {
+                  parsedItems[i].publicUrl = pubData.publicUrl;
+                  newOrder.items[i].publicUrl = pubData.publicUrl;
+                }
+              }
+            } catch (uploadErr) {
+              console.warn('Backup en Storage omitido:', uploadErr);
+            }
+          }
+          sbPayload.items_json = JSON.stringify(parsedItems);
+          const { error: insertErr } = await supabaseClient.from('orders').insert([sbPayload]);
+          if (insertErr) {
+            console.warn('Error insertando orden en Supabase:', insertErr.message);
+          } else {
+            saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
+          }
+        } catch (err) {
+          console.warn('No se pudo sincronizar orden con Supabase:', err);
+        }
+      }
+
+      const confirmBox = document.getElementById('orderConfirmationBox');
+      if (confirmBox) {
+        confirmBox.classList.remove('hidden');
+        confirmBox.innerHTML = `
+          <div class="font-bold text-sm">✅ ¡Pedido enviado a Caja! Código: ${orderCode}</div>
+          <div>${effectiveMode === 'store' ? `Pasa a <strong>Caja</strong> con tu nombre (<strong>${customerName}</strong>) o código <strong>${orderCode}</strong> para pagar <strong>L ${total.toFixed(2)}</strong> y enviar tu pedido a impresión.` : 'Caja verificará tu comprobante de pago para liberar tu pedido al laboratorio.'}</div>
+        `;
+      }
+
+      uploadedPhotos = [];
+      receiptDataUrl = '';
+      document.getElementById('customerNameInput').value = '';
+      document.getElementById('customerPhoneInput').value = '';
+      document.getElementById('deliveryAddressInput').value = '';
+      document.getElementById('paymentReceiptInput').value = '';
+      document.getElementById('receiptFileName').textContent = '';
+      renderPhotosList();
+      updateOrderTotals();
+      showToast(`Orden ${orderCode} enviada a Caja. Pasa a pagar L ${total.toFixed(2)}.`);
+    }
+
+    // =========================================================================
+    // FOTÓGRAFO PROFESIONAL
     // =========================================================================
     function openProLoginModal() {
       document.getElementById('proLoginError').classList.add('hidden');
@@ -653,487 +1816,133 @@
       const errEl = document.getElementById('proLoginError');
 
       const found = proPhotographers.find(
-        (p) => p.active !== false && String(p.username).toLowerCase() === user && String(p.password) === pass
+        (p) => p.active !== false && p.username.toLowerCase() === user && p.password === pass
       );
 
       if (!found) {
-        errEl.textContent = 'Usuario o contraseña incorrectos, o cuenta inactiva.';
+        errEl.textContent = 'Usuario o contraseña incorrectos.';
         errEl.classList.remove('hidden');
         return;
       }
 
       activeProPhotographer = found;
-      errEl.classList.add('hidden');
       closeProLoginModal();
-      updateProSessionUI();
+      const badge = document.getElementById('proSessionBadge');
+      const logoutBtn = document.getElementById('logoutProBtn');
+      if (badge) {
+        badge.textContent = `⭐ Tarifa Pro: ${found.name}`;
+        badge.classList.remove('hidden');
+      }
+      if (logoutBtn) logoutBtn.classList.remove('hidden');
+
       renderPhotosList();
       updateOrderTotals();
-      showToast(`Bienvenido ${found.name} — Tarifa Fotógrafo Pro activa`);
+      showToast(`Bienvenido ${found.name}. Tarifas preferenciales activadas.`);
     }
 
     function logoutProPhotographer() {
       activeProPhotographer = null;
-      updateProSessionUI();
+      document.getElementById('proSessionBadge')?.classList.add('hidden');
+      document.getElementById('logoutProBtn')?.classList.add('hidden');
       renderPhotosList();
       updateOrderTotals();
-      showToast('Sesión de Fotógrafo Pro cerrada');
+      showToast('Sesión de Fotógrafo Pro cerrada.');
     }
 
-    function updateProSessionUI() {
-      const badge = document.getElementById('proSessionBadge');
-      const loginBtn = document.getElementById('openProLoginBtn');
-      const logoutBtn = document.getElementById('logoutProBtn');
+    // =========================================================================
+    // MODO KIOSKO EN TIENDA
+    // =========================================================================
+    function openKioskModeModal() {
+      const errEl = document.getElementById('kioskPinError');
+      const titleEl = document.getElementById('kioskModalTitle');
+      const descEl = document.getElementById('kioskModalDesc');
+      const btnEl = document.getElementById('kioskConfirmBtn');
+      const inputEl = document.getElementById('kioskPinInput');
+      if (errEl) errEl.classList.add('hidden');
+      if (inputEl) inputEl.value = '';
 
-      if (activeProPhotographer) {
-        badge.textContent = `⭐ ${activeProPhotographer.name}`;
-        badge.classList.remove('hidden');
-        loginBtn.classList.add('hidden');
-        logoutBtn.classList.remove('hidden');
+      if (isKioskModeActive) {
+        if (titleEl) titleEl.textContent = 'Salir del Modo Kiosko';
+        if (descEl) descEl.textContent = 'Ingresa la contraseña operativa para desbloquear nuevamente los accesos de Caja y Laboratorio.';
+        if (btnEl) btnEl.textContent = 'Desactivar Kiosko';
       } else {
-        badge.classList.add('hidden');
-        loginBtn.classList.remove('hidden');
-        logoutBtn.classList.add('hidden');
+        if (titleEl) titleEl.textContent = 'Activar Modo Kiosko en Tienda';
+        if (descEl) descEl.innerHTML = 'Fija la estación para autoservicio de clientes en mostrador (pasa directo a <strong>Caja</strong> al enviar) y oculta los accesos administrativos.';
+        if (btnEl) btnEl.textContent = 'Activar Kiosko';
       }
+
+      document.getElementById('kioskModeModal').classList.remove('hidden');
+      setTimeout(() => inputEl?.focus(), 50);
     }
 
-    function getUnitPrice(sizeKey) {
-      const item = printSizes[sizeKey] || Object.values(printSizes)[0];
-      if (!item) return 0;
-      return activeProPhotographer ? Number(item.proPrice ?? item.price ?? 0) : Number(item.price ?? 0);
+    function closeKioskModeModal() {
+      document.getElementById('kioskModeModal').classList.add('hidden');
     }
 
-    // =========================================================================
-    // FOTOS, EDICIÓN Y CÁLCULOS
-    // =========================================================================
-    function handlePhotoFilesSelected(event) {
-      const files = Array.from(event.target.files || []);
-      if (!files.length) return;
-
-      const defaultSizeKey = Object.keys(printSizes)[0] || '4x6';
-
-      files.forEach((file) => {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-          const dataUrl = e.target.result;
-          const img = new Image();
-          img.onload = () => {
-            uploadedPhotos.push({
-              id: 'photo-' + Date.now() + '-' + Math.random().toString(36).slice(2, 7),
-              name: file.name,
-              dataUrl,
-              natWidth: img.naturalWidth,
-              natHeight: img.naturalHeight,
-              sizeKey: defaultSizeKey,
-              finish: 'Brillante',
-              border: 'none',
-              copies: 1,
-              zoom: 100,
-              panX: 0,
-              panY: 0,
-              rotation: 0,
-              flipX: false,
-              filter: 'none',
-              brightness: 100,
-              contrast: 100,
-              caption: ''
-            });
-            renderPhotosList();
-            updateOrderTotals();
-          };
-          img.src = dataUrl;
-        };
-        reader.readAsDataURL(file);
-      });
-
-      event.target.value = '';
-    }
-
-    function updatePhotoField(photoId, field, value) {
-      const photo = uploadedPhotos.find((p) => p.id === photoId);
-      if (!photo) return;
-      if (field === 'copies') {
-        photo.copies = Math.max(1, parseInt(value, 10) || 1);
-      } else {
-        photo[field] = value;
-      }
-      renderPhotosList();
-      updateOrderTotals();
-    }
-
-    function removeUploadedPhoto(photoId) {
-      uploadedPhotos = uploadedPhotos.filter((p) => p.id !== photoId);
-      renderPhotosList();
-      updateOrderTotals();
-    }
-
-    function getPhotoCssTransform(photo) {
-      const scaleX = ((photo.zoom || 100) / 100) * (photo.flipX ? -1 : 1);
-      const scaleY = (photo.zoom || 100) / 100;
-      const tx = photo.panX || 0;
-      const ty = photo.panY || 0;
-      const rot = photo.rotation || 0;
-      return `translate(${tx}%, ${ty}%) rotate(${rot}deg) scale(${scaleX}, ${scaleY})`;
-    }
-
-    function getPhotoCssFilter(photo) {
-      const baseFilter = photo.filter && photo.filter !== 'none' ? `${photo.filter} ` : '';
-      return `${baseFilter}brightness(${photo.brightness ?? 100}%) contrast(${photo.contrast ?? 100}%)`;
-    }
-
-    function renderPhotosList() {
-      const container = document.getElementById('photosListContainer');
-      const countBadge = document.getElementById('photosCountBadge');
-
-      countBadge.textContent = `${uploadedPhotos.length} ${uploadedPhotos.length === 1 ? 'foto' : 'fotos'}`;
-
-      if (!uploadedPhotos.length) {
-        container.innerHTML = `
-          <div id="emptyPhotosState" class="text-center py-10 text-slate-400 text-sm">
-            Aún no has agregado fotografías. Sube una o varias imágenes para comenzar.
-          </div>`;
+    function confirmKioskModeToggle() {
+      const pin = (document.getElementById('kioskPinInput').value || '').trim();
+      const errEl = document.getElementById('kioskPinError');
+      if (pin !== securityPins.staffPin && pin !== securityPins.adminPin) {
+        errEl.textContent = 'Contraseña operativa incorrecta.';
+        errEl.classList.remove('hidden');
         return;
       }
 
-      const sizeOptionsHtml = Object.values(printSizes)
-        .map((sz) => {
-          const price = activeProPhotographer ? sz.proPrice : sz.price;
-          return `<option value="${sz.key}">${sz.label} — L ${Number(price).toFixed(2)}</option>`;
-        })
-        .join('');
-
-      container.innerHTML = uploadedPhotos
-        .map((photo) => {
-          const unitPrice = getUnitPrice(photo.sizeKey);
-          const lineTotal = unitPrice * (photo.copies || 1);
-          const borderClass =
-            photo.border === 'polaroid'
-              ? 'p-2 pb-5 bg-white shadow-sm border border-slate-200'
-              : photo.border === 'classic'
-              ? 'p-2 bg-white border border-slate-300'
-              : '';
-
-          return `
-            <div class="rounded-2xl border border-slate-200 p-4 flex flex-col sm:flex-row gap-4 items-start sm:items-center bg-slate-50/40">
-              <div class="w-24 h-24 rounded-xl bg-slate-200 overflow-hidden flex items-center justify-center shrink-0 ${borderClass}">
-                <img src="${photo.dataUrl}" alt="${photo.name}" style="transform:${getPhotoCssTransform(photo)};filter:${getPhotoCssFilter(photo)};" class="photo-preview-box max-w-full max-h-full object-contain" />
-              </div>
-
-              <div class="flex-1 min-w-0 space-y-2.5 w-full">
-                <div class="flex items-start justify-between gap-2">
-                  <div class="min-w-0">
-                    <p class="text-sm font-bold text-slate-900 truncate">${photo.name}</p>
-                    <p class="text-[11px] text-slate-500">
-                      ${photo.natWidth}×${photo.natHeight} px
-                      ${photo.caption ? ` • "${photo.caption}"` : ''}
-                    </p>
-                  </div>
-                  <div class="flex items-center gap-1.5 shrink-0">
-                    <button type="button" onclick="openCropEditor('${photo.id}')" class="px-3 py-1.5 rounded-xl bg-sky-100 hover:bg-sky-200 text-sky-900 text-xs font-bold transition">
-                      ✏️ Editar
-                    </button>
-                    <button type="button" onclick="removeUploadedPhoto('${photo.id}')" class="px-2.5 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 text-xs font-semibold transition">
-                      ✕
-                    </button>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs">
-                  <select onchange="updatePhotoField('${photo.id}', 'sizeKey', this.value)" class="px-2.5 py-2 rounded-xl border border-slate-300 bg-white font-medium">
-                    ${sizeOptionsHtml}
-                  </select>
-
-                  <select onchange="updatePhotoField('${photo.id}', 'finish', this.value)" class="px-2.5 py-2 rounded-xl border border-slate-300 bg-white">
-                    ${PAPER_FINISHES.map((f) => `<option value="${f}" ${photo.finish === f ? 'selected' : ''}>Papel ${f}</option>`).join('')}
-                  </select>
-
-                  <div class="flex items-center justify-between gap-2 bg-white border border-slate-300 rounded-xl px-2.5 py-1.5">
-                    <span class="text-slate-500">Copias:</span>
-                    <input type="number" min="1" max="500" value="${photo.copies}" onchange="updatePhotoField('${photo.id}', 'copies', this.value)" class="w-16 text-right font-bold text-slate-900 focus:outline-none" />
-                  </div>
-                </div>
-
-                <div class="flex items-center justify-between text-xs pt-0.5">
-                  <select onchange="updatePhotoField('${photo.id}', 'border', this.value)" class="px-2.5 py-1 rounded-lg border border-slate-200 bg-white text-[11px] text-slate-600">
-                    ${PHOTO_BORDERS.map((b) => `<option value="${b.id}" ${photo.border === b.id ? 'selected' : ''}>${b.label}</option>`).join('')}
-                  </select>
-                  <span class="font-bold text-slate-900">Subtotal: L ${lineTotal.toFixed(2)}</span>
-                </div>
-              </div>
-            </div>`;
-        })
-        .join('');
-
-      // Sincronizar valor seleccionado en cada <select> de tamaño
-      const selects = container.querySelectorAll('select');
-      let idx = 0;
-      uploadedPhotos.forEach((photo) => {
-        if (selects[idx]) selects[idx].value = photo.sizeKey;
-        idx += 3;
-      });
+      isKioskModeActive = !isKioskModeActive;
+      closeKioskModeModal();
+      applyKioskModeUI();
+      showToast(isKioskModeActive ? '🖥️ Modo Kiosko activado para clientes en tienda.' : 'Modo Kiosko desactivado.');
     }
 
-    // =========================================================================
-    // MODAL EDITOR DE ENCUADRE
-    // =========================================================================
-    function openCropEditor(photoId) {
-      const photo = uploadedPhotos.find((p) => p.id === photoId);
-      if (!photo) return;
-      editingPhotoId = photoId;
+    function applyKioskModeUI() {
+      const kioskBtn = document.getElementById('toggleKioskModeBtn');
+      const otherBtns = Array.from(document.querySelectorAll('footer button')).filter((b) => b.id !== 'toggleKioskModeBtn');
+      const deliverySection = document.getElementById('deliveryModeSection');
+      const kioskNotice = document.getElementById('kioskCashierNotice');
+      const shippingRow = document.getElementById('shippingRow');
+      const headingEl = document.getElementById('customerSectionHeading');
+      const submitBtn = document.getElementById('submitOrderBtn');
+      const subtitleEl = document.getElementById('brandSubtitle');
 
-      document.getElementById('cropEditorSubtitle').textContent = `Editando: ${photo.name}`;
-      document.getElementById('cropPreviewImage').src = photo.dataUrl;
-      document.getElementById('cropZoomRange').value = photo.zoom ?? 100;
-      document.getElementById('cropPanXRange').value = photo.panX ?? 0;
-      document.getElementById('cropPanYRange').value = photo.panY ?? 0;
-      document.getElementById('cropFilterSelect').value = photo.filter ?? 'none';
-      document.getElementById('cropBrightnessRange').value = photo.brightness ?? 100;
-      document.getElementById('cropContrastRange').value = photo.contrast ?? 100;
-      document.getElementById('cropCaptionInput').value = photo.caption ?? '';
+      otherBtns.forEach((btn) => btn.classList.toggle('hidden', isKioskModeActive));
+      if (deliverySection) deliverySection.classList.toggle('hidden', isKioskModeActive);
+      if (kioskNotice) kioskNotice.classList.toggle('hidden', !isKioskModeActive);
+      if (shippingRow) shippingRow.classList.toggle('hidden', isKioskModeActive);
 
-      updateCropPreviewTransform();
-      document.getElementById('cropEditorModal').classList.remove('hidden');
-    }
-
-    function closeCropEditor() {
-      editingPhotoId = null;
-      document.getElementById('cropEditorModal').classList.add('hidden');
-    }
-
-    function rotateCropPhoto(deltaDeg) {
-      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
-      if (!photo) return;
-      photo.rotation = (((photo.rotation || 0) + deltaDeg) % 360 + 360) % 360;
-      updateCropPreviewTransform();
-    }
-
-    function toggleFlipCropPhoto() {
-      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
-      if (!photo) return;
-      photo.flipX = !photo.flipX;
-      updateCropPreviewTransform();
-    }
-
-    function updateCropPreviewTransform() {
-      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
-      if (!photo) return;
-
-      const zoom = Number(document.getElementById('cropZoomRange').value) || 100;
-      const panX = Number(document.getElementById('cropPanXRange').value) || 0;
-      const panY = Number(document.getElementById('cropPanYRange').value) || 0;
-      const filter = document.getElementById('cropFilterSelect').value || 'none';
-      const brightness = Number(document.getElementById('cropBrightnessRange').value) || 100;
-      const contrast = Number(document.getElementById('cropContrastRange').value) || 100;
-
-      document.getElementById('zoomLabel').textContent = `Zoom ${zoom}%`;
-      document.getElementById('brightnessLabel').textContent = `Brillo (${brightness}%)`;
-      document.getElementById('contrastLabel').textContent = `Contraste (${contrast}%)`;
-
-      const tempState = {
-        ...photo,
-        zoom,
-        panX,
-        panY,
-        filter,
-        brightness,
-        contrast
-      };
-
-      const img = document.getElementById('cropPreviewImage');
-      img.style.transform = getPhotoCssTransform(tempState);
-      img.style.filter = getPhotoCssFilter(tempState);
-    }
-
-    function saveCropEditorChanges() {
-      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
-      if (!photo) return;
-
-      photo.zoom = Number(document.getElementById('cropZoomRange').value) || 100;
-      photo.panX = Number(document.getElementById('cropPanXRange').value) || 0;
-      photo.panY = Number(document.getElementById('cropPanYRange').value) || 0;
-      photo.filter = document.getElementById('cropFilterSelect').value || 'none';
-      photo.brightness = Number(document.getElementById('cropBrightnessRange').value) || 100;
-      photo.contrast = Number(document.getElementById('cropContrastRange').value) || 100;
-      photo.caption = (document.getElementById('cropCaptionInput').value || '').trim();
-
-      renderPhotosList();
-      closeCropEditor();
-      showToast('Edición guardada en la fotografía');
-    }
-
-    // =========================================================================
-    // ENTREGA, BANCOS Y ENVÍO DE ORDEN
-    // =========================================================================
-    function setDeliveryMode(mode) {
-      deliveryMode = mode;
-
-      const storeBtn = document.getElementById('modeStoreBtn');
-      const pickupBtn = document.getElementById('modePickupBtn');
-      const deliveryBtn = document.getElementById('modeDeliveryBtn');
-      const activeClass = 'p-3 rounded-2xl border-2 border-sky-600 bg-sky-50 text-left transition';
-      const inactiveClass = 'p-3 rounded-2xl border border-slate-200 bg-white text-left hover:border-slate-300 transition';
-
-      storeBtn.className = mode === 'store' ? activeClass : inactiveClass;
-      pickupBtn.className = mode === 'pickup' ? activeClass : inactiveClass;
-      deliveryBtn.className = mode === 'delivery' ? activeClass : inactiveClass;
-
-      document.getElementById('deliveryAddressBox').classList.toggle('hidden', mode !== 'delivery');
-      document.getElementById('bankTransferBox').classList.toggle('hidden', mode === 'store');
-
-      renderBankAccountsList();
-      updateOrderTotals();
-    }
-
-    function renderBankAccountsList() {
-      const listEl = document.getElementById('bankAccountsList');
-      const accounts = studioConfig.bankAccounts || [];
-      if (!accounts.length) {
-        listEl.innerHTML = '<p class="text-slate-500">Consulta las cuentas directamente con el laboratorio.</p>';
-        return;
-      }
-      listEl.innerHTML = accounts
-        .map(
-          (acc) => `
-          <div class="bg-white rounded-xl border border-slate-200 p-2.5">
-            <div class="font-bold text-slate-900">${acc.bank}</div>
-            <div>Cuenta: <span class="font-mono font-semibold">${acc.account}</span></div>
-            <div class="text-[11px] text-slate-500">${acc.holder || ''}</div>
-          </div>`
-        )
-        .join('');
-    }
-
-    function handleReceiptSelected(event) {
-      const file = event.target.files?.[0];
-      if (!file) {
-        receiptDataUrl = '';
-        document.getElementById('receiptFileName').textContent = '';
-        return;
-      }
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        receiptDataUrl = e.target.result;
-        document.getElementById('receiptFileName').textContent = `Comprobante listo: ${file.name}`;
-      };
-      reader.readAsDataURL(file);
-    }
-
-    function updateOrderTotals() {
-      const subtotal = uploadedPhotos.reduce((acc, p) => acc + getUnitPrice(p.sizeKey) * (p.copies || 1), 0);
-      const shipping = uploadedPhotos.length > 0 && deliveryMode === 'delivery' ? Number(studioConfig.shippingCost || 0) : 0;
-      const total = subtotal + shipping;
-
-      document.getElementById('subtotalAmount').textContent = `L ${subtotal.toFixed(2)}`;
-      document.getElementById('shippingAmount').textContent = `L ${shipping.toFixed(2)}`;
-      document.getElementById('totalAmount').textContent = `L ${total.toFixed(2)}`;
-    }
-
-    async function submitCustomerOrder() {
-      const name = (document.getElementById('customerNameInput').value || '').trim();
-      const phone = (document.getElementById('customerPhoneInput').value || '').trim();
-      const address = (document.getElementById('deliveryAddressInput').value || '').trim();
-
-      if (!uploadedPhotos.length) {
-        showToast('Sube al menos una fotografía antes de enviar la orden');
-        return;
-      }
-      if (!name || !phone) {
-        showToast('Completa tu nombre y teléfono para continuar');
-        return;
-      }
-      if (deliveryMode === 'delivery' && !address) {
-        showToast('Ingresa la dirección de entrega a domicilio');
-        return;
-      }
-      if (deliveryMode !== 'store' && !receiptDataUrl) {
-        showToast('Adjunta el comprobante de pago para pedidos web o envío');
-        return;
-      }
-
-      const subtotal = uploadedPhotos.reduce((acc, p) => acc + getUnitPrice(p.sizeKey) * (p.copies || 1), 0);
-      const shipping = deliveryMode === 'delivery' ? Number(studioConfig.shippingCost || 0) : 0;
-      const total = subtotal + shipping;
-
-      const prefix = deliveryMode === 'store' ? 'K' : 'W';
-      const orderCode = `#${prefix}-${Math.floor(100000 + Math.random() * 900000)}`;
-
-      const newOrder = {
-        id: 'ord-' + Date.now(),
-        order_code: orderCode,
-        created_at: new Date().toISOString(),
-        customer_name: name,
-        customer_phone: phone,
-        delivery_mode: deliveryMode,
-        delivery_address: deliveryMode === 'delivery' ? address : '',
-        photographer_name: activeProPhotographer ? activeProPhotographer.name : 'Cliente General',
-        subtotal,
-        shipping,
-        total,
-        receipt_url: deliveryMode === 'store' ? '' : receiptDataUrl,
-        payment_status: 'pending_cashier',
-        lab_status: 'waiting_payment',
-        items: uploadedPhotos.map((p) => {
-          const sz = printSizes[p.sizeKey] || { key: p.sizeKey, label: p.sizeKey, widthIn: 4, heightIn: 6 };
-          return {
-            name: p.name,
-            sizeKey: sz.key,
-            sizeLabel: sz.label,
-            widthIn: sz.widthIn || 4,
-            heightIn: sz.heightIn || 6,
-            finish: p.finish,
-            border: p.border,
-            copies: p.copies,
-            unitPrice: getUnitPrice(p.sizeKey),
-            dataUrl: p.dataUrl,
-            zoom: p.zoom,
-            panX: p.panX,
-            panY: p.panY,
-            rotation: p.rotation,
-            flipX: p.flipX,
-            filter: p.filter,
-            brightness: p.brightness,
-            contrast: p.contrast,
-            caption: p.caption
-          };
-        })
-      };
-
-      if (supabaseClient) {
-        try {
-          const { error } = await supabaseClient.from('orders').insert([newOrder]);
-          if (error) console.warn('Error guardando orden en Supabase:', error);
-        } catch (err) {
-          console.warn('Fallo de red al guardar en Supabase:', err);
+      if (isKioskModeActive) {
+        setDeliveryMode('store');
+        if (headingEl) headingEl.textContent = '3. Tus datos para pasar a Caja';
+        if (submitBtn) submitBtn.textContent = 'Enviar Orden y Pasar a Caja';
+        if (kioskBtn) {
+          kioskBtn.textContent = '🖥️ Salir Kiosko';
+          kioskBtn.className = 'text-[11px] font-semibold px-2.5 py-1 rounded-lg text-sky-700 bg-sky-50 border border-sky-200 transition';
         }
+        if (subtitleEl) subtitleEl.textContent = (studioConfig.labInfo || '').trim();
+      } else {
+        if (headingEl) headingEl.textContent = '3. Datos del cliente y entrega';
+        if (submitBtn) submitBtn.textContent = 'Enviar Orden de Impresión';
+        if (kioskBtn) {
+          kioskBtn.textContent = '🖥️ Kiosko';
+          kioskBtn.className = 'text-[11px] font-medium px-2.5 py-1 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-slate-100 border border-slate-200/80 transition';
+        }
+        if (subtitleEl) subtitleEl.textContent = (studioConfig.labInfo || '').trim();
       }
-
-      ordersStore.unshift(newOrder);
-      saveJsonStorage('lab_orders_store_v1', ordersStore);
-
-      const confirmBox = document.getElementById('orderConfirmationBox');
-      confirmBox.innerHTML = `
-        <div class="font-bold text-sm">✅ Orden ${orderCode} registrada</div>
-        <p>Presenta este código en <strong>Caja</strong>. Por seguridad, Laboratorio recibirá y procesará la orden en cuanto Caja confirme el pago.</p>
-      `;
-      confirmBox.classList.remove('hidden');
-
-      uploadedPhotos = [];
-      receiptDataUrl = '';
-      document.getElementById('paymentReceiptInput').value = '';
-      document.getElementById('receiptFileName').textContent = '';
-      renderPhotosList();
       updateOrderTotals();
-      showToast(`Orden ${orderCode} enviada a Caja`);
     }
 
     // =========================================================================
-    // CAJA: VERIFICACIÓN DE PAGO
+    // PANEL DE CAJA (VERIFICACIÓN DE PAGO)
     // =========================================================================
     function openCashierPanelView() {
       document.getElementById('cashierPinError').classList.add('hidden');
       document.getElementById('cashierPanelModal').classList.remove('hidden');
-      updateCashierAuthUI();
       if (isCashierAuthenticated) {
-        refreshOrdersFromCloud();
+        document.getElementById('cashierAuthBox').classList.add('hidden');
+        document.getElementById('cashierOrdersWorkspace').classList.remove('hidden');
+        renderCashierOrders();
+      } else {
+        document.getElementById('cashierAuthBox').classList.remove('hidden');
+        document.getElementById('cashierOrdersWorkspace').classList.add('hidden');
       }
     }
 
@@ -1142,117 +1951,133 @@
     }
 
     function verifyCashierPin() {
-      const entered = (document.getElementById('cashierPinInput').value || '').trim();
+      const pin = (document.getElementById('cashierPinInput').value || '').trim();
       const errEl = document.getElementById('cashierPinError');
-      if (entered !== securityPins.staffPin && entered !== securityPins.adminPin) {
-        errEl.textContent = 'Contraseña incorrecta.';
+      if (pin !== securityPins.staffPin && pin !== securityPins.adminPin) {
+        errEl.textContent = 'Contraseña operativa incorrecta.';
         errEl.classList.remove('hidden');
         return;
       }
       isCashierAuthenticated = true;
       document.getElementById('cashierPinInput').value = '';
-      errEl.classList.add('hidden');
-      updateCashierAuthUI();
-      refreshOrdersFromCloud();
+      document.getElementById('cashierAuthBox').classList.add('hidden');
+      document.getElementById('cashierOrdersWorkspace').classList.remove('hidden');
+      renderCashierOrders();
     }
 
     function logoutCashierSession() {
       isCashierAuthenticated = false;
-      updateCashierAuthUI();
+      closeCashierPanelModal();
+      showToast('Sesión de Caja cerrada.');
     }
 
-    function updateCashierAuthUI() {
-      document.getElementById('cashierAuthBox').classList.toggle('hidden', isCashierAuthenticated);
-      document.getElementById('cashierOrdersWorkspace').classList.toggle('hidden', !isCashierAuthenticated);
+    function renderCashierOrders() {
+      const list = document.getElementById('cashierOrdersList');
+      const stats = document.getElementById('cashierStatsLabel');
+      if (!list) return;
+
+      const pendingCount = ordersStore.filter((o) => o.payment_status !== 'paid').length;
+      if (stats) stats.textContent = `${pendingCount} orden(es) pendiente(s) de cobro • ${ordersStore.length} totales`;
+
+      if (ordersStore.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-xs text-slate-400">No hay órdenes registradas todavía.</div>`;
+        return;
+      }
+
+      list.innerHTML = ordersStore
+        .map((ord) => {
+          const isPaid = ord.payment_status === 'paid';
+          const copiesCount = (ord.items || []).reduce((acc, it) => acc + (Number(it.copies) || 1), 0);
+          return `
+            <div class="rounded-2xl border ${isPaid ? 'border-emerald-200 bg-emerald-50/40' : 'border-amber-200 bg-amber-50/40'} p-4 flex flex-wrap items-center justify-between gap-3">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="text-sm font-extrabold text-slate-900">${ord.order_code}</span>
+                  <span class="text-[11px] font-bold px-2 py-0.5 rounded-full ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                    ${isPaid ? '✓ Pagado y enviado a Lab' : '⏳ Pendiente de cobro'}
+                  </span>
+                  ${ord.photographer_name ? `<span class="text-[11px] font-semibold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">⭐ ${ord.photographer_name}</span>` : ''}
+                </div>
+                <div class="text-xs text-slate-700 font-medium">${ord.customer_name} • Tel: ${ord.customer_phone}</div>
+                <div class="text-[11px] text-slate-500">${(ord.items || []).length} foto(s) • ${copiesCount} copia(s) • Modalidad: ${ord.delivery_mode === 'store' ? 'Tienda/Kiosko' : ord.delivery_mode === 'delivery' ? 'Domicilio' : 'Retiro Web'}</div>
+              </div>
+
+              <div class="flex flex-wrap items-center gap-2">
+                <div class="text-right mr-2">
+                  <div class="text-[11px] text-slate-500">Total a cobrar</div>
+                  <div class="text-base font-extrabold text-slate-900">L ${(Number(ord.total) || 0).toFixed(2)}</div>
+                </div>
+                ${ord.receipt_url ? `<button onclick="previewOrderReceipt('${ord.id}')" class="px-3 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold">Ver comprobante</button>` : ''}
+                ${
+                  isPaid
+                    ? `<span class="px-3 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">Liberada a Lab</span>`
+                    : `<button onclick="approveOrderPayment('${ord.id}')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs">✓ Confirmar Pago</button>`
+                }
+              </div>
+            </div>
+          `;
+        })
+        .join('');
     }
 
-    async function approveOrderPaymentInCashier(orderId) {
-      const order = ordersStore.find((o) => o.id === orderId);
-      if (!order) return;
+    function previewOrderReceipt(orderId) {
+      const ord = ordersStore.find((o) => o.id === orderId);
+      if (!ord || !ord.receipt_url) return;
+      document.getElementById('receiptPreviewImg').src = ord.receipt_url;
+      document.getElementById('receiptPreviewModal').classList.remove('hidden');
+    }
 
-      order.payment_status = 'paid';
-      order.lab_status = 'ready_for_lab';
-      order.paid_at = new Date().toISOString();
+    async function approveOrderPayment(orderId) {
+      const ord = ordersStore.find((o) => o.id === orderId);
+      if (!ord) return;
+      ord.payment_status = 'paid';
+      ord.lab_status = 'imprimiendo';
+      const updatedNotes = (ord.order_notes || '').includes('[VERIFICADO_CAJA]')
+        ? ord.order_notes
+        : `[VERIFICADO_CAJA] ${ord.order_notes || ''}`.trim();
+      ord.order_notes = updatedNotes;
+      saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
 
       if (supabaseClient) {
         try {
           await supabaseClient
             .from('orders')
-            .update({ payment_status: 'paid', lab_status: 'ready_for_lab' })
+            .update({
+              payment_status: 'paid',
+              status: 'imprimiendo',
+              order_notes: updatedNotes,
+              receipt_path: ord.delivery_mode === 'store' ? 'PAGADO_EN_CAJA' : (ord.receipt_url || 'PAGADO')
+            })
             .eq('id', orderId);
         } catch (err) {
           console.warn('Error actualizando pago en Supabase:', err);
         }
       }
 
-      saveJsonStorage('lab_orders_store_v1', ordersStore);
       renderCashierOrders();
       if (isLabAuthenticated) renderLabOrders();
-      showToast(`Pago confirmado para ${order.order_code} — Enviada a Laboratorio`);
-    }
-
-    function openReceiptModal(orderId) {
-      const order = ordersStore.find((o) => o.id === orderId);
-      if (!order || !order.receipt_url) return;
-      document.getElementById('receiptPreviewImg').src = order.receipt_url;
-      document.getElementById('receiptPreviewModal').classList.remove('hidden');
-    }
-
-    function renderCashierOrders() {
-      const pendingOrders = ordersStore.filter((o) => o.payment_status !== 'paid');
-      document.getElementById('cashierStatsLabel').textContent = `${pendingOrders.length} ${pendingOrders.length === 1 ? 'orden pendiente de pago' : 'órdenes pendientes de pago'}`;
-
-      const listEl = document.getElementById('cashierOrdersList');
-      if (!pendingOrders.length) {
-        listEl.innerHTML = '<div class="text-center py-8 text-slate-400 text-sm">No hay órdenes pendientes de cobro en Caja.</div>';
-        return;
-      }
-
-      listEl.innerHTML = pendingOrders
-        .map((ord) => {
-          const totalCopies = (ord.items || []).reduce((s, it) => s + (it.copies || 1), 0);
-          return `
-            <div class="rounded-2xl border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-4 bg-white">
-              <div class="space-y-1">
-                <div class="flex items-center gap-2">
-                  <span class="font-mono font-extrabold text-sm text-slate-900">${ord.order_code}</span>
-                  <span class="text-xs px-2 py-0.5 rounded-full bg-amber-100 text-amber-800 font-semibold">Pendiente de Pago</span>
-                  <span class="text-xs text-slate-500">• ${ord.photographer_name || 'Cliente General'}</span>
-                </div>
-                <p class="text-sm font-semibold text-slate-800">${ord.customer_name} (${ord.customer_phone})</p>
-                <p class="text-xs text-slate-500">${totalCopies} impresión(es) • Modalidad: ${ord.delivery_mode}</p>
-              </div>
-
-              <div class="flex items-center gap-3">
-                <div class="text-right">
-                  <div class="text-xs text-slate-500">Total a cobrar</div>
-                  <div class="text-base font-extrabold text-slate-900">L ${Number(ord.total || 0).toFixed(2)}</div>
-                </div>
-                ${
-                  ord.receipt_url
-                    ? `<button onclick="openReceiptModal('${ord.id}')" class="px-3 py-2 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold">Ver comprobante</button>`
-                    : ''
-                }
-                <button onclick="approveOrderPaymentInCashier('${ord.id}')" class="px-4 py-2.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold shadow-xs">
-                  ✓ Check pagado
-                </button>
-              </div>
-            </div>`;
-        })
-        .join('');
+      showToast(`Pago confirmado para ${ord.order_code}. Ya está visible en Laboratorio.`);
     }
 
     // =========================================================================
-    // LABORATORIO, ADMINISTRAR Y DESCARGA ZIP A 300 DPI
+    // PANEL DE LABORATORIO Y ADMINISTRAR
     // =========================================================================
     function openLabPanelView(initialTab = 'orders') {
-      pendingAdminTab = initialTab;
       document.getElementById('labPinError').classList.add('hidden');
       document.getElementById('labPanelModal').classList.remove('hidden');
-      updateLabAuthUI();
+
       if (isLabAuthenticated) {
-        switchLabTab(initialTab);
-        refreshOrdersFromCloud();
+        document.getElementById('labAuthBox').classList.add('hidden');
+        document.getElementById('labWorkspace').classList.remove('hidden');
+        updateAdminModeUI();
+        if (initialTab === 'orders') {
+          switchLabTab('orders');
+        } else {
+          requestAdminTab(initialTab);
+        }
+      } else {
+        document.getElementById('labAuthBox').classList.remove('hidden');
+        document.getElementById('labWorkspace').classList.add('hidden');
       }
     }
 
@@ -1261,52 +2086,49 @@
     }
 
     function verifyLabPin() {
-      const entered = (document.getElementById('labPinInput').value || '').trim();
+      const pin = (document.getElementById('labPinInput').value || '').trim();
       const errEl = document.getElementById('labPinError');
-
-      if (entered === securityPins.adminPin) {
-        isLabAuthenticated = true;
-        isAdminUnlocked = true;
-      } else if (entered === securityPins.staffPin) {
-        isLabAuthenticated = true;
-      } else {
+      if (pin !== securityPins.staffPin && pin !== securityPins.adminPin) {
         errEl.textContent = 'Contraseña operativa incorrecta.';
         errEl.classList.remove('hidden');
         return;
       }
-
+      isLabAuthenticated = true;
+      if (pin === securityPins.adminPin) {
+        isAdminUnlocked = true;
+      }
       document.getElementById('labPinInput').value = '';
-      errEl.classList.add('hidden');
-      updateLabAuthUI();
-      switchLabTab(pendingAdminTab || 'orders');
-      refreshOrdersFromCloud();
+      document.getElementById('labAuthBox').classList.add('hidden');
+      document.getElementById('labWorkspace').classList.remove('hidden');
+      updateAdminModeUI();
+      switchLabTab('orders');
     }
 
     function logoutLabSession() {
       isLabAuthenticated = false;
       isAdminUnlocked = false;
-      document.getElementById('adminPasswordPromptBox').classList.add('hidden');
-      updateLabAuthUI();
-    }
-
-    function updateLabAuthUI() {
-      document.getElementById('labAuthBox').classList.toggle('hidden', isLabAuthenticated);
-      document.getElementById('labWorkspace').classList.toggle('hidden', !isLabAuthenticated);
-      document.getElementById('adminUnlockedBadge').classList.toggle('hidden', !isAdminUnlocked);
-      document.getElementById('adminLoginBtn').classList.toggle('hidden', isAdminUnlocked);
-      document.getElementById('adminLockBtn').classList.toggle('hidden', !isAdminUnlocked);
+      closeLabPanelModal();
+      showToast('Sesión de Laboratorio cerrada.');
     }
 
     function openAdminUnlockPrompt() {
       document.getElementById('adminPinError').classList.add('hidden');
       document.getElementById('adminPasswordPromptBox').classList.remove('hidden');
-      document.getElementById('adminPinInput').focus();
+    }
+
+    function requestAdminTab(tabName) {
+      if (isAdminUnlocked) {
+        switchLabTab(tabName);
+      } else {
+        pendingAdminTab = tabName;
+        openAdminUnlockPrompt();
+      }
     }
 
     function verifyAdminPin() {
-      const entered = (document.getElementById('adminPinInput').value || '').trim();
+      const pin = (document.getElementById('adminPinInput').value || '').trim();
       const errEl = document.getElementById('adminPinError');
-      if (entered !== securityPins.adminPin) {
+      if (pin !== securityPins.adminPin) {
         errEl.textContent = 'Contraseña de administración incorrecta.';
         errEl.classList.remove('hidden');
         return;
@@ -1314,36 +2136,40 @@
       isAdminUnlocked = true;
       document.getElementById('adminPinInput').value = '';
       document.getElementById('adminPasswordPromptBox').classList.add('hidden');
-      updateLabAuthUI();
-      switchLabTab(pendingAdminTab || 'pricing');
-      showToast('Modo Administrar habilitado');
+      updateAdminModeUI();
+      switchLabTab(pendingAdminTab || 'photographers');
+      showToast('Opciones de administración habilitadas.');
     }
 
     function lockAdminMode() {
       isAdminUnlocked = false;
-      updateLabAuthUI();
+      updateAdminModeUI();
       switchLabTab('orders');
-      showToast('Opciones administrativas bloqueadas');
+      showToast('Modo Administrar bloqueado.');
     }
 
-    function requestAdminTab(tabName) {
-      if (!isAdminUnlocked) {
-        pendingAdminTab = tabName;
-        openAdminUnlockPrompt();
-        return;
-      }
-      switchLabTab(tabName);
+    function updateAdminModeUI() {
+      document.getElementById('adminUnlockedBadge')?.classList.toggle('hidden', !isAdminUnlocked);
+      document.getElementById('adminLoginBtn')?.classList.toggle('hidden', isAdminUnlocked);
+      document.getElementById('adminLockBtn')?.classList.toggle('hidden', !isAdminUnlocked);
     }
 
     function switchLabTab(tabName) {
-      const tabs = ['orders', 'photographers', 'pricing', 'studio', 'security'];
-      tabs.forEach((t) => {
-        const cap = t.charAt(0).toUpperCase() + t.slice(1);
-        document.getElementById(`labTab${cap}`).classList.toggle('hidden', t !== tabName);
-        const btn = document.getElementById(`tabBtn${cap}`);
-        if (btn) {
-          btn.className =
-            t === tabName
+      const tabs = {
+        orders: { panel: 'labTabOrders', btn: 'tabBtnOrders' },
+        photographers: { panel: 'labTabPhotographers', btn: 'tabBtnPhotographers' },
+        pricing: { panel: 'labTabPricing', btn: 'tabBtnPricing' },
+        studio: { panel: 'labTabStudio', btn: 'tabBtnStudio' },
+        security: { panel: 'labTabSecurity', btn: 'tabBtnSecurity' }
+      };
+
+      Object.entries(tabs).forEach(([key, cfg]) => {
+        const panelEl = document.getElementById(cfg.panel);
+        const btnEl = document.getElementById(cfg.btn);
+        if (panelEl) panelEl.classList.toggle('hidden', key !== tabName);
+        if (btnEl) {
+          btnEl.className =
+            key === tabName
               ? 'px-3.5 py-2 rounded-xl bg-slate-900 text-white text-xs font-bold'
               : 'px-3.5 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold';
         }
@@ -1352,189 +2178,240 @@
       if (tabName === 'orders') renderLabOrders();
       if (tabName === 'photographers') renderProPhotographersAdmin();
       if (tabName === 'pricing') renderPricingProductsAdmin();
-      if (tabName === 'studio') loadStudioFormAdmin();
-      if (tabName === 'security') loadSecurityFormAdmin();
+      if (tabName === 'studio') renderStudioConfigAdmin();
+      if (tabName === 'security') renderSecurityConfigAdmin();
     }
 
     function renderLabOrders() {
-      // Solo órdenes confirmadas como pagadas por Caja
-      const paidOrders = ordersStore.filter((o) => o.payment_status === 'paid');
-      document.getElementById('labOrdersCountLabel').textContent = `${paidOrders.length} ${paidOrders.length === 1 ? 'orden aprobada por Caja' : 'órdenes aprobadas por Caja'}`;
+      const list = document.getElementById('labOrdersList');
+      const label = document.getElementById('labOrdersCountLabel');
+      if (!list) return;
 
-      const listEl = document.getElementById('labOrdersList');
-      if (!paidOrders.length) {
-        listEl.innerHTML = '<div class="text-center py-8 text-slate-400 text-sm">No hay órdenes pagadas pendientes de producción en Laboratorio.</div>';
+      const paidOrders = ordersStore.filter((o) => o.payment_status === 'paid');
+      if (label) label.textContent = `${paidOrders.length} orden(es) pagada(s) lista(s) para producción`;
+
+      if (paidOrders.length === 0) {
+        list.innerHTML = `<div class="text-center py-8 text-xs text-slate-400">No hay órdenes pagadas pendientes en Laboratorio.</div>`;
         return;
       }
 
-      listEl.innerHTML = paidOrders
+      list.innerHTML = paidOrders
         .map((ord) => {
-          const totalCopies = (ord.items || []).reduce((s, it) => s + (it.copies || 1), 0);
+          const copiesCount = (ord.items || []).reduce((acc, it) => acc + (Number(it.copies) || 1), 0);
           return `
-            <div class="rounded-2xl border border-slate-200 p-4 flex flex-wrap items-center justify-between gap-4 bg-white">
+            <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 flex flex-wrap items-center justify-between gap-3">
               <div class="space-y-1">
                 <div class="flex items-center gap-2">
-                  <span class="font-mono font-extrabold text-sm text-slate-900">${ord.order_code}</span>
-                  <span class="text-xs px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 font-semibold">✓ Pagado en Caja</span>
-                  <span class="text-xs text-slate-500">• ${ord.photographer_name || 'Cliente General'}</span>
+                  <span class="text-sm font-extrabold text-slate-900">${ord.order_code}</span>
+                  <span class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-sky-100 text-sky-800">300 DPI Listo</span>
                 </div>
-                <p class="text-sm font-semibold text-slate-800">${ord.customer_name} (${ord.customer_phone})</p>
-                <p class="text-xs text-slate-500">${(ord.items || []).length} archivo(s) • ${totalCopies} copia(s) a 300 DPI</p>
+                <div class="text-xs font-semibold text-slate-800">${ord.customer_name} • ${ord.customer_phone}</div>
+                <div class="text-[11px] text-slate-500">${(ord.items || []).length} archivo(s) • ${copiesCount} copia(s) totales</div>
               </div>
 
               <div class="flex flex-wrap items-center gap-2">
-                <button onclick="downloadOrderZip300DPI('${ord.id}')" class="px-4 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-xs">
-                  ⬇ Descargar ZIP (300 DPI)
+                <button onclick="downloadOrderZip300DPI('${ord.id}')" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold shadow-xs">
+                  ⬇️ Descargar ZIP (300 DPI)
                 </button>
-                <button onclick="markOrderDeliveredAndCleanup('${ord.id}')" class="px-3 py-2.5 rounded-xl border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700">
-                  Entregado
+                <button onclick="markOrderDeliveredAndClean('${ord.id}')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">
+                  ✓ Entregado y liberar
                 </button>
               </div>
-            </div>`;
+            </div>
+          `;
         })
         .join('');
     }
 
-    async function markOrderDeliveredAndCleanup(orderId) {
+    function renderEditedItemTo300DPIDataUrl(item) {
+      return new Promise((resolve) => {
+        const img = new Image();
+        img.crossOrigin = 'anonymous';
+        img.onload = () => {
+          const dim = getOrientedDimensions(
+            { widthIn: item.widthIn || 4, heightIn: item.heightIn || 6 },
+            item.orientation || 'landscape'
+          );
+          const canvasW = Math.round(dim.widthIn * 300);
+          const canvasH = Math.round(dim.heightIn * 300);
+
+          const canvas = document.createElement('canvas');
+          canvas.width = canvasW;
+          canvas.height = canvasH;
+          const ctx = canvas.getContext('2d');
+
+          const borderStyle = item.border || 'none';
+          const borderSizeMm = Number(item.borderSizeMm ?? 5);
+          const borderColor = item.borderColor || '#ffffff';
+
+          const padPx = borderStyle === 'none' ? 0 : Math.round((borderSizeMm / 25.4) * 300);
+
+          ctx.fillStyle = borderStyle === 'none' ? '#ffffff' : borderColor;
+          ctx.fillRect(0, 0, canvasW, canvasH);
+
+          const boxX = padPx;
+          const boxY = padPx;
+          const boxW = Math.max(50, canvasW - padPx * 2);
+          const boxH = Math.max(50, canvasH - padPx * 2);
+
+          ctx.save();
+          ctx.beginPath();
+          ctx.rect(boxX, boxY, boxW, boxH);
+          ctx.clip();
+
+          const zoom = (Number(item.zoom) || 100) / 100;
+          const panX = ((Number(item.panX) || 0) / 100) * boxW;
+          const panY = ((Number(item.panY) || 0) / 100) * boxH;
+          const rotRad = ((Number(item.rotation) || 0) * Math.PI) / 180;
+          const flip = item.flipX ? -1 : 1;
+
+          ctx.translate(boxX + boxW / 2 + panX, boxY + boxH / 2 + panY);
+          ctx.rotate(rotRad);
+          ctx.scale(zoom * flip, zoom);
+          ctx.filter = getPhotoCssFilter(item);
+
+          const isRot90 = Math.abs((Number(item.rotation) || 0) % 180) === 90;
+          const effectiveW = isRot90 ? img.naturalHeight : img.naturalWidth;
+          const effectiveH = isRot90 ? img.naturalWidth : img.naturalHeight;
+          const imgRatio = effectiveW / (effectiveH || 1);
+          const boxRatio = boxW / (boxH || 1);
+          let drawW = boxW;
+          let drawH = boxH;
+          if (imgRatio > boxRatio) {
+            drawH = boxH;
+            drawW = boxH * imgRatio;
+          } else {
+            drawW = boxW;
+            drawH = boxW / imgRatio;
+          }
+          if (isRot90) {
+            ctx.drawImage(img, -drawH / 2, -drawW / 2, drawH, drawW);
+          } else {
+            ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
+          }
+          ctx.restore();
+
+          if (item.caption && item.caption.trim()) {
+            const placement = getCaptionPlacementForPhoto(item, item.captionPos || 'bottom');
+            const isSide = placement.side === 'left' || placement.side === 'right';
+            const refSpan = isSide ? boxH : boxW;
+            const sizeRatio = (Number(item.captionSize) || 18) / 340;
+            const fontSize = Math.max(28, Math.round(refSpan * sizeRatio));
+            const bandThickness = Math.round(fontSize * 1.75);
+
+            ctx.save();
+            if (borderStyle === 'polaroid') {
+              ctx.fillStyle = borderColor;
+              if (placement.side === 'left') ctx.fillRect(boxX, boxY, bandThickness, boxH);
+              else if (placement.side === 'right') ctx.fillRect(boxX + boxW - bandThickness, boxY, bandThickness, boxH);
+              else if (placement.side === 'top') ctx.fillRect(boxX, boxY, boxW, bandThickness);
+              else ctx.fillRect(boxX, boxY + boxH - bandThickness, boxW, bandThickness);
+            }
+
+            let tx = boxX + boxW / 2;
+            let ty = boxY + boxH - bandThickness / 2;
+            if (placement.side === 'left') {
+              tx = boxX + bandThickness / 2;
+              ty = boxY + boxH / 2;
+            } else if (placement.side === 'right') {
+              tx = boxX + boxW - bandThickness / 2;
+              ty = boxY + boxH / 2;
+            } else if (placement.side === 'top') {
+              tx = boxX + boxW / 2;
+              ty = boxY + bandThickness / 2;
+            }
+
+            ctx.translate(tx, ty);
+            ctx.rotate((placement.rotateDeg * Math.PI) / 180);
+            ctx.font = `bold ${fontSize}px Inter, sans-serif`;
+            ctx.fillStyle = item.captionColor || '#1e293b';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(item.caption.trim(), 0, 0, refSpan - 40);
+            ctx.restore();
+          }
+
+          resolve(canvas.toDataURL('image/jpeg', 0.96));
+        };
+        img.onerror = () => resolve(item.dataUrl || item.publicUrl || '');
+        img.src = item.dataUrl || item.publicUrl || '';
+      });
+    }
+
+    async function downloadOrderZip300DPI(orderId) {
+      const ord = ordersStore.find((o) => o.id === orderId);
+      if (!ord) return;
+      if (!window.JSZip) {
+        showToast('Error: librería ZIP no disponible.');
+        return;
+      }
+
+      showToast(`Generando archivos a 300 DPI para ${ord.order_code}...`);
+      const zip = new JSZip();
+
+      for (let i = 0; i < (ord.items || []).length; i++) {
+        const item = ord.items[i];
+        let sourceItem = { ...item };
+        if (!sourceItem.dataUrl && !sourceItem.publicUrl && supabaseClient && sourceItem.storagePath) {
+          const { data: pubData } = supabaseClient.storage
+            .from(DEFAULT_SUPABASE_BUCKET)
+            .getPublicUrl(sourceItem.storagePath);
+          if (pubData?.publicUrl) sourceItem.publicUrl = pubData.publicUrl;
+        }
+        const renderedUrl = await renderEditedItemTo300DPIDataUrl(sourceItem);
+        if (!renderedUrl || !renderedUrl.includes(',')) continue;
+        const base64Data = renderedUrl.split(',')[1];
+        const folderName = (item.folderName || `${item.sizeKey}_${item.finish}`).replace(/[^a-zA-Z0-9_-]/g, '_');
+        const safeName = (item.name || item.originalName || `foto_${i + 1}.jpg`).replace(/\.[^.]+$/, '');
+        const fileName = `${String(i + 1).padStart(2, '0')}_${safeName}_${item.copies}copias_300DPI.jpg`;
+        zip.folder(folderName).file(fileName, base64Data, { base64: true });
+      }
+
+      const blob = await zip.generateAsync({ type: 'blob' });
+      const link = document.createElement('a');
+      link.href = URL.createObjectURL(blob);
+      link.download = `${ord.order_code}_${ord.customer_name.replace(/\s+/g, '_')}_300DPI.zip`;
+      link.click();
+      showToast(`ZIP ${ord.order_code} descargado.`);
+    }
+
+    async function markOrderDeliveredAndClean(orderId) {
+      const targetOrder = ordersStore.find((o) => o.id === orderId);
       ordersStore = ordersStore.filter((o) => o.id !== orderId);
-      saveJsonStorage('lab_orders_store_v1', ordersStore);
+      saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
       if (supabaseClient) {
         try {
+          const paths = (targetOrder?.items || []).map((it) => it.storagePath).filter(Boolean);
+          if (paths.length > 0) {
+            await supabaseClient.storage.from(DEFAULT_SUPABASE_BUCKET).remove(paths);
+          }
           await supabaseClient.from('orders').delete().eq('id', orderId);
         } catch (err) {
           console.warn('Error eliminando orden en Supabase:', err);
         }
       }
       renderLabOrders();
-      showToast('Orden marcada como entregada y limpiada');
-    }
-
-    function renderEditedItemTo300DPIDataUrl(item) {
-      return new Promise((resolve) => {
-        const img = new Image();
-        img.onload = () => {
-          const widthIn = Number(item.widthIn) || 4;
-          const heightIn = Number(item.heightIn) || 6;
-          const targetW = Math.max(300, Math.round(widthIn * 300));
-          const targetH = Math.max(300, Math.round(heightIn * 300));
-
-          const canvas = document.createElement('canvas');
-          canvas.width = targetW;
-          canvas.height = targetH;
-          const ctx = canvas.getContext('2d');
-
-          ctx.fillStyle = '#ffffff';
-          ctx.fillRect(0, 0, targetW, targetH);
-
-          const pad = item.border === 'polaroid' ? Math.round(targetW * 0.06) : item.border === 'classic' ? Math.round(targetW * 0.03) : 0;
-          const bottomPad = item.border === 'polaroid' ? Math.round(targetH * 0.16) : pad;
-          const boxW = Math.max(100, targetW - pad * 2);
-          const boxH = Math.max(100, targetH - pad - bottomPad);
-
-          ctx.save();
-          ctx.beginPath();
-          ctx.rect(pad, pad, boxW, boxH);
-          ctx.clip();
-
-          ctx.translate(pad + boxW / 2, pad + boxH / 2);
-          const zoom = (item.zoom || 100) / 100;
-          const panX = ((item.panX || 0) / 100) * boxW;
-          const panY = ((item.panY || 0) / 100) * boxH;
-          ctx.translate(panX, panY);
-          ctx.rotate(((item.rotation || 0) * Math.PI) / 180);
-          ctx.scale(zoom * (item.flipX ? -1 : 1), zoom);
-
-          ctx.filter = getPhotoCssFilter(item);
-
-          const imgRatio = img.naturalWidth / (img.naturalHeight || 1);
-          const boxRatio = boxW / (boxH || 1);
-          let drawW = boxW;
-          let drawH = boxH;
-          if (imgRatio > boxRatio) {
-            drawH = boxW / imgRatio;
-          } else {
-            drawW = boxH * imgRatio;
-          }
-          ctx.drawImage(img, -drawW / 2, -drawH / 2, drawW, drawH);
-          ctx.restore();
-
-          if (item.caption) {
-            ctx.fillStyle = '#1e293b';
-            ctx.font = `600 ${Math.max(24, Math.round(targetW * 0.035))}px Inter, sans-serif`;
-            ctx.textAlign = 'center';
-            ctx.fillText(item.caption, targetW / 2, targetH - Math.max(20, bottomPad * 0.35));
-          }
-
-          resolve(canvas.toDataURL('image/jpeg', 0.95));
-        };
-        img.onerror = () => resolve(null);
-        img.src = item.dataUrl;
-      });
-    }
-
-    async function downloadOrderZip300DPI(orderId) {
-      const order = ordersStore.find((o) => o.id === orderId);
-      if (!order || !window.JSZip) return;
-
-      showToast(`Generando ZIP a 300 DPI para ${order.order_code}...`);
-      const zip = new JSZip();
-      const folder = zip.folder(`${order.order_code.replace('#', '')}_${(order.customer_name || 'Cliente').replace(/\s+/g, '_')}`);
-
-      let resumen = `ORDEN: ${order.order_code}\nESTUDIO: ${studioConfig.labName}\nCLIENTE: ${order.customer_name}\nTELEFONO: ${order.customer_phone}\nTIPO: ${order.photographer_name || 'Cliente General'}\nTOTAL: L ${Number(order.total || 0).toFixed(2)}\n\nDETALLE DE IMPRESIONES (300 DPI):\n`;
-
-      for (let i = 0; i < (order.items || []).length; i++) {
-        const it = order.items[i];
-        const processedDataUrl = await renderEditedItemTo300DPIDataUrl(it);
-        if (!processedDataUrl) continue;
-
-        const base64 = processedDataUrl.split(',')[1];
-        const safeFolder = `${it.sizeKey || 'Tamano'}_${it.finish || 'Brillante'}`.replace(/[^a-zA-Z0-9_-]/g, '_');
-        const cleanBaseName = (it.name || `foto_${i + 1}`).replace(/\.[^/.]+$/, '').replace(/[^a-zA-Z0-9_-]/g, '_');
-
-        for (let c = 1; c <= (it.copies || 1); c++) {
-          folder.file(`${safeFolder}/${cleanBaseName}_x${c}_300dpi.jpg`, base64, { base64: true });
-        }
-
-        resumen += `- ${it.name} | ${it.sizeLabel} | ${it.finish} | Copias: ${it.copies}${it.caption ? ` | Texto: "${it.caption}"` : ''}\n`;
-      }
-
-      folder.file('RESUMEN_PEDIDO.txt', resumen);
-      const blob = await zip.generateAsync({ type: 'blob' });
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${order.order_code.replace('#', '')}_300DPI.zip`;
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      URL.revokeObjectURL(url);
-      showToast(`ZIP ${order.order_code}_300DPI.zip descargado`);
+      if (isCashierAuthenticated) renderCashierOrders();
+      showToast('Orden marcada como entregada y liberada.');
     }
 
     // =========================================================================
     // ADMINISTRACIÓN: FOTÓGRAFOS, PRODUCTOS, ESTUDIO Y CLAVES
     // =========================================================================
     function renderProPhotographersAdmin() {
-      const el = document.getElementById('proPhotographersList');
-      if (!proPhotographers.length) {
-        el.innerHTML = '<p class="text-xs text-slate-500">No hay fotógrafos registrados.</p>';
-        return;
-      }
-      el.innerHTML = proPhotographers
+      const list = document.getElementById('proPhotographersList');
+      if (!list) return;
+      list.innerHTML = proPhotographers
         .map(
           (p) => `
-          <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-2xl border border-slate-200 bg-white text-xs">
+          <div class="flex items-center justify-between p-3 rounded-xl border border-slate-200 bg-white text-xs">
             <div>
               <span class="font-bold text-slate-900">${p.name}</span>
-              <span class="text-slate-500 ml-2">Usuario: <strong class="font-mono">${p.username}</strong> • Clave: <strong class="font-mono">${p.password}</strong></span>
+              <span class="text-slate-500 ml-2">Usuario: <strong>${p.username}</strong> • Clave: <strong>${p.password}</strong></span>
             </div>
-            <div class="flex items-center gap-2">
-              <button onclick="toggleProActive('${p.id}')" class="px-2.5 py-1 rounded-lg font-semibold ${p.active !== false ? 'bg-emerald-100 text-emerald-800' : 'bg-slate-200 text-slate-700'}">
-                ${p.active !== false ? 'Activo' : 'Suspendido'}
-              </button>
-              <button onclick="deleteProPhotographer('${p.id}')" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 font-semibold hover:bg-rose-100">Eliminar</button>
-            </div>
-          </div>`
+            <button onclick="removeProPhotographer('${p.id}')" class="text-rose-600 hover:underline font-semibold">Eliminar</button>
+          </div>
+        `
         )
         .join('');
     }
@@ -1544,125 +2421,98 @@
       const username = (document.getElementById('newProUserInput').value || '').trim();
       const password = (document.getElementById('newProPassInput').value || '').trim();
       if (!name || !username || !password) {
-        showToast('Completa nombre, usuario y contraseña del fotógrafo');
+        showToast('Completa nombre, usuario y contraseña del fotógrafo.');
         return;
       }
-      proPhotographers.push({
-        id: 'pro-' + Date.now(),
-        name,
-        username,
-        password,
-        active: true
-      });
-      saveJsonStorage('lab_pro_photographers_v1', proPhotographers);
+      proPhotographers.push({ id: 'pro-' + Date.now(), name, username, password, active: true });
+      saveJsonStorage(STORAGE_KEYS.proPhotographers, proPhotographers);
       document.getElementById('newProNameInput').value = '';
       document.getElementById('newProUserInput').value = '';
       document.getElementById('newProPassInput').value = '';
       renderProPhotographersAdmin();
-      showToast('Fotógrafo Pro agregado');
+      showToast('Fotógrafo Pro agregado.');
     }
 
-    function toggleProActive(id) {
-      const p = proPhotographers.find((item) => item.id === id);
-      if (!p) return;
-      p.active = p.active === false ? true : false;
-      saveJsonStorage('lab_pro_photographers_v1', proPhotographers);
-      renderProPhotographersAdmin();
-    }
-
-    function deleteProPhotographer(id) {
-      proPhotographers = proPhotographers.filter((item) => item.id !== id);
-      saveJsonStorage('lab_pro_photographers_v1', proPhotographers);
+    function removeProPhotographer(id) {
+      proPhotographers = proPhotographers.filter((p) => p.id !== id);
+      saveJsonStorage(STORAGE_KEYS.proPhotographers, proPhotographers);
       renderProPhotographersAdmin();
     }
 
     function renderPricingProductsAdmin() {
-      const el = document.getElementById('pricingProductsList');
-      const items = Object.values(printSizes);
-      el.innerHTML = items
+      const list = document.getElementById('pricingProductsList');
+      if (!list) return;
+      list.innerHTML = Object.values(printSizes)
         .map(
           (sz) => `
-          <div class="grid grid-cols-1 sm:grid-cols-6 gap-2 items-center p-3 rounded-2xl border border-slate-200 bg-white text-xs">
-            <input type="text" value="${sz.label}" onchange="editPrintSizeField('${sz.key}', 'label', this.value)" class="sm:col-span-2 px-2.5 py-1.5 rounded-lg border border-slate-300 font-semibold" />
-            <div class="flex items-center gap-1">
-              <span class="text-slate-500">L</span>
-              <input type="number" step="0.01" value="${sz.price}" onchange="editPrintSizeField('${sz.key}', 'price', Number(this.value))" class="w-full px-2 py-1.5 rounded-lg border border-slate-300" />
+          <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border border-slate-200 bg-white text-xs">
+            <div>
+              <span class="font-bold text-slate-900">${sz.label}</span>
+              <span class="text-slate-500 ml-2">(${sz.widthIn}×${sz.heightIn}" • ${Math.round(sz.widthIn * 300)}×${Math.round(sz.heightIn * 300)} px)</span>
             </div>
-            <div class="flex items-center gap-1">
-              <span class="text-sky-700 font-semibold">Pro</span>
-              <input type="number" step="0.01" value="${sz.proPrice}" onchange="editPrintSizeField('${sz.key}', 'proPrice', Number(this.value))" class="w-full px-2 py-1.5 rounded-lg border border-slate-300" />
+            <div class="flex items-center gap-3">
+              <span>Público: <strong>L ${Number(sz.price).toFixed(2)}</strong></span>
+              <span>Pro: <strong>L ${Number(sz.proPrice).toFixed(2)}</strong></span>
+              <button onclick="removePrintSizeProduct('${sz.key}')" class="text-rose-600 hover:underline font-semibold">Eliminar</button>
             </div>
-            <div class="text-slate-500 font-mono">${sz.widthIn || 4}"×${sz.heightIn || 6}"</div>
-            <button onclick="deletePrintSizeProduct('${sz.key}')" class="px-2.5 py-1.5 rounded-lg bg-rose-50 text-rose-700 font-semibold hover:bg-rose-100 justify-self-end">Eliminar</button>
-          </div>`
+          </div>
+        `
         )
         .join('');
     }
 
     function addPrintSizeProduct() {
-      const key = (document.getElementById('newSizeKeyInput').value || '').trim().toLowerCase().replace(/\s+/g, '_');
+      const key = (document.getElementById('newSizeKeyInput').value || '').trim();
       const label = (document.getElementById('newSizeLabelInput').value || '').trim();
-      const widthIn = Number(document.getElementById('newSizeWidthInput').value) || 4;
-      const heightIn = Number(document.getElementById('newSizeHeightInput').value) || 6;
-      const price = Number(document.getElementById('newSizePriceInput').value) || 0;
-      const proPrice = Number(document.getElementById('newSizeProPriceInput').value) || price;
+      const widthIn = parseFloat(document.getElementById('newSizeWidthInput').value);
+      const heightIn = parseFloat(document.getElementById('newSizeHeightInput').value);
+      const price = parseFloat(document.getElementById('newSizePriceInput').value);
+      const proPrice = parseFloat(document.getElementById('newSizeProPriceInput').value);
 
-      if (!key || !label) {
-        showToast('Ingresa clave y etiqueta para el nuevo producto');
+      if (!key || !label || !widthIn || !heightIn || isNaN(price)) {
+        showToast('Completa clave, etiqueta, dimensiones en pulgadas y precio.');
         return;
       }
 
-      printSizes[key] = { key, label, widthIn, heightIn, price, proPrice };
-      saveJsonStorage('lab_print_sizes_v1', printSizes);
-
-      ['newSizeKeyInput', 'newSizeLabelInput', 'newSizeWidthInput', 'newSizeHeightInput', 'newSizePriceInput', 'newSizeProPriceInput'].forEach(
-        (id) => (document.getElementById(id).value = '')
-      );
-
+      printSizes[key] = {
+        key,
+        label,
+        widthIn,
+        heightIn,
+        price,
+        proPrice: isNaN(proPrice) ? price : proPrice
+      };
+      saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
       renderPricingProductsAdmin();
       renderPhotosList();
-      updateOrderTotals();
-      showToast('Producto agregado al catálogo');
+      showToast(`Producto ${label} agregado.`);
     }
 
-    function editPrintSizeField(key, field, value) {
-      if (!printSizes[key]) return;
-      printSizes[key][field] = value;
-      saveJsonStorage('lab_print_sizes_v1', printSizes);
-      renderPhotosList();
-      updateOrderTotals();
-    }
-
-    function deletePrintSizeProduct(key) {
+    function removePrintSizeProduct(key) {
       if (Object.keys(printSizes).length <= 1) {
-        showToast('Debe existir al menos un tamaño en el catálogo');
+        showToast('Debe existir al menos un tamaño disponible.');
         return;
       }
       delete printSizes[key];
-      saveJsonStorage('lab_print_sizes_v1', printSizes);
+      saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
       renderPricingProductsAdmin();
       renderPhotosList();
-      updateOrderTotals();
     }
 
-    function loadStudioFormAdmin() {
+    function renderStudioConfigAdmin() {
       document.getElementById('studioNameInput').value = studioConfig.labName || '';
-      document.getElementById('shippingCostInput').value = studioConfig.shippingCost ?? 0;
-      renderAdminBankAccounts();
-    }
-
-    function renderAdminBankAccounts() {
-      const el = document.getElementById('adminBankAccountsList');
-      const list = studioConfig.bankAccounts || [];
-      el.innerHTML = list
+      document.getElementById('shippingCostInput').value = studioConfig.shippingCost ?? 75;
+      document.getElementById('studioInfoInput').value = studioConfig.labInfo || '';
+      const list = document.getElementById('adminBankAccountsList');
+      if (!list) return;
+      list.innerHTML = (studioConfig.bankAccounts || [])
         .map(
           (acc, idx) => `
-          <div class="flex items-center justify-between gap-2 bg-white border border-slate-200 rounded-xl px-3 py-2 text-xs">
-            <div>
-              <strong>${acc.bank}</strong> • <span class="font-mono">${acc.account}</span> • <span class="text-slate-500">${acc.holder || ''}</span>
-            </div>
-            <button onclick="removeBankAccount(${idx})" class="text-rose-600 font-semibold hover:underline">Quitar</button>
-          </div>`
+          <div class="flex items-center justify-between p-2.5 rounded-xl bg-white border border-slate-200 text-xs">
+            <div><strong>${acc.bank}</strong>: ${acc.account} (${acc.holder || ''})</div>
+            <button onclick="removeBankAccount(${idx})" class="text-rose-600 font-semibold">Quitar</button>
+          </div>
+        `
         )
         .join('');
     }
@@ -1672,71 +2522,86 @@
       const account = (document.getElementById('newBankNumberInput').value || '').trim();
       const holder = (document.getElementById('newBankHolderInput').value || '').trim();
       if (!bank || !account) {
-        showToast('Completa banco y número de cuenta');
+        showToast('Ingresa el nombre del banco y el número de cuenta.');
         return;
       }
       studioConfig.bankAccounts = studioConfig.bankAccounts || [];
       studioConfig.bankAccounts.push({ bank, account, holder });
+      saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
       document.getElementById('newBankNameInput').value = '';
       document.getElementById('newBankNumberInput').value = '';
       document.getElementById('newBankHolderInput').value = '';
-      renderAdminBankAccounts();
+      renderStudioConfigAdmin();
+      renderBankAccountsForCustomer();
+      showToast('Cuenta bancaria agregada.');
     }
 
-    function removeBankAccount(index) {
-      studioConfig.bankAccounts.splice(index, 1);
-      renderAdminBankAccounts();
+    function removeBankAccount(idx) {
+      studioConfig.bankAccounts.splice(idx, 1);
+      saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
+      renderStudioConfigAdmin();
+      renderBankAccountsForCustomer();
     }
 
     function saveStudioSettings() {
-      studioConfig.labName = (document.getElementById('studioNameInput').value || '').trim() || DEFAULT_LAB_BRAND_NAME;
-      studioConfig.shippingCost = Math.max(0, Number(document.getElementById('shippingCostInput').value) || 0);
-      saveJsonStorage('lab_studio_config_v1', studioConfig);
-      applyBrandingToUI();
-      renderBankAccountsList();
+      const name = (document.getElementById('studioNameInput').value || '').trim();
+      const ship = parseFloat(document.getElementById('shippingCostInput').value);
+      const info = (document.getElementById('studioInfoInput').value || '').trim();
+      if (name) studioConfig.labName = name;
+      if (!isNaN(ship)) studioConfig.shippingCost = ship;
+      studioConfig.labInfo = info;
+      saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
+      applyStudioBrandingUI();
       updateOrderTotals();
-      showToast('Configuración del estudio y bancos guardada');
+      showToast('Configuración del estudio guardada.');
     }
 
-    function loadSecurityFormAdmin() {
+    function renderSecurityConfigAdmin() {
       document.getElementById('staffPinConfigInput').value = securityPins.staffPin || '';
       document.getElementById('adminPinConfigInput').value = securityPins.adminPin || '';
-      document.getElementById('supabaseUrlConfigInput').value = securityPins.supabaseUrl || '';
-      document.getElementById('supabaseKeyConfigInput').value = securityPins.supabaseKey || '';
-      document.getElementById('supabaseSchemaConfigInput').value = securityPins.supabaseSchema || 'foto_estudio';
     }
 
     function saveSecurityAndCloudSettings() {
       const staffPin = (document.getElementById('staffPinConfigInput').value || '').trim();
       const adminPin = (document.getElementById('adminPinConfigInput').value || '').trim();
       if (!staffPin || !adminPin) {
-        showToast('Ambas contraseñas deben tener contenido');
+        showToast('Las contraseñas no pueden quedar vacías.');
         return;
       }
-
-      securityPins = {
-        staffPin,
-        adminPin,
-        supabaseUrl: (document.getElementById('supabaseUrlConfigInput').value || '').trim(),
-        supabaseKey: (document.getElementById('supabaseKeyConfigInput').value || '').trim(),
-        supabaseSchema: (document.getElementById('supabaseSchemaConfigInput').value || 'foto_estudio').trim()
-      };
-
-      saveJsonStorage('lab_security_pins_v1', securityPins);
-      initSupabaseConnection();
-      showToast('Claves y conexión en la nube actualizadas');
+      securityPins.staffPin = staffPin;
+      securityPins.adminPin = adminPin;
+      saveJsonStorage(STORAGE_KEYS.securityPins, securityPins);
+      showToast('Claves de acceso actualizadas.');
     }
 
-    // =========================================================================
-    // ARRANQUE DE LA APLICACIÓN
-    // =========================================================================
+    async function refreshOrdersFromCloud(silent = false) {
+      if (!supabaseClient) {
+        if (!silent) showToast('Modo local activo: órdenes actualizadas desde este navegador.');
+        if (isCashierAuthenticated) renderCashierOrders();
+        if (isLabAuthenticated) renderLabOrders();
+        return;
+      }
+      try {
+        const { data, error } = await supabaseClient
+          .from('orders')
+          .select('*')
+          .order('created_at', { ascending: false });
+        if (!error && Array.isArray(data)) {
+          ordersStore = data.map(normalizeOrderFromSupabaseRow);
+          saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
+          if (isCashierAuthenticated) renderCashierOrders();
+          if (isLabAuthenticated) renderLabOrders();
+          if (!silent) showToast('Órdenes sincronizadas desde la nube.');
+        }
+      } catch (err) {
+        console.warn('Error sincronizando órdenes:', err);
+      }
+    }
+
     window.addEventListener('DOMContentLoaded', () => {
-      applyUrlOverrides();
-      applyBrandingToUI();
-      renderBankAccountsList();
+      initBrandingAndCloud();
       renderPhotosList();
       updateOrderTotals();
-      initSupabaseConnection();
     });
   </script>
 </body>
