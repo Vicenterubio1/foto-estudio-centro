@@ -85,7 +85,7 @@
           </svg>
         </div>
         <div class="flex items-center gap-2.5 flex-wrap">
-          <h1 class="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 leading-tight">
+          <h1 id="headerBrandName" class="text-base sm:text-lg font-extrabold tracking-tight text-slate-900 leading-tight">
             Master Color
           </h1>
           <button
@@ -293,7 +293,7 @@
                   class="p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-bold text-left hover:bg-slate-50 transition"
                 >
                   <div>Envío a Domicilio</div>
-                  <div class="text-[11px] font-normal text-slate-500 mt-0.5">+ L 60.00</div>
+                  <div id="deliveryShippingFeeLabel" class="text-[11px] font-normal text-slate-500 mt-0.5">+ L 60.00</div>
                 </button>
               </div>
             </div>
@@ -365,7 +365,7 @@
                   <span class="text-xs font-bold text-slate-800">Pago por Transferencia / Depósito</span>
                   <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-brand-100 text-brand-700">Requerido</span>
                 </div>
-                <div class="text-[11px] text-slate-600 bg-white rounded-lg p-2.5 border border-slate-200 space-y-0.5">
+                <div id="bankAccountsDisplayList" class="text-[11px] text-slate-600 bg-white rounded-lg p-2.5 border border-slate-200 space-y-0.5">
                   <p><span class="font-semibold text-slate-800">Banco Atlántida:</span> 1200-4589-2210 (Master Color)</p>
                   <p><span class="font-semibold text-slate-800">BAC Credomatic:</span> 7421-8890-112 (Master Color)</p>
                   <p class="text-[10px] text-slate-400 pt-0.5">Adjunta la captura o PDF del comprobante para iniciar tu impresión.</p>
@@ -446,7 +446,7 @@
 
   <!-- Pie de página discreto con accesos de personal (Kiosko, Laboratorio, Caja y Pro) -->
   <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-8 border-t border-slate-200/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
-    <span>© Master Color • Laboratorio Fotográfico</span>
+    <span id="footerBrandText">© Master Color • Laboratorio Fotográfico</span>
     <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
       <button
         id="proAccessFooterBtn"
@@ -621,7 +621,7 @@
             </svg>
           </div>
           <div>
-            <h3 class="text-base font-bold">Recepción de Laboratorio — Master Color</h3>
+            <h3 id="labPanelHeaderTitle" class="text-base font-bold">Recepción de Laboratorio — Master Color</h3>
             <p id="labConnectionStatus" class="text-xs text-slate-400">Gestión de órdenes a 300 DPI</p>
           </div>
         </div>
@@ -650,7 +650,16 @@
             class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition inline-flex items-center gap-1.5"
           >
             <span>💲</span>
-            <span>Tarifas</span>
+            <span>Productos y Tarifas</span>
+          </button>
+          <button
+            type="button"
+            id="labTabStudioBtn"
+            onclick="switchLabPanelSection('studio')"
+            class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition inline-flex items-center gap-1.5"
+          >
+            <span>⚙️</span>
+            <span>Estudio y Bancos</span>
           </button>
           <button
             type="button"
@@ -700,99 +709,96 @@
               class="absolute right-2 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 transition"
               title="Mostrar u ocultar contraseña"
             >
-              <svg id="labEyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-              </svg>
-            </button>
-          </div>
-          <button type="submit" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold">
-            Entrar
-          </button>
-        </form>
-      </div>
-
-      <!-- Contenido del panel de laboratorio -->
-      <div id="labOrdersContent" class="hidden p-6 overflow-y-auto space-y-4 bg-slate-50 flex-1">
-        <!-- Sección: Órdenes -->
-        <div id="labOrdersSection" class="space-y-4">
-          <!-- Pestañas de filtro por estado -->
-          <div id="labStatusTabs" class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-2xl border border-slate-200"></div>
-
-          <!-- Lista de tarjetas de órdenes -->
-          <div id="labOrdersList" class="space-y-4"></div>
-        </div>
-
-        <!-- Sección: Gestor de Fotógrafos Pro -->
-        <div id="labPhotographersSection" class="hidden space-y-4">
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+        <!-- Sección: Editor Visual de Productos y Tarifas (Aficionado y Fotógrafo Pro) -->
+        <div id="labPricingSection" class="hidden space-y-4">
+          <!-- Formulario para agregar nuevo producto / tamaño -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
             <div>
-              <h4 class="text-sm font-extrabold text-slate-900">Registrar Nuevo Fotógrafo Profesional</h4>
-              <p class="text-xs text-slate-500 mt-0.5">Asigna un usuario y contraseña individual para que acceda a la tarifa preferencial.</p>
+              <h4 class="text-sm font-extrabold text-slate-900">Agregar Nuevo Producto / Tamaño</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Define el nombre, sus medidas en pulgadas (para impresión a 300 DPI) y sus dos tarifas.</p>
             </div>
 
-            <form onsubmit="createProPhotographer(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+            <form onsubmit="addNewLabProduct(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-2.5 items-end">
               <div class="sm:col-span-4">
-                <label for="newProFullName" class="block text-[11px] font-bold text-slate-600 mb-1">Nombre / Estudio *</label>
+                <label for="newProdLabel" class="block text-[11px] font-bold text-slate-600 mb-1">Nombre del producto *</label>
                 <input
-                  id="newProFullName"
+                  id="newProdLabel"
                   type="text"
                   required
-                  placeholder="Ej: Estudio Carlos Méndez"
-                  class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-              <div class="sm:col-span-3">
-                <label for="newProUsername" class="block text-[11px] font-bold text-slate-600 mb-1">Usuario *</label>
-                <input
-                  id="newProUsername"
-                  type="text"
-                  required
-                  placeholder="Ej: carlos.foto"
-                  class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                />
-              </div>
-              <div class="sm:col-span-3">
-                <label for="newProPassword" class="block text-[11px] font-bold text-slate-600 mb-1">Contraseña *</label>
-                <input
-                  id="newProPassword"
-                  type="text"
-                  required
-                  placeholder="Ej: Carlos2026*"
-                  class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  placeholder='Ej: 11x14" (28x35 cm)'
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
                 />
               </div>
               <div class="sm:col-span-2">
+                <label for="newProdWidthIn" class="block text-[11px] font-bold text-slate-600 mb-1">Ancho (pulg) *</label>
+                <input
+                  id="newProdWidthIn"
+                  type="number"
+                  step="0.1"
+                  min="1"
+                  max="60"
+                  required
+                  placeholder="14"
+                  class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+              <div class="sm:col-span-2">
+                <label for="newProdHeightIn" class="block text-[11px] font-bold text-slate-600 mb-1">Alto (pulg) *</label>
+                <input
+                  id="newProdHeightIn"
+                  type="number"
+                  step="0.1"
+                  min="1"
+                  max="60"
+                  required
+                  placeholder="11"
+                  class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+              <div class="sm:col-span-2">
+                <label for="newProdAmateurPrice" class="block text-[11px] font-bold text-slate-600 mb-1">Aficionado (L) *</label>
+                <input
+                  id="newProdAmateurPrice"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  required
+                  placeholder="95.00"
+                  class="w-full rounded-xl border border-slate-300 px-2.5 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                />
+              </div>
+              <div class="sm:col-span-2">
+                <label for="newProdProPrice" class="block text-[11px] font-bold text-indigo-700 mb-1">Pro (L) *</label>
+                <input
+                  id="newProdProPrice"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  required
+                  placeholder="70.00"
+                  class="w-full rounded-xl border border-indigo-200 bg-indigo-50/40 px-2.5 py-2 text-xs font-semibold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div class="sm:col-span-12 flex justify-end pt-1">
                 <button
                   type="submit"
-                  id="createProBtn"
-                  class="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition"
+                  class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition"
                 >
-                  + Agregar
+                  + Agregar producto al catálogo
                 </button>
               </div>
             </form>
           </div>
 
-          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
-            <div class="flex items-center justify-between">
-              <h4 class="text-sm font-extrabold text-slate-900">Fotógrafos Registrados</h4>
-              <span id="proPhotographersCountLabel" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full">0 cuentas</span>
-            </div>
-            <div id="labPhotographersList" class="space-y-2.5"></div>
-          </div>
-        </div>
-
-        <!-- Sección: Editor Visual de Tarifas (Aficionado y Fotógrafo Pro) -->
-        <div id="labPricingSection" class="hidden space-y-4">
+          <!-- Tabla editable de productos existentes -->
           <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
             <div class="flex flex-wrap items-center justify-between gap-2">
               <div>
-                <h4 class="text-sm font-extrabold text-slate-900">Configurar Tarifas de Impresión</h4>
-                <p class="text-xs text-slate-500 mt-0.5">Define el precio público (Aficionado) y el precio preferencial para Fotógrafos Pro en cada tamaño.</p>
+                <h4 class="text-sm font-extrabold text-slate-900">Editar Productos y Tarifas Existentes</h4>
+                <p class="text-xs text-slate-500 mt-0.5">Modifica nombres, medidas en pulgadas o precios para Aficionado y Fotógrafo Pro, o elimina los que no necesites.</p>
               </div>
               <span id="pricingSyncStatusBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
-                Tarifas activas
+                Catálogo activo
               </span>
             </div>
 
@@ -801,9 +807,12 @@
                 <table class="w-full text-left text-xs">
                   <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase text-[11px]">
                     <tr>
-                      <th class="py-2.5 px-3 font-bold">Tamaño de impresión</th>
-                      <th class="py-2.5 px-3 font-bold">Precio Aficionado (L)</th>
-                      <th class="py-2.5 px-3 font-bold text-indigo-700">Precio Fotógrafo Pro (L)</th>
+                      <th class="py-2.5 px-3 font-bold">Nombre del producto</th>
+                      <th class="py-2.5 px-3 font-bold">Ancho (in)</th>
+                      <th class="py-2.5 px-3 font-bold">Alto (in)</th>
+                      <th class="py-2.5 px-3 font-bold">Aficionado (L)</th>
+                      <th class="py-2.5 px-3 font-bold text-indigo-700">Fotógrafo Pro (L)</th>
+                      <th class="py-2.5 px-3 font-bold text-right">Acción</th>
                     </tr>
                   </thead>
                   <tbody id="labPricingTableBody" class="divide-y divide-slate-100"></tbody>
@@ -816,11 +825,81 @@
                   id="savePricingBtn"
                   class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-sm transition"
                 >
-                  Guardar tarifas
+                  Guardar todos los cambios
                 </button>
               </div>
             </form>
           </div>
+        </div>
+
+        <!-- Sección: Configuración de Marca Blanca (Nombre del Laboratorio, Envío y Cuentas Bancarias) -->
+        <div id="labStudioSection" class="hidden space-y-4">
+          <form onsubmit="saveLabStudioSettings(event)" class="space-y-4">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h4 class="text-sm font-extrabold text-slate-900">Identidad del Laboratorio y Envío</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Personaliza el nombre comercial del laboratorio y la tarifa de entrega a domicilio.</p>
+                </div>
+                <span id="studioSyncStatusBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                  Marca activa
+                </span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                <div class="sm:col-span-8">
+                  <label for="cfgLabBrandName" class="block text-[11px] font-bold text-slate-600 mb-1">Nombre del Laboratorio / Estudio *</label>
+                  <input
+                    id="cfgLabBrandName"
+                    type="text"
+                    required
+                    placeholder="Ej: Foto Estudio Express"
+                    class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  />
+                </div>
+                <div class="sm:col-span-4">
+                  <label for="cfgShippingFee" class="block text-[11px] font-bold text-slate-600 mb-1">Costo de envío a domicilio (L)</label>
+                  <input
+                    id="cfgShippingFee"
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    required
+                    placeholder="60.00"
+                    class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div>
+                  <h4 class="text-sm font-extrabold text-slate-900">Cuentas Bancarias para Transferencias</h4>
+                  <p class="text-xs text-slate-500 mt-0.5">Estas cuentas aparecerán al cliente cuando realice pedidos desde casa.</p>
+                </div>
+                <button
+                  type="button"
+                  onclick="addBankAccountRow()"
+                  class="px-3 py-1.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-bold transition"
+                >
+                  + Agregar cuenta bancaria
+                </button>
+              </div>
+
+              <div id="labBankAccountsEditorList" class="space-y-2.5"></div>
+
+              <div class="flex justify-end pt-2">
+                <button
+                  type="submit"
+                  id="saveStudioSettingsBtn"
+                  class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-sm transition"
+                >
+                  Guardar datos del estudio y bancos
+                </button>
+              </div>
+            </div>
+          </form>
         </div>
       </div>
     </div>
@@ -839,7 +918,7 @@
             </svg>
           </div>
           <div>
-            <h3 class="text-base font-bold">Ventana de Caja — Master Color</h3>
+            <h3 id="cashierPanelHeaderTitle" class="text-base font-bold">Ventana de Caja — Master Color</h3>
             <p id="cashierConnectionStatus" class="text-xs text-emerald-200/80">Control de pagos y check de cobro</p>
           </div>
         </div>
@@ -1199,19 +1278,166 @@
       luster: 'Perlado / Lustre'
     };
 
-    const SHIPPING_FEE = 60.00;
+    let SHIPPING_FEE = 60.00;
     const CURRENCY_SYMBOL = 'L';
+
+    let studioConfig = {
+      brandName: 'Master Color',
+      shippingFee: 60.00,
+      bankAccounts: [
+        { bank: 'Banco Atlántida', account: '1200-4589-2210', holder: 'Master Color' },
+        { bank: 'BAC Credomatic', account: '7421-8890-112', holder: 'Master Color' }
+      ]
+    };
+
+    function applyStudioBrandingToUI() {
+      const brand = (studioConfig.brandName || 'Master Color').trim() || 'Master Color';
+      SHIPPING_FEE = Math.max(0, Number(studioConfig.shippingFee) || 0);
+
+      document.title = `${brand} — Impresión Fotográfica en Línea`;
+      const headerBrandEl = document.getElementById('headerBrandName');
+      if (headerBrandEl) headerBrandEl.textContent = brand;
+
+      const footerBrandEl = document.getElementById('footerBrandText');
+      if (footerBrandEl) footerBrandEl.textContent = `© ${brand} • Laboratorio Fotográfico`;
+
+      const labHeaderEl = document.getElementById('labPanelHeaderTitle');
+      if (labHeaderEl) labHeaderEl.textContent = `Recepción de Laboratorio — ${brand}`;
+
+      const cashierHeaderEl = document.getElementById('cashierPanelHeaderTitle');
+      if (cashierHeaderEl) cashierHeaderEl.textContent = `Ventana de Caja — ${brand}`;
+
+      const shippingLabelEl = document.getElementById('deliveryShippingFeeLabel');
+      if (shippingLabelEl) {
+        shippingLabelEl.textContent = SHIPPING_FEE > 0 ? `+ ${formatCurrency(SHIPPING_FEE)}` : 'Gratis';
+      }
+
+      const banksContainer = document.getElementById('bankAccountsDisplayList');
+      if (banksContainer) {
+        const accounts = Array.isArray(studioConfig.bankAccounts) ? studioConfig.bankAccounts : [];
+        if (accounts.length === 0) {
+          banksContainer.innerHTML = `<p class="text-[11px] text-slate-500">Solicita los datos de transferencia en el estudio y adjunta tu comprobante.</p>`;
+        } else {
+          banksContainer.innerHTML = accounts.map((acc) => `
+            <p><span class="font-semibold text-slate-800">${escapeHtml(acc.bank)}:</span> ${escapeHtml(acc.account)}${acc.holder ? ` (${escapeHtml(acc.holder)})` : ''}</p>
+          `).join('') + `<p class="text-[10px] text-slate-400 pt-0.5">Adjunta la captura o PDF del comprobante para iniciar tu impresión.</p>`;
+        }
+      }
+    }
+
+    function loadLocalStudioConfig() {
+      try {
+        const raw = localStorage.getItem('mc_studio_settings');
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && typeof parsed === 'object') {
+            studioConfig = {
+              brandName: parsed.brandName || studioConfig.brandName,
+              shippingFee: parsed.shippingFee != null ? Number(parsed.shippingFee) : studioConfig.shippingFee,
+              bankAccounts: Array.isArray(parsed.bankAccounts) ? parsed.bankAccounts : studioConfig.bankAccounts
+            };
+          }
+        }
+      } catch (e) {}
+      applyStudioBrandingToUI();
+    }
+
+    async function syncStudioConfigFromCloud() {
+      loadLocalStudioConfig();
+      if (!isSupabaseConfigured || !supabaseClient) return;
+      try {
+        const { data, error } = await supabaseClient
+          .from('studio_settings')
+          .select('*')
+          .eq('setting_key', 'general')
+          .limit(1);
+
+        if (!error && Array.isArray(data) && data.length > 0 && data[0].setting_value) {
+          const val = data[0].setting_value;
+          studioConfig = {
+            brandName: val.brandName || studioConfig.brandName,
+            shippingFee: val.shippingFee != null ? Number(val.shippingFee) : studioConfig.shippingFee,
+            bankAccounts: Array.isArray(val.bankAccounts) ? val.bankAccounts : studioConfig.bankAccounts
+          };
+          try {
+            localStorage.setItem('mc_studio_settings', JSON.stringify(studioConfig));
+          } catch (e) {}
+          applyStudioBrandingToUI();
+          recalculateOrderSummary();
+        }
+      } catch (err) {
+        console.warn('Usando configuración local del estudio:', err);
+      }
+    }
+
+    loadLocalStudioConfig();
+
+    function getDefaultSizeKey() {
+      const keys = Object.keys(PRINT_SIZES);
+      return PRINT_SIZES['4x6'] ? '4x6' : (keys[0] || '4x6');
+    }
 
     function applySavedPricingOverrides(customMap) {
       if (!customMap || typeof customMap !== 'object') return;
       Object.entries(customMap).forEach(([key, vals]) => {
-        if (PRINT_SIZES[key] && vals) {
-          const p = parseFloat(vals.price);
-          const pro = parseFloat(vals.proPrice);
+        if (!vals) return;
+        const p = parseFloat(vals.price);
+        const pro = parseFloat(vals.proPrice);
+        const wIn = parseFloat(vals.widthIn);
+        const hIn = parseFloat(vals.heightIn);
+        const label = typeof vals.label === 'string' && vals.label.trim() ? vals.label.trim() : null;
+
+        if (PRINT_SIZES[key]) {
+          if (label) PRINT_SIZES[key].label = label;
+          if (!Number.isNaN(wIn) && wIn > 0) PRINT_SIZES[key].widthIn = wIn;
+          if (!Number.isNaN(hIn) && hIn > 0) PRINT_SIZES[key].heightIn = hIn;
           if (!Number.isNaN(p) && p >= 0) PRINT_SIZES[key].price = p;
           if (!Number.isNaN(pro) && pro >= 0) PRINT_SIZES[key].proPrice = pro;
+          PRINT_SIZES[key].minPxW = Math.round((PRINT_SIZES[key].widthIn || 6) * 200);
+          PRINT_SIZES[key].minPxH = Math.round((PRINT_SIZES[key].heightIn || 4) * 200);
+        } else if (label) {
+          const finalW = !Number.isNaN(wIn) && wIn > 0 ? wIn : 6;
+          const finalH = !Number.isNaN(hIn) && hIn > 0 ? hIn : 4;
+          PRINT_SIZES[key] = {
+            label,
+            price: !Number.isNaN(p) && p >= 0 ? p : 10,
+            proPrice: !Number.isNaN(pro) && pro >= 0 ? pro : 7,
+            widthIn: finalW,
+            heightIn: finalH,
+            dpi: 300,
+            minPxW: Math.round(finalW * 200),
+            minPxH: Math.round(finalH * 200)
+          };
         }
       });
+
+      const deletedKeys = Array.isArray(customMap.__deletedKeys) ? customMap.__deletedKeys : [];
+      deletedKeys.forEach((delKey) => {
+        if (Object.keys(PRINT_SIZES).length > 1 && PRINT_SIZES[delKey]) {
+          delete PRINT_SIZES[delKey];
+        }
+      });
+    }
+
+    function buildCatalogSnapshotMap() {
+      const snapshot = {};
+      Object.entries(PRINT_SIZES).forEach(([k, spec]) => {
+        snapshot[k] = {
+          label: spec.label,
+          widthIn: spec.widthIn,
+          heightIn: spec.heightIn,
+          price: spec.price,
+          proPrice: spec.proPrice
+        };
+      });
+      try {
+        const raw = localStorage.getItem('mc_custom_pricing');
+        const prev = raw ? JSON.parse(raw) : {};
+        if (Array.isArray(prev.__deletedKeys)) {
+          snapshot.__deletedKeys = prev.__deletedKeys.filter((dk) => !PRINT_SIZES[dk]);
+        }
+      } catch (e) {}
+      return snapshot;
     }
 
     function loadLocalPricingOverrides() {
@@ -1233,13 +1459,16 @@
           const cloudMap = {};
           data.forEach((row) => {
             cloudMap[row.size_key] = {
+              label: row.label || undefined,
+              widthIn: row.width_in != null ? Number(row.width_in) : undefined,
+              heightIn: row.height_in != null ? Number(row.height_in) : undefined,
               price: Number(row.amateur_price),
               proPrice: Number(row.pro_price)
             };
           });
           applySavedPricingOverrides(cloudMap);
           try {
-            localStorage.setItem('mc_custom_pricing', JSON.stringify(cloudMap));
+            localStorage.setItem('mc_custom_pricing', JSON.stringify(buildCatalogSnapshotMap()));
           } catch (e) {}
           renderPriceGuide();
           renderPhotosGrid();
@@ -1253,7 +1482,8 @@
     loadLocalPricingOverrides();
 
     function getUnitPriceForSize(sizeKey) {
-      const spec = PRINT_SIZES[sizeKey] || PRINT_SIZES['4x6'];
+      const fallbackKey = getDefaultSizeKey();
+      const spec = PRINT_SIZES[sizeKey] || PRINT_SIZES[fallbackKey];
       return customerTier === 'pro' ? spec.proPrice : spec.price;
     }
 
@@ -1401,7 +1631,7 @@
             dataUrl,
             naturalWidth: dimensions.width,
             naturalHeight: dimensions.height,
-            sizeKey: '4x6',
+            sizeKey: getDefaultSizeKey(),
             paperKey: 'glossy',
             quantity: 1,
             orientation: 'landscape',
@@ -2640,11 +2870,11 @@
 
       if (isKioskMode) {
         titleEl.textContent = 'Salir del Modo Kiosko';
-        descEl.textContent = 'Ingresa la contraseña de Master Color para volver al modo web normal.';
+        descEl.textContent = `Ingresa la contraseña de ${studioConfig.brandName} para volver al modo web normal.`;
         btnEl.textContent = 'Salir de Kiosko';
       } else {
         titleEl.textContent = 'Activar Modo Kiosko';
-        descEl.textContent = 'Ingresa la contraseña de Master Color para habilitar el autoservicio en tienda.';
+        descEl.textContent = `Ingresa la contraseña de ${studioConfig.brandName} para habilitar el autoservicio en tienda.`;
         btnEl.textContent = 'Activar Kiosko';
       }
 
@@ -3084,19 +3314,23 @@
       const ordersSec = document.getElementById('labOrdersSection');
       const photoSec = document.getElementById('labPhotographersSection');
       const pricingSec = document.getElementById('labPricingSection');
+      const studioSec = document.getElementById('labStudioSection');
       const ordersBtn = document.getElementById('labTabOrdersBtn');
       const photoBtn = document.getElementById('labTabPhotographersBtn');
       const pricingBtn = document.getElementById('labTabPricingBtn');
+      const studioBtn = document.getElementById('labTabStudioBtn');
 
       if (!ordersSec || !photoSec) return;
 
       ordersSec.classList.add('hidden');
       photoSec.classList.add('hidden');
       if (pricingSec) pricingSec.classList.add('hidden');
+      if (studioSec) studioSec.classList.add('hidden');
 
       if (ordersBtn) ordersBtn.className = 'px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition';
       if (photoBtn) photoBtn.className = 'px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition inline-flex items-center gap-1.5';
       if (pricingBtn) pricingBtn.className = 'px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition inline-flex items-center gap-1.5';
+      if (studioBtn) studioBtn.className = 'px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition inline-flex items-center gap-1.5';
 
       if (section === 'photographers') {
         photoSec.classList.remove('hidden');
@@ -3106,9 +3340,170 @@
         pricingSec.classList.remove('hidden');
         if (pricingBtn) pricingBtn.className = 'px-3 py-1.5 rounded-xl bg-emerald-600 text-xs font-bold text-white transition inline-flex items-center gap-1.5';
         renderLabPricingEditor();
+      } else if (section === 'studio' && studioSec) {
+        studioSec.classList.remove('hidden');
+        if (studioBtn) studioBtn.className = 'px-3 py-1.5 rounded-xl bg-amber-600 text-xs font-bold text-white transition inline-flex items-center gap-1.5';
+        renderLabStudioEditor();
       } else {
         ordersSec.classList.remove('hidden');
         if (ordersBtn) ordersBtn.className = 'px-3 py-1.5 rounded-xl bg-brand-600 text-xs font-bold text-white transition';
+      }
+    }
+
+    async function renderLabStudioEditor() {
+      await syncStudioConfigFromCloud();
+      const brandInp = document.getElementById('cfgLabBrandName');
+      const shipInp = document.getElementById('cfgShippingFee');
+      const badgeEl = document.getElementById('studioSyncStatusBadge');
+
+      if (brandInp) brandInp.value = studioConfig.brandName || 'Master Color';
+      if (shipInp) shipInp.value = Number(studioConfig.shippingFee || 0).toFixed(2);
+      if (badgeEl) {
+        badgeEl.textContent = isSupabaseConfigured ? '🟢 Sincronizado con la nube' : '💾 Guardado en este equipo';
+      }
+
+      renderBankAccountEditorRows();
+    }
+
+    function renderBankAccountEditorRows() {
+      const container = document.getElementById('labBankAccountsEditorList');
+      if (!container) return;
+
+      const list = Array.isArray(studioConfig.bankAccounts) ? studioConfig.bankAccounts : [];
+      if (list.length === 0) {
+        container.innerHTML = `<p class="text-xs text-slate-400 italic py-2">No hay cuentas bancarias agregadas. Usa "+ Agregar cuenta bancaria".</p>`;
+        return;
+      }
+
+      container.innerHTML = list.map((acc, idx) => `
+        <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center bg-slate-50 p-2.5 rounded-xl border border-slate-200">
+          <div class="sm:col-span-4">
+            <input
+              type="text"
+              required
+              data-bank-idx="${idx}"
+              data-bank-field="bank"
+              value="${escapeHtml(acc.bank || '')}"
+              placeholder="Banco (Ej: BAC Credomatic)"
+              class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+          </div>
+          <div class="sm:col-span-4">
+            <input
+              type="text"
+              required
+              data-bank-idx="${idx}"
+              data-bank-field="account"
+              value="${escapeHtml(acc.account || '')}"
+              placeholder="Número de cuenta"
+              class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-mono font-semibold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+          </div>
+          <div class="sm:col-span-3">
+            <input
+              type="text"
+              data-bank-idx="${idx}"
+              data-bank-field="holder"
+              value="${escapeHtml(acc.holder || '')}"
+              placeholder="Titular de la cuenta"
+              class="w-full rounded-lg border border-slate-300 bg-white px-2.5 py-1.5 text-xs font-medium text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+          </div>
+          <div class="sm:col-span-1 text-right">
+            <button
+              type="button"
+              onclick="removeBankAccountRow(${idx})"
+              class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-[11px] font-bold transition"
+              title="Quitar cuenta"
+            >
+              ✕
+            </button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function collectBankAccountsFromInputs() {
+      const bankInputs = document.querySelectorAll('input[data-bank-field="bank"]');
+      const nextAccounts = [];
+      bankInputs.forEach((inp) => {
+        const idx = inp.getAttribute('data-bank-idx');
+        const accInp = document.querySelector(`input[data-bank-idx="${idx}"][data-bank-field="account"]`);
+        const holderInp = document.querySelector(`input[data-bank-idx="${idx}"][data-bank-field="holder"]`);
+        nextAccounts.push({
+          bank: inp.value.trim(),
+          account: accInp ? accInp.value.trim() : '',
+          holder: holderInp ? holderInp.value.trim() : ''
+        });
+      });
+      return nextAccounts;
+    }
+
+    function addBankAccountRow() {
+      studioConfig.bankAccounts = collectBankAccountsFromInputs();
+      studioConfig.bankAccounts.push({
+        bank: '',
+        account: '',
+        holder: document.getElementById('cfgLabBrandName')?.value.trim() || studioConfig.brandName || ''
+      });
+      renderBankAccountEditorRows();
+    }
+
+    function removeBankAccountRow(idx) {
+      studioConfig.bankAccounts = collectBankAccountsFromInputs();
+      studioConfig.bankAccounts.splice(idx, 1);
+      renderBankAccountEditorRows();
+    }
+
+    async function saveLabStudioSettings(event) {
+      event.preventDefault();
+      const btn = document.getElementById('saveStudioSettingsBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
+      }
+
+      try {
+        const nextBrand = (document.getElementById('cfgLabBrandName')?.value || 'Master Color').trim() || 'Master Color';
+        const nextShipping = Math.max(0, parseFloat(document.getElementById('cfgShippingFee')?.value || '0') || 0);
+        const nextAccounts = collectBankAccountsFromInputs().filter((a) => a.bank && a.account);
+
+        studioConfig = {
+          brandName: nextBrand,
+          shippingFee: nextShipping,
+          bankAccounts: nextAccounts
+        };
+
+        try {
+          localStorage.setItem('mc_studio_settings', JSON.stringify(studioConfig));
+        } catch (e) {}
+
+        applyStudioBrandingToUI();
+        recalculateOrderSummary();
+
+        if (isSupabaseConfigured && supabaseClient) {
+          const { error } = await supabaseClient
+            .from('studio_settings')
+            .upsert([{
+              setting_key: 'general',
+              setting_value: studioConfig,
+              updated_at: new Date().toISOString()
+            }], { onConflict: 'setting_key' });
+
+          if (error) {
+            console.warn('Guardado local, aviso nube:', error.message);
+            showToast('Datos del estudio guardados en este dispositivo.', 'warning');
+          } else {
+            showToast(`¡Marca blanca de "${nextBrand}" guardada y sincronizada!`, 'success');
+          }
+        } else {
+          showToast(`¡Marca blanca de "${nextBrand}" guardada!`, 'success');
+        }
+      } finally {
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Guardar datos del estudio y bancos';
+        }
       }
     }
 
@@ -3123,35 +3518,181 @@
         statusBadge.textContent = isSupabaseConfigured ? '🟢 Sincronizado con la nube' : '💾 Guardado en este equipo';
       }
 
+      const keys = Object.keys(PRINT_SIZES);
       tbody.innerHTML = Object.entries(PRINT_SIZES).map(([key, spec]) => `
         <tr class="hover:bg-slate-50/70">
-          <td class="py-2.5 px-3 font-bold text-slate-800">${escapeHtml(spec.label)}</td>
-          <td class="py-2.5 px-3">
+          <td class="py-2 px-3">
+            <input
+              type="text"
+              required
+              data-prod-field="label"
+              data-size-key="${escapeHtml(key)}"
+              value="${escapeHtml(spec.label)}"
+              class="w-44 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+          </td>
+          <td class="py-2 px-3">
+            <input
+              type="number"
+              step="0.1"
+              min="1"
+              max="60"
+              required
+              data-prod-field="widthIn"
+              data-size-key="${escapeHtml(key)}"
+              value="${Number(spec.widthIn)}"
+              class="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+          </td>
+          <td class="py-2 px-3">
+            <input
+              type="number"
+              step="0.1"
+              min="1"
+              max="60"
+              required
+              data-prod-field="heightIn"
+              data-size-key="${escapeHtml(key)}"
+              value="${Number(spec.heightIn)}"
+              class="w-20 rounded-lg border border-slate-300 px-2 py-1.5 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+          </td>
+          <td class="py-2 px-3">
             <input
               type="number"
               step="0.01"
               min="0"
               required
               data-price-tier="amateur"
-              data-size-key="${key}"
+              data-size-key="${escapeHtml(key)}"
               value="${Number(spec.price).toFixed(2)}"
-              class="w-28 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+              class="w-24 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
             />
           </td>
-          <td class="py-2.5 px-3">
+          <td class="py-2 px-3">
             <input
               type="number"
               step="0.01"
               min="0"
               required
               data-price-tier="pro"
-              data-size-key="${key}"
+              data-size-key="${escapeHtml(key)}"
               value="${Number(spec.proPrice).toFixed(2)}"
-              class="w-28 rounded-lg border border-indigo-200 bg-indigo-50/40 px-2.5 py-1.5 text-xs font-bold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              class="w-24 rounded-lg border border-indigo-200 bg-indigo-50/40 px-2.5 py-1.5 text-xs font-bold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
             />
+          </td>
+          <td class="py-2 px-3 text-right">
+            ${keys.length > 1 ? `
+              <button
+                type="button"
+                onclick="deleteLabProduct('${escapeHtml(key)}')"
+                class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-[11px] font-bold transition"
+                title="Eliminar producto del catálogo"
+              >
+                Eliminar
+              </button>
+            ` : `<span class="text-[11px] text-slate-400">Mínimo 1</span>`}
           </td>
         </tr>
       `).join('');
+    }
+
+    async function addNewLabProduct(event) {
+      event.preventDefault();
+      const label = document.getElementById('newProdLabel').value.trim();
+      const widthIn = parseFloat(document.getElementById('newProdWidthIn').value);
+      const heightIn = parseFloat(document.getElementById('newProdHeightIn').value);
+      const price = parseFloat(document.getElementById('newProdAmateurPrice').value);
+      const proPrice = parseFloat(document.getElementById('newProdProPrice').value);
+
+      if (!label || Number.isNaN(widthIn) || Number.isNaN(heightIn) || Number.isNaN(price) || Number.isNaN(proPrice)) {
+        showToast('Completa todos los campos del producto.', 'warning');
+        return;
+      }
+
+      const slug = label
+        .toLowerCase()
+        .replace(/[^a-z0-9]+/g, '_')
+        .replace(/^_+|_+$/g, '')
+        .slice(0, 24);
+      const sizeKey = `${slug || 'prod'}_${Date.now().toString(36).slice(-4)}`;
+
+      PRINT_SIZES[sizeKey] = {
+        label,
+        price: Math.max(0, price),
+        proPrice: Math.max(0, proPrice),
+        widthIn: Math.max(1, widthIn),
+        heightIn: Math.max(1, heightIn),
+        dpi: 300,
+        minPxW: Math.round(Math.max(1, widthIn) * 200),
+        minPxH: Math.round(Math.max(1, heightIn) * 200)
+      };
+
+      try {
+        localStorage.setItem('mc_custom_pricing', JSON.stringify(buildCatalogSnapshotMap()));
+      } catch (e) {}
+
+      if (isSupabaseConfigured && supabaseClient) {
+        await supabaseClient
+          .from('pricing_config')
+          .upsert([{
+            size_key: sizeKey,
+            label,
+            width_in: PRINT_SIZES[sizeKey].widthIn,
+            height_in: PRINT_SIZES[sizeKey].heightIn,
+            amateur_price: PRINT_SIZES[sizeKey].price,
+            pro_price: PRINT_SIZES[sizeKey].proPrice,
+            updated_at: new Date().toISOString()
+          }], { onConflict: 'size_key' });
+      }
+
+      document.getElementById('newProdLabel').value = '';
+      document.getElementById('newProdWidthIn').value = '';
+      document.getElementById('newProdHeightIn').value = '';
+      document.getElementById('newProdAmateurPrice').value = '';
+      document.getElementById('newProdProPrice').value = '';
+
+      renderPriceGuide();
+      renderPhotosGrid();
+      recalculateOrderSummary();
+      renderLabPricingEditor();
+      showToast(`Producto "${label}" agregado al catálogo.`, 'success');
+    }
+
+    async function deleteLabProduct(sizeKey) {
+      if (Object.keys(PRINT_SIZES).length <= 1) {
+        showToast('Debe quedar al menos un producto activo.', 'warning');
+        return;
+      }
+      const deletedLabel = PRINT_SIZES[sizeKey]?.label || sizeKey;
+      delete PRINT_SIZES[sizeKey];
+
+      const fallbackKey = getDefaultSizeKey();
+      photos.forEach((p) => {
+        if (p.sizeKey === sizeKey) p.sizeKey = fallbackKey;
+      });
+
+      const snapshot = buildCatalogSnapshotMap();
+      const deletedList = Array.isArray(snapshot.__deletedKeys) ? snapshot.__deletedKeys : [];
+      if (!deletedList.includes(sizeKey)) deletedList.push(sizeKey);
+      snapshot.__deletedKeys = deletedList;
+
+      try {
+        localStorage.setItem('mc_custom_pricing', JSON.stringify(snapshot));
+      } catch (e) {}
+
+      if (isSupabaseConfigured && supabaseClient) {
+        await supabaseClient
+          .from('pricing_config')
+          .delete()
+          .eq('size_key', sizeKey);
+      }
+
+      renderPriceGuide();
+      renderPhotosGrid();
+      recalculateOrderSummary();
+      renderLabPricingEditor();
+      showToast(`Producto "${deletedLabel}" eliminado.`, 'info');
     }
 
     async function saveLabPricingSettings(event) {
@@ -3167,14 +3708,31 @@
         const upsertRows = [];
 
         Object.keys(PRINT_SIZES).forEach((sizeKey) => {
+          const labelInp = document.querySelector(`input[data-prod-field="label"][data-size-key="${sizeKey}"]`);
+          const widthInp = document.querySelector(`input[data-prod-field="widthIn"][data-size-key="${sizeKey}"]`);
+          const heightInp = document.querySelector(`input[data-prod-field="heightIn"][data-size-key="${sizeKey}"]`);
           const amateurInp = document.querySelector(`input[data-price-tier="amateur"][data-size-key="${sizeKey}"]`);
           const proInp = document.querySelector(`input[data-price-tier="pro"][data-size-key="${sizeKey}"]`);
+
+          const newLabel = (labelInp?.value || PRINT_SIZES[sizeKey].label).trim() || PRINT_SIZES[sizeKey].label;
+          const newWidthIn = Math.max(1, parseFloat(widthInp?.value || PRINT_SIZES[sizeKey].widthIn) || PRINT_SIZES[sizeKey].widthIn);
+          const newHeightIn = Math.max(1, parseFloat(heightInp?.value || PRINT_SIZES[sizeKey].heightIn) || PRINT_SIZES[sizeKey].heightIn);
           const amateurVal = Math.max(0, parseFloat(amateurInp?.value || PRINT_SIZES[sizeKey].price) || 0);
           const proVal = Math.max(0, parseFloat(proInp?.value || PRINT_SIZES[sizeKey].proPrice) || 0);
 
-          updatedMap[sizeKey] = { price: amateurVal, proPrice: proVal };
+          updatedMap[sizeKey] = {
+            label: newLabel,
+            widthIn: newWidthIn,
+            heightIn: newHeightIn,
+            price: amateurVal,
+            proPrice: proVal
+          };
+
           upsertRows.push({
             size_key: sizeKey,
+            label: newLabel,
+            width_in: newWidthIn,
+            height_in: newHeightIn,
             amateur_price: amateurVal,
             pro_price: proVal,
             updated_at: new Date().toISOString()
@@ -3183,7 +3741,7 @@
 
         applySavedPricingOverrides(updatedMap);
         try {
-          localStorage.setItem('mc_custom_pricing', JSON.stringify(updatedMap));
+          localStorage.setItem('mc_custom_pricing', JSON.stringify(buildCatalogSnapshotMap()));
         } catch (e) {}
 
         if (isSupabaseConfigured && supabaseClient) {
@@ -3193,12 +3751,12 @@
 
           if (error) {
             console.warn('Guardado local, aviso nube:', error.message);
-            showToast('Tarifas guardadas en este navegador. (Crea la tabla pricing_config para sincronizar en todos los celulares).', 'warning');
+            showToast('Productos y tarifas guardados localmente.', 'warning');
           } else {
-            showToast('¡Tarifas de Aficionado y Fotógrafo Pro actualizadas en toda la plataforma!', 'success');
+            showToast('¡Productos y tarifas actualizados en toda la plataforma!', 'success');
           }
         } else {
-          showToast('¡Tarifas actualizadas!', 'success');
+          showToast('¡Productos y tarifas actualizados!', 'success');
         }
 
         renderPriceGuide();
@@ -3207,7 +3765,7 @@
       } finally {
         if (btn) {
           btn.disabled = false;
-          btn.textContent = 'Guardar tarifas';
+          btn.textContent = 'Guardar todos los cambios';
         }
       }
     }
@@ -3809,7 +4367,7 @@
         const rootFolder = zip.folder(`Orden_${order.order_code}_${order.customer_name.replace(/\s+/g, '_')}`);
 
         const summaryLines = [
-          `MASTER COLOR — HOJA DE TRABAJO DE LABORATORIO`,
+          `${(studioConfig.brandName || 'MASTER COLOR').toUpperCase()} — HOJA DE TRABAJO DE LABORATORIO`,
           `Orden: #${order.order_code}`,
           `Cliente: ${order.customer_name}`,
           `Teléfono: ${order.customer_phone}`,
@@ -3845,8 +4403,9 @@
         const zipBlob = await zip.generateAsync({ type: 'blob' });
         const url = URL.createObjectURL(zipBlob);
         const a = document.createElement('a');
+        const cleanBrandSlug = (studioConfig.brandName || 'MasterColor').replace(/[^a-zA-Z0-9_-]/g, '');
         a.href = url;
-        a.download = `Orden_${order.order_code}_MasterColor.zip`;
+        a.download = `Orden_${order.order_code}_${cleanBrandSlug}.zip`;
         document.body.appendChild(a);
         a.click();
         a.remove();
@@ -3866,7 +4425,9 @@
 
     // Inicialización al cargar
     document.addEventListener('DOMContentLoaded', () => {
+      applyStudioBrandingToUI();
       renderPriceGuide();
+      syncStudioConfigFromCloud();
       syncPricingFromCloud();
       setupFileUploadListeners();
       setupCropDragListeners();
