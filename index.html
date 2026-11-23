@@ -434,17 +434,31 @@
 
         <!-- Tabla rápida de tarifas -->
         <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm">
-          <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500 mb-2.5">Tarifas por tamaño</h4>
+          <div class="flex items-center justify-between mb-2.5">
+            <h4 class="text-xs font-bold uppercase tracking-wider text-slate-500">Tarifas por tamaño</h4>
+            <span id="priceGuideTierLabel" class="hidden text-[10px] font-bold px-2 py-0.5 rounded-full bg-indigo-100 text-indigo-700">Tarifa Pro</span>
+          </div>
           <div id="priceGuideList" class="grid grid-cols-2 gap-2 text-xs"></div>
         </div>
       </aside>
     </div>
   </main>
 
-  <!-- Pie de página discreto con accesos de personal (Kiosko y Laboratorio) -->
+  <!-- Pie de página discreto con accesos de personal (Kiosko, Laboratorio, Caja y Pro) -->
   <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 mt-8 border-t border-slate-200/70 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-400">
     <span>© Master Color • Laboratorio Fotográfico</span>
-    <div class="flex items-center gap-4">
+    <div class="flex flex-wrap items-center justify-center gap-3 sm:gap-4">
+      <button
+        id="proAccessFooterBtn"
+        type="button"
+        onclick="openProPinModal()"
+        class="hover:text-slate-600 transition cursor-pointer inline-flex items-center gap-1.5"
+        title="Acceso exclusivo para fotógrafos registrados"
+      >
+        <span id="proFooterDot" class="w-1.5 h-1.5 rounded-full bg-slate-300"></span>
+        <span id="proFooterLabel">Fotógrafos</span>
+      </button>
+      <span class="text-slate-300">•</span>
       <button
         id="kioskModeToggleBtn"
         type="button"
@@ -483,216 +497,65 @@
   </footer>
 
   <!-- ===================================================================== -->
-  <!-- MODAL: EDITOR DE ENCUADRE, POSICIÓN, BORDE AJUSTABLE Y DEDICATORIA    -->
+  <!-- MODAL: ACCESO DISCRETO FOTÓGRAFOS REGISTRADOS                         -->
   <!-- ===================================================================== -->
-  <div id="cropEditorModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4">
-    <div class="bg-white rounded-2xl max-w-lg w-full shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[94vh]">
-      <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between shrink-0">
+  <div id="proPinModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-sm w-full shadow-2xl border border-slate-200 p-6 text-center space-y-4">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-700 mx-auto flex items-center justify-center">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+          <path d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+          <circle cx="12" cy="13" r="3" />
+        </svg>
+      </div>
+      <div>
+        <h3 class="text-base font-bold text-slate-900">Portal de Fotógrafos</h3>
+        <p class="text-xs text-slate-500 mt-1">Inicia sesión con tu usuario y contraseña personal.</p>
+      </div>
+      <form onsubmit="verifyProModalCode(event)" class="space-y-3 text-left">
         <div>
-          <h3 class="text-base font-bold text-slate-900">Ajustar encuadre, borde y texto</h3>
-          <p id="modalPhotoSubtitle" class="text-xs text-slate-500">Arrastra la foto o usa las flechas para ubicar el encuadre</p>
+          <label for="proModalUserInput" class="block text-[11px] font-bold text-slate-600 mb-1">Usuario</label>
+          <input
+            id="proModalUserInput"
+            type="text"
+            placeholder="Ej: estudio.carlos"
+            autocomplete="username"
+            required
+            class="w-full text-sm font-semibold rounded-xl border border-slate-300 px-3.5 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
         </div>
-        <button type="button" onclick="closeCropModal()" class="p-2 rounded-xl hover:bg-slate-100 text-slate-500">
-          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-            <path d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </button>
-      </div>
-
-      <div class="p-4 sm:p-5 space-y-4 overflow-y-auto">
-        <!-- Área interactiva de recorte -->
-        <div class="checkerboard-bg rounded-xl p-4 flex flex-col items-center justify-center border border-slate-200">
-          <div
-            id="modalPaperFrame"
-            style="width: 310px; height: 207px; padding: 0px; background-color: #ffffff;"
-            class="relative shadow-md transition-all duration-150 select-none overflow-hidden flex items-center justify-center"
-          >
-            <div
-              id="modalCropViewport"
-              class="relative w-full h-full overflow-hidden cursor-grab active:cursor-grabbing bg-slate-900 flex items-center justify-center"
+        <div>
+          <label for="proModalCodeInput" class="block text-[11px] font-bold text-slate-600 mb-1">Contraseña</label>
+          <div class="relative">
+            <input
+              id="proModalCodeInput"
+              type="password"
+              placeholder="••••••••"
+              autocomplete="current-password"
+              required
+              class="w-full text-sm font-semibold rounded-xl border border-slate-300 pl-3.5 pr-10 py-2.5 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+            <button
+              type="button"
+              onclick="togglePasswordVisibility('proModalCodeInput', 'proEyeIcon')"
+              class="absolute right-2.5 top-1/2 -translate-y-1/2 p-1 text-slate-400 hover:text-slate-700 transition"
+              title="Mostrar u ocultar contraseña"
             >
-              <img
-                id="modalCropImg"
-                src=""
-                alt="Vista previa de recorte"
-                draggable="false"
-                style="max-width: none; z-index: 10;"
-                class="origin-center select-none pointer-events-none"
-              />
-              <!-- Guías de tercios y cruz central de alineación -->
-              <div style="z-index: 15;" class="pointer-events-none absolute inset-0 border border-white/40 grid grid-cols-3 grid-rows-3">
-                <div class="border-r border-b border-white/25"></div>
-                <div class="border-r border-b border-white/25"></div>
-                <div class="border-b border-white/25"></div>
-                <div class="border-r border-b border-white/25"></div>
-                <div class="border-r border-b border-white/25"></div>
-                <div class="border-b border-white/25"></div>
-                <div class="border-r border-white/25"></div>
-                <div class="border-r border-white/25"></div>
-                <div></div>
-              </div>
-              <!-- Líneas centrales para centrar foto y texto -->
-              <div style="z-index: 16;" class="pointer-events-none absolute inset-y-0 left-1/2 -translate-x-1/2 border-l border-dashed border-amber-300/75"></div>
-              <div style="z-index: 16;" class="pointer-events-none absolute inset-x-0 top-1/2 -translate-y-1/2 border-t border-dashed border-amber-300/75"></div>
-              <!-- Texto / dedicatoria en vivo -->
-              <div
-                id="modalCaptionOverlay"
-                style="z-index: 20; color: #ffffff;"
-                class="pointer-events-none absolute text-center font-bold tracking-wide drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)] whitespace-nowrap transition-all"
-              ></div>
-            </div>
-          </div>
-
-          <!-- Botones de ajuste fino de posición (Flechas ↑ ↓ ← →) -->
-          <div class="mt-3 flex items-center gap-1.5">
-            <span class="text-[11px] font-semibold text-slate-500 mr-1">Mover foto:</span>
-            <button type="button" onclick="nudgeModalOffset(0, -10)" class="p-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 shadow-sm" title="Subir imagen">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M5 15l7-7 7 7"/></svg>
-            </button>
-            <button type="button" onclick="nudgeModalOffset(0, 10)" class="p-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 shadow-sm" title="Bajar imagen">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7"/></svg>
-            </button>
-            <button type="button" onclick="nudgeModalOffset(-10, 0)" class="p-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 shadow-sm" title="Mover a la izquierda">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M15 19l-7-7 7-7"/></svg>
-            </button>
-            <button type="button" onclick="nudgeModalOffset(10, 0)" class="p-1.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 shadow-sm" title="Mover a la derecha">
-              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path d="M9 5l7 7-7 7"/></svg>
-            </button>
-            <button type="button" onclick="centerModalOffset()" class="ml-1 px-2 py-1 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 text-[11px] font-semibold text-slate-700 shadow-sm">
-              Centrar
+              <svg id="proEyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+              </svg>
             </button>
           </div>
         </div>
-
-        <!-- Controles de zoom, rotación, borde y texto -->
-        <div class="space-y-3">
-          <div class="flex items-center gap-3">
-            <span class="text-xs font-semibold text-slate-600 w-14">Zoom</span>
-            <input
-              id="modalZoomSlider"
-              type="range"
-              min="1"
-              max="2.5"
-              step="0.05"
-              value="1"
-              oninput="handleModalZoom(this.value)"
-              class="flex-1 accent-brand-600 cursor-pointer"
-            />
-            <span id="modalZoomLabel" class="text-xs font-bold text-slate-700 w-10 text-right">100%</span>
-          </div>
-
-          <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                onclick="rotateModalPhoto()"
-                class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold inline-flex items-center gap-1.5 transition"
-              >
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
-                  <path d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Rotar 90°
-              </button>
-              <button
-                type="button"
-                onclick="toggleModalOrientation()"
-                class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold transition"
-              >
-                Papel: <span id="modalOrientationText">Horizontal</span>
-              </button>
-            </div>
-
-            <label class="inline-flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-              <input
-                id="modalBorderCheckbox"
-                type="checkbox"
-                onchange="toggleModalBorder(this.checked)"
-                class="rounded text-brand-600 focus:ring-brand-500 w-4 h-4"
-              />
-              Borde de color
-            </label>
-          </div>
-
-          <!-- Personalización de color y grosor de borde -->
-          <div id="modalBorderOptions" class="hidden bg-slate-50 rounded-xl p-3.5 border border-slate-200 space-y-3">
-            <div class="flex flex-wrap items-center justify-between gap-2">
-              <span class="text-xs font-bold text-slate-700">Color del borde:</span>
-              <div id="modalBorderSwatches" class="flex items-center gap-2">
-                <button type="button" data-border-color="#ffffff" onclick="setModalBorderColor('#ffffff')" style="background-color: #ffffff;" class="w-7 h-7 rounded-full border-2 border-slate-400 shadow-sm hover:scale-110 transition" title="Blanco clásico"></button>
-                <button type="button" data-border-color="#0f172a" onclick="setModalBorderColor('#0f172a')" style="background-color: #0f172a;" class="w-7 h-7 rounded-full border-2 border-slate-300 shadow-sm hover:scale-110 transition" title="Negro galería"></button>
-                <button type="button" data-border-color="#fef3c7" onclick="setModalBorderColor('#fef3c7')" style="background-color: #fef3c7;" class="w-7 h-7 rounded-full border-2 border-amber-400 shadow-sm hover:scale-110 transition" title="Crema vintage"></button>
-                <button type="button" data-border-color="#fecdd3" onclick="setModalBorderColor('#fecdd3')" style="background-color: #fecdd3;" class="w-7 h-7 rounded-full border-2 border-rose-400 shadow-sm hover:scale-110 transition" title="Rosa pastel"></button>
-                <button type="button" data-border-color="#bae6fd" onclick="setModalBorderColor('#bae6fd')" style="background-color: #bae6fd;" class="w-7 h-7 rounded-full border-2 border-sky-400 shadow-sm hover:scale-110 transition" title="Celeste"></button>
-                <label class="relative w-7 h-7 rounded-full border-2 border-slate-300 overflow-hidden cursor-pointer shadow-sm hover:scale-110 transition bg-gradient-to-tr from-pink-500 via-amber-400 to-sky-500" title="Elegir cualquier color">
-                  <input id="modalBorderColorPicker" type="color" value="#ffffff" oninput="setModalBorderColor(this.value)" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" />
-                </label>
-              </div>
-            </div>
-            <div class="flex items-center gap-3">
-              <span class="text-xs font-semibold text-slate-600">Grosor del borde</span>
-              <input
-                id="modalBorderWidthSlider"
-                type="range"
-                min="2"
-                max="15"
-                step="1"
-                value="4"
-                oninput="handleModalBorderWidth(this.value)"
-                class="flex-1 accent-brand-600 cursor-pointer"
-              />
-              <span id="modalBorderWidthLabel" class="text-xs font-bold text-slate-700 w-12 text-right">4 mm</span>
-            </div>
-          </div>
-
-          <!-- Texto o dedicatoria -->
-          <div class="bg-slate-50 rounded-xl p-3.5 border border-slate-200 space-y-2.5">
-            <div class="flex items-center justify-between">
-              <label for="modalCaptionInput" class="text-xs font-bold text-slate-700">Texto o dedicatoria (opcional)</label>
-              <span id="modalCaptionCount" class="text-[11px] text-slate-400">0/45</span>
-            </div>
-            <input
-              id="modalCaptionInput"
-              type="text"
-              maxlength="45"
-              placeholder="Ej: Graduación 2026 • Te amo mamá"
-              oninput="handleModalCaption(this.value)"
-              class="w-full text-xs sm:text-sm rounded-xl border border-slate-300 bg-white px-3 py-2 focus:outline-none focus:ring-2 focus:ring-brand-500"
-            />
-            <div class="flex flex-wrap items-center justify-between gap-2 pt-1">
-              <div id="modalCaptionSwatches" class="flex items-center gap-1.5">
-                <span class="text-[11px] font-semibold text-slate-600 mr-0.5">Color:</span>
-                <button type="button" data-caption-color="#ffffff" onclick="setModalCaptionColor('#ffffff')" style="background-color: #ffffff;" class="w-6 h-6 rounded-full border-2 border-slate-400 shadow-sm hover:scale-110 transition" title="Blanco"></button>
-                <button type="button" data-caption-color="#0f172a" onclick="setModalCaptionColor('#0f172a')" style="background-color: #0f172a;" class="w-6 h-6 rounded-full border-2 border-slate-300 shadow-sm hover:scale-110 transition" title="Negro"></button>
-                <button type="button" data-caption-color="#facc15" onclick="setModalCaptionColor('#facc15')" style="background-color: #facc15;" class="w-6 h-6 rounded-full border-2 border-slate-300 shadow-sm hover:scale-110 transition" title="Dorado"></button>
-                <button type="button" data-caption-color="#f43f5e" onclick="setModalCaptionColor('#f43f5e')" style="background-color: #f43f5e;" class="w-6 h-6 rounded-full border-2 border-slate-300 shadow-sm hover:scale-110 transition" title="Rojo"></button>
-                <button type="button" data-caption-color="#38bdf8" onclick="setModalCaptionColor('#38bdf8')" style="background-color: #38bdf8;" class="w-6 h-6 rounded-full border-2 border-slate-300 shadow-sm hover:scale-110 transition" title="Celeste"></button>
-                <label class="relative w-6 h-6 rounded-full border-2 border-slate-300 overflow-hidden cursor-pointer shadow-sm hover:scale-110 transition bg-gradient-to-tr from-pink-500 via-amber-400 to-sky-500" title="Color personalizado">
-                  <input id="modalCaptionColorPicker" type="color" value="#ffffff" oninput="setModalCaptionColor(this.value)" class="opacity-0 absolute inset-0 w-full h-full cursor-pointer" />
-                </label>
-              </div>
-              <div class="flex items-center gap-1.5">
-                <label for="modalCaptionSizeSelect" class="text-[11px] font-semibold text-slate-600">Tamaño:</label>
-                <select id="modalCaptionSizeSelect" onchange="setModalCaptionSize(this.value)" class="text-xs font-semibold rounded-lg border border-slate-300 bg-white px-2 py-1 text-slate-800 focus:outline-none focus:ring-2 focus:ring-brand-500">
-                  <option value="xs">Muy pequeño</option>
-                  <option value="sm">Pequeño</option>
-                  <option value="md" selected>Mediano</option>
-                  <option value="lg">Grande</option>
-                  <option value="xl">Extra grande</option>
-                </select>
-              </div>
-            </div>
-          </div>
+        <div class="flex items-center gap-2 pt-2">
+          <button type="button" onclick="closeProPinModal()" class="flex-1 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700">
+            Cancelar
+          </button>
+          <button type="submit" class="flex-1 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm">
+            Ingresar
+          </button>
         </div>
-      </div>
-
-      <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
-        <button type="button" onclick="closeCropModal()" class="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-semibold text-slate-700">
-          Cancelar
-        </button>
-        <button type="button" onclick="saveModalChanges()" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-xs font-bold text-white shadow-sm">
-          Guardar ajustes
-        </button>
-      </div>
+      </form>
     </div>
   </div>
 
@@ -762,7 +625,24 @@
             <p id="labConnectionStatus" class="text-xs text-slate-400">Gestión de órdenes a 300 DPI</p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-2">
+          <button
+            type="button"
+            id="labTabOrdersBtn"
+            onclick="switchLabPanelSection('orders')"
+            class="px-3 py-1.5 rounded-xl bg-brand-600 text-xs font-bold text-white transition"
+          >
+            Órdenes
+          </button>
+          <button
+            type="button"
+            id="labTabPhotographersBtn"
+            onclick="switchLabPanelSection('photographers')"
+            class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition inline-flex items-center gap-1.5"
+          >
+            <span>📷</span>
+            <span>Fotógrafos Pro</span>
+          </button>
           <button
             type="button"
             onclick="fetchLabOrders()"
@@ -825,11 +705,74 @@
 
       <!-- Contenido del panel de laboratorio -->
       <div id="labOrdersContent" class="hidden p-6 overflow-y-auto space-y-4 bg-slate-50 flex-1">
-        <!-- Pestañas de filtro por estado -->
-        <div id="labStatusTabs" class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-2xl border border-slate-200"></div>
+        <!-- Sección: Órdenes -->
+        <div id="labOrdersSection" class="space-y-4">
+          <!-- Pestañas de filtro por estado -->
+          <div id="labStatusTabs" class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-2xl border border-slate-200"></div>
 
-        <!-- Lista de tarjetas de órdenes -->
-        <div id="labOrdersList" class="space-y-4"></div>
+          <!-- Lista de tarjetas de órdenes -->
+          <div id="labOrdersList" class="space-y-4"></div>
+        </div>
+
+        <!-- Sección: Gestor de Fotógrafos Pro -->
+        <div id="labPhotographersSection" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+            <div>
+              <h4 class="text-sm font-extrabold text-slate-900">Registrar Nuevo Fotógrafo Profesional</h4>
+              <p class="text-xs text-slate-500 mt-0.5">Asigna un usuario y contraseña individual para que acceda a la tarifa preferencial.</p>
+            </div>
+
+            <form onsubmit="createProPhotographer(event)" class="grid grid-cols-1 sm:grid-cols-12 gap-3 items-end">
+              <div class="sm:col-span-4">
+                <label for="newProFullName" class="block text-[11px] font-bold text-slate-600 mb-1">Nombre / Estudio *</label>
+                <input
+                  id="newProFullName"
+                  type="text"
+                  required
+                  placeholder="Ej: Estudio Carlos Méndez"
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div class="sm:col-span-3">
+                <label for="newProUsername" class="block text-[11px] font-bold text-slate-600 mb-1">Usuario *</label>
+                <input
+                  id="newProUsername"
+                  type="text"
+                  required
+                  placeholder="Ej: carlos.foto"
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div class="sm:col-span-3">
+                <label for="newProPassword" class="block text-[11px] font-bold text-slate-600 mb-1">Contraseña *</label>
+                <input
+                  id="newProPassword"
+                  type="text"
+                  required
+                  placeholder="Ej: Carlos2026*"
+                  class="w-full rounded-xl border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+              <div class="sm:col-span-2">
+                <button
+                  type="submit"
+                  id="createProBtn"
+                  class="w-full py-2 px-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold shadow-sm transition"
+                >
+                  + Agregar
+                </button>
+              </div>
+            </form>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-3">
+            <div class="flex items-center justify-between">
+              <h4 class="text-sm font-extrabold text-slate-900">Fotógrafos Registrados</h4>
+              <span id="proPhotographersCountLabel" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full">0 cuentas</span>
+            </div>
+            <div id="labPhotographersList" class="space-y-2.5"></div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -924,6 +867,103 @@
   </div>
 
   <!-- ===================================================================== -->
+  <!-- MODAL: EDITOR DE ENCUADRE, ZOOM, BORDE Y TEXTO                        -->
+  <!-- ===================================================================== -->
+  <div id="cropEditorModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-2xl max-w-2xl w-full shadow-2xl overflow-hidden border border-slate-200 flex flex-col max-h-[92vh]">
+      <div class="px-5 py-3.5 bg-slate-900 text-white flex items-center justify-between shrink-0">
+        <div>
+          <h3 class="text-sm sm:text-base font-bold">Ajustar Encuadre y Diseño</h3>
+          <p id="modalPhotoSubtitle" class="text-[11px] text-slate-300 truncate max-w-xs sm:max-w-md"></p>
+        </div>
+        <button type="button" onclick="closeCropModal()" class="p-1.5 rounded-xl hover:bg-white/10 text-slate-300">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path d="M6 18L18 6M6 6l12 12" />
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-4 sm:p-5 overflow-y-auto space-y-4">
+        <div class="checkerboard-bg rounded-2xl border border-slate-200 p-4 flex flex-col items-center justify-center">
+          <div id="modalCropViewport" class="flex items-center justify-center cursor-grab active:cursor-grabbing select-none touch-none min-h-[290px]">
+            <div id="modalPaperFrame" class="relative shadow-lg overflow-hidden flex items-center justify-center transition-all">
+              <div class="relative w-full h-full overflow-hidden bg-slate-900 flex items-center justify-center">
+                <img id="modalCropImg" src="" alt="Vista previa" class="max-w-none origin-center select-none pointer-events-none" />
+                <div id="modalCaptionOverlay" class="pointer-events-none absolute text-center font-bold tracking-wide px-1 truncate"></div>
+              </div>
+            </div>
+          </div>
+          <p class="text-[11px] text-slate-500 mt-2">Arrastra la foto dentro del marco para centrar a las personas.</p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+            <div class="flex items-center justify-between">
+              <span class="font-bold text-slate-700">Zoom</span>
+              <span id="modalZoomLabel" class="font-extrabold text-brand-700">100%</span>
+            </div>
+            <input id="modalZoomSlider" type="range" min="1" max="2.6" step="0.05" value="1" oninput="handleModalZoom(this.value)" class="w-full accent-brand-600" />
+            <div class="flex items-center gap-2 pt-1">
+              <button type="button" onclick="rotateModalPhoto()" class="flex-1 py-1.5 px-2.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-semibold text-slate-700">Girar 90°</button>
+              <button type="button" onclick="toggleModalOrientation()" class="flex-1 py-1.5 px-2.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-semibold text-slate-700">
+                Papel: <span id="modalOrientationText">Horizontal</span>
+              </button>
+              <button type="button" onclick="centerModalOffset()" class="py-1.5 px-2.5 rounded-lg bg-white border border-slate-300 hover:bg-slate-100 font-semibold text-slate-700">Centrar</button>
+            </div>
+          </div>
+
+          <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2">
+            <label class="flex items-center gap-2 font-bold text-slate-700 cursor-pointer">
+              <input id="modalBorderCheckbox" type="checkbox" onchange="toggleModalBorder(this.checked)" class="rounded text-brand-600" />
+              <span>Agregar margen / borde</span>
+            </label>
+            <div id="modalBorderOptions" class="hidden space-y-2 pt-1">
+              <div class="flex items-center justify-between gap-2">
+                <div id="modalBorderSwatches" class="flex items-center gap-1.5">
+                  <button type="button" data-border-color="#ffffff" onclick="setModalBorderColor('#ffffff')" class="w-5 h-5 rounded-full bg-white border border-slate-300"></button>
+                  <button type="button" data-border-color="#0f172a" onclick="setModalBorderColor('#0f172a')" class="w-5 h-5 rounded-full bg-slate-900"></button>
+                  <button type="button" data-border-color="#fef3c7" onclick="setModalBorderColor('#fef3c7')" class="w-5 h-5 rounded-full bg-amber-100 border border-amber-300"></button>
+                </div>
+                <input id="modalBorderColorPicker" type="color" value="#ffffff" oninput="setModalBorderColor(this.value)" class="w-7 h-6 rounded cursor-pointer border-0" />
+                <span id="modalBorderWidthLabel" class="text-[11px] font-bold text-slate-600">4 mm</span>
+              </div>
+              <input id="modalBorderWidthSlider" type="range" min="2" max="12" step="1" value="4" oninput="handleModalBorderWidth(this.value)" class="w-full accent-brand-600" />
+            </div>
+          </div>
+        </div>
+
+        <div class="bg-slate-50 p-3 rounded-xl border border-slate-200 space-y-2 text-xs">
+          <div class="flex items-center justify-between">
+            <label for="modalCaptionInput" class="font-bold text-slate-700">Dedicatoria / Fecha en la foto (opcional)</label>
+            <span id="modalCaptionCount" class="text-[11px] text-slate-400">0/45</span>
+          </div>
+          <div class="flex flex-wrap items-center gap-2">
+            <input id="modalCaptionInput" type="text" maxlength="45" oninput="handleModalCaption(this.value)" placeholder="Ej: Graduación 2026 • Familia López" class="flex-1 min-w-[180px] rounded-xl border border-slate-300 bg-white px-3 py-2 text-xs focus:outline-none focus:ring-2 focus:ring-brand-500" />
+            <div id="modalCaptionSwatches" class="flex items-center gap-1">
+              <button type="button" data-caption-color="#ffffff" onclick="setModalCaptionColor('#ffffff')" class="w-5 h-5 rounded-full bg-white border border-slate-300"></button>
+              <button type="button" data-caption-color="#0f172a" onclick="setModalCaptionColor('#0f172a')" class="w-5 h-5 rounded-full bg-slate-900"></button>
+              <button type="button" data-caption-color="#facc15" onclick="setModalCaptionColor('#facc15')" class="w-5 h-5 rounded-full bg-yellow-400"></button>
+            </div>
+            <input id="modalCaptionColorPicker" type="color" value="#ffffff" oninput="setModalCaptionColor(this.value)" class="w-7 h-7 rounded cursor-pointer border-0" />
+            <select id="modalCaptionSizeSelect" onchange="setModalCaptionSize(this.value)" class="rounded-lg border border-slate-300 bg-white px-2 py-1.5 text-xs font-semibold">
+              <option value="xs">XS</option>
+              <option value="sm">S</option>
+              <option value="md" selected>M</option>
+              <option value="lg">L</option>
+              <option value="xl">XL</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <div class="px-5 py-3.5 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-2 shrink-0">
+        <button type="button" onclick="closeCropModal()" class="px-4 py-2 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700">Cancelar</button>
+        <button type="button" onclick="saveModalChanges()" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-sm">Guardar encuadre</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
   <div id="orderSuccessModal" class="fixed inset-0 z-50 hidden bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-white rounded-2xl max-w-md w-full shadow-2xl overflow-hidden border border-slate-200 p-6 text-center space-y-4">
       <div class="w-16 h-16 rounded-full bg-emerald-100 text-emerald-600 mx-auto flex items-center justify-center">
@@ -991,6 +1031,14 @@
 
     const LAB_ACCESS_PIN = 'Master_Color_Elvin';
     const KIOSK_ACCESS_PIN = 'Master_Color_Elvin';
+
+    // Directorio individual de fotógrafos registrados (usuario, contraseña y nombre)
+    const PRO_PHOTOGRAPHERS = [
+      { user: 'carlos.foto', pass: 'Carlos2026*', name: 'Carlos Méndez Fotografía' },
+      { user: 'andrea.estudio', pass: 'Andrea2026*', name: 'Estudio Andrea López' },
+      { user: 'bodas.hn', pass: 'Bodas2026*', name: 'Luis Rivera Bodas & Eventos' }
+    ];
+
     const LAB_STORAGE_BUCKET = 'lab-orders';
 
     let supabaseClient = null;
@@ -1047,6 +1095,7 @@
       '4x6': {
         label: '4x6" (10x15 cm)',
         price: 8.00,
+        proPrice: 5.50,
         widthIn: 6,
         heightIn: 4,
         dpi: 300,
@@ -1056,6 +1105,7 @@
       '5x7': {
         label: '5x7" (13x18 cm)',
         price: 15.00,
+        proPrice: 11.00,
         widthIn: 7,
         heightIn: 5,
         dpi: 300,
@@ -1065,6 +1115,7 @@
       '6x8': {
         label: '6x8" (15x20 cm)',
         price: 25.00,
+        proPrice: 18.00,
         widthIn: 8,
         heightIn: 6,
         dpi: 300,
@@ -1074,6 +1125,7 @@
       '8x10': {
         label: '8x10" (20x25 cm)',
         price: 45.00,
+        proPrice: 32.00,
         widthIn: 10,
         heightIn: 8,
         dpi: 300,
@@ -1083,6 +1135,7 @@
       'wallet': {
         label: 'Set 4 Wallet (Cartera)',
         price: 20.00,
+        proPrice: 14.00,
         widthIn: 6,
         heightIn: 4,
         dpi: 300,
@@ -1099,6 +1152,11 @@
 
     const SHIPPING_FEE = 60.00;
     const CURRENCY_SYMBOL = 'L';
+
+    function getUnitPriceForSize(sizeKey) {
+      const spec = PRINT_SIZES[sizeKey] || PRINT_SIZES['4x6'];
+      return customerTier === 'pro' ? spec.proPrice : spec.price;
+    }
 
     // Calcula la proporción real (ancho / alto) según tamaño y orientación del papel
     function getPaperAspectRatio(sizeKey, orientation) {
@@ -1133,6 +1191,8 @@
 
     // Estado de la aplicación
     let photos = [];
+    let customerTier = 'amateur'; // 'amateur' | 'pro'
+    let activeProAccount = null;
     let deliveryMethod = 'pickup';
     let activeModalPhotoId = null;
     let modalDraft = null;
@@ -1177,10 +1237,14 @@
 
     function renderPriceGuide() {
       const container = document.getElementById('priceGuideList');
-      container.innerHTML = Object.entries(PRINT_SIZES).map(([, spec]) => `
+      const tierLabelEl = document.getElementById('priceGuideTierLabel');
+      if (tierLabelEl) {
+        tierLabelEl.classList.toggle('hidden', customerTier !== 'pro');
+      }
+      container.innerHTML = Object.entries(PRINT_SIZES).map(([key, spec]) => `
         <div class="flex items-center justify-between bg-slate-50 px-2.5 py-2 rounded-lg border border-slate-100">
           <span class="text-slate-600 font-medium">${spec.label}</span>
-          <span class="font-bold text-slate-900">${formatCurrency(spec.price)}</span>
+          <span class="font-bold ${customerTier === 'pro' ? 'text-indigo-700' : 'text-slate-900'}">${formatCurrency(getUnitPriceForSize(key))}</span>
         </div>
       `).join('');
     }
@@ -1337,8 +1401,9 @@
 
     function renderPhotoCardHTML(item, index) {
       const spec = PRINT_SIZES[item.sizeKey];
+      const unitPrice = getUnitPriceForSize(item.sizeKey);
       const quality = evaluateResolution(item);
-      const lineTotal = spec.price * item.quantity;
+      const lineTotal = unitPrice * item.quantity;
 
       // Medidas proporcionales al tamaño real seleccionado (4x6, 5x7, 6x8, 8x10)
       const isLandscape = item.orientation === 'landscape';
@@ -1463,7 +1528,7 @@
                 >
                   ${Object.entries(PRINT_SIZES).map(([key, s]) => `
                     <option value="${key}" ${item.sizeKey === key ? 'selected' : ''}>
-                      ${s.label} — ${formatCurrency(s.price)}
+                      ${s.label} — ${formatCurrency(getUnitPriceForSize(key))}
                     </option>
                   `).join('')}
                 </select>
@@ -1607,6 +1672,106 @@
       recalculateOrderSummary();
     }
 
+    function requestProPhotographerTier() {
+      if (customerTier === 'pro') return;
+      const box = document.getElementById('proCodeVerifyBox');
+      if (box) {
+        box.classList.remove('hidden');
+        const inp = document.getElementById('proPhotographerCodeInput');
+        if (inp) inp.focus();
+      }
+    }
+
+    function openProPinModal() {
+      if (customerTier === 'pro') {
+        setCustomerTier('amateur', null);
+        showToast('Has cerrado tu sesión de fotógrafo.', 'info');
+        return;
+      }
+      const userInp = document.getElementById('proModalUserInput');
+      const passInp = document.getElementById('proModalCodeInput');
+      if (userInp) userInp.value = '';
+      if (passInp) passInp.value = '';
+      document.getElementById('proPinModal').classList.remove('hidden');
+      setTimeout(() => { if (userInp) userInp.focus(); }, 60);
+    }
+
+    function closeProPinModal() {
+      document.getElementById('proPinModal').classList.add('hidden');
+    }
+
+    async function verifyProModalCode(event) {
+      if (event) event.preventDefault();
+      const userInp = document.getElementById('proModalUserInput');
+      const passInp = document.getElementById('proModalCodeInput');
+      if (!userInp || !passInp) return;
+
+      const enteredUser = userInp.value.trim().toLowerCase();
+      const enteredPass = passInp.value;
+
+      let matchedAccount = null;
+
+      if (isSupabaseConfigured && supabaseClient) {
+        try {
+          const { data, error } = await supabaseClient
+            .from('photographers')
+            .select('*')
+            .ilike('username', enteredUser)
+            .eq('password', enteredPass)
+            .eq('active', true)
+            .limit(1);
+
+          if (!error && Array.isArray(data) && data.length > 0) {
+            matchedAccount = {
+              user: data[0].username,
+              pass: data[0].password,
+              name: data[0].full_name
+            };
+          }
+        } catch (err) {
+          console.warn('Fallback a lista local de fotógrafos:', err);
+        }
+      }
+
+      if (!matchedAccount) {
+        matchedAccount = PRO_PHOTOGRAPHERS.find(
+          (acc) => acc.user.toLowerCase() === enteredUser && acc.pass === enteredPass
+        );
+      }
+
+      if (matchedAccount) {
+        closeProPinModal();
+        setCustomerTier('pro', matchedAccount);
+        showToast(`Bienvenido, ${matchedAccount.name}.`, 'success');
+      } else {
+        showToast('Usuario o contraseña incorrectos (o cuenta inactiva).', 'error');
+      }
+    }
+
+    function setCustomerTier(tier, account = null) {
+      customerTier = tier === 'pro' ? 'pro' : 'amateur';
+      activeProAccount = customerTier === 'pro' ? account : null;
+
+      const footerDot = document.getElementById('proFooterDot');
+      const footerLabel = document.getElementById('proFooterLabel');
+      const nameInput = document.getElementById('customerName');
+
+      if (customerTier === 'pro' && activeProAccount) {
+        if (footerDot) footerDot.className = 'w-1.5 h-1.5 rounded-full bg-indigo-500';
+        if (footerLabel) footerLabel.textContent = `${activeProAccount.name} (Salir)`;
+        if (nameInput && !nameInput.value.trim()) {
+          nameInput.value = activeProAccount.name;
+        }
+      } else {
+        if (footerDot) footerDot.className = 'w-1.5 h-1.5 rounded-full bg-slate-300';
+        if (footerLabel) footerLabel.textContent = 'Fotógrafos';
+      }
+
+      renderPriceGuide();
+      renderPhotosGrid();
+      recalculateOrderSummary();
+    }
+
     function recalculateOrderSummary() {
       const badge = document.getElementById('summaryBadgeCount');
       const breakdownList = document.getElementById('orderBreakdownList');
@@ -1638,13 +1803,14 @@
 
       photos.forEach((p) => {
         const spec = PRINT_SIZES[p.sizeKey];
+        const unitPrice = getUnitPriceForSize(p.sizeKey);
         if (!grouped[p.sizeKey]) {
           grouped[p.sizeKey] = { label: spec.label, qty: 0, amount: 0 };
         }
         grouped[p.sizeKey].qty += p.quantity;
-        grouped[p.sizeKey].amount += spec.price * p.quantity;
+        grouped[p.sizeKey].amount += unitPrice * p.quantity;
         totalPrints += p.quantity;
-        subtotal += spec.price * p.quantity;
+        subtotal += unitPrice * p.quantity;
       });
 
       breakdownList.innerHTML = Object.values(grouped).map((g) => `
@@ -2169,7 +2335,8 @@
         for (let i = 0; i < photos.length; i++) {
           const item = photos[i];
           const spec = PRINT_SIZES[item.sizeKey];
-          subtotal += spec.price * item.quantity;
+          const unitPrice = getUnitPriceForSize(item.sizeKey);
+          subtotal += unitPrice * item.quantity;
           totalPrints += item.quantity;
 
           submitBtn.innerHTML = `<span class="animate-pulse">Preparando foto ${i + 1} de ${photos.length} (300 DPI)...</span>`;
@@ -2200,8 +2367,9 @@
             paperKey: item.paperKey,
             paperLabel: PAPER_TYPES[item.paperKey],
             quantity: item.quantity,
-            unitPrice: spec.price,
-            lineTotal: spec.price * item.quantity,
+            unitPrice,
+            lineTotal: unitPrice * item.quantity,
+            customerTier,
             orientation: item.orientation,
             whiteBorder: item.whiteBorder,
             borderColor: item.borderColor,
@@ -2215,6 +2383,12 @@
 
         submitBtn.innerHTML = `<span class="animate-pulse">Registrando orden en laboratorio...</span>`;
 
+        const tierPrefix = customerTier === 'pro'
+          ? `[FOTÓGRAFO PRO: ${activeProAccount ? activeProAccount.name : 'Registrado'}] `
+          : '';
+        const storePrefix = isStoreOrder ? '[KIOSKO EN TIENDA - PAGO EN CAJA] ' : '';
+        const combinedNotes = `${tierPrefix}${storePrefix}${orderNotes}`.trim();
+
         const orderPayload = {
           order_code: orderCode,
           customer_name: customerName,
@@ -2222,7 +2396,7 @@
           customer_email: customerEmail || null,
           delivery_method: isStoreOrder ? 'pickup' : deliveryMethod,
           customer_address: (!isStoreOrder && deliveryMethod === 'shipping') ? customerAddress : null,
-          order_notes: isStoreOrder ? `[KIOSKO EN TIENDA - PAGO EN CAJA] ${orderNotes}`.trim() : (orderNotes || null),
+          order_notes: combinedNotes || null,
           subtotal,
           shipping_cost: shippingCost,
           grand_total: grandTotal,
@@ -2276,6 +2450,7 @@
       document.getElementById('orderSuccessModal').classList.add('hidden');
       photos = [];
       clearReceiptFile();
+      setCustomerTier('amateur', null);
       document.getElementById('checkoutForm').reset();
       if (isKioskMode) {
         document.getElementById('customerPhone').value = 'En tienda';
@@ -2547,6 +2722,7 @@
       if (isLabUnlocked) {
         document.getElementById('labPinGate').classList.add('hidden');
         document.getElementById('labOrdersContent').classList.remove('hidden');
+        switchLabPanelSection('orders');
         fetchLabOrders();
         startLabRealtimeSubscription();
       } else {
@@ -2555,6 +2731,166 @@
         document.getElementById('labOrdersContent').classList.add('hidden');
         setTimeout(() => document.getElementById('labPinInput').focus(), 60);
       }
+    }
+
+    function switchLabPanelSection(section) {
+      const ordersSec = document.getElementById('labOrdersSection');
+      const photoSec = document.getElementById('labPhotographersSection');
+      const ordersBtn = document.getElementById('labTabOrdersBtn');
+      const photoBtn = document.getElementById('labTabPhotographersBtn');
+
+      if (!ordersSec || !photoSec) return;
+
+      if (section === 'photographers') {
+        ordersSec.classList.add('hidden');
+        photoSec.classList.remove('hidden');
+        if (ordersBtn) ordersBtn.className = 'px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition';
+        if (photoBtn) photoBtn.className = 'px-3 py-1.5 rounded-xl bg-indigo-600 text-xs font-bold text-white transition inline-flex items-center gap-1.5';
+        fetchLabPhotographers();
+      } else {
+        photoSec.classList.add('hidden');
+        ordersSec.classList.remove('hidden');
+        if (ordersBtn) ordersBtn.className = 'px-3 py-1.5 rounded-xl bg-brand-600 text-xs font-bold text-white transition';
+        if (photoBtn) photoBtn.className = 'px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition inline-flex items-center gap-1.5';
+      }
+    }
+
+    async function fetchLabPhotographers() {
+      const listEl = document.getElementById('labPhotographersList');
+      const countEl = document.getElementById('proPhotographersCountLabel');
+      if (!listEl) return;
+
+      if (!isSupabaseConfigured || !supabaseClient) {
+        listEl.innerHTML = `<div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-xs">Conecta Supabase primero para administrar fotógrafos desde aquí.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = `<p class="text-xs text-slate-400">Cargando directorio...</p>`;
+
+      try {
+        const { data, error } = await supabaseClient
+          .from('photographers')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        const rows = data || [];
+        if (countEl) countEl.textContent = `${rows.length} ${rows.length === 1 ? 'cuenta' : 'cuentas'}`;
+
+        if (rows.length === 0) {
+          listEl.innerHTML = `<div class="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">Aún no has creado cuentas de fotógrafos en la nube. Agrega el primero arriba.</div>`;
+          return;
+        }
+
+        listEl.innerHTML = rows.map((p) => `
+          <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl border ${p.active ? 'border-slate-200 bg-slate-50/70' : 'border-rose-200 bg-rose-50/40'}">
+            <div class="space-y-0.5">
+              <div class="flex items-center gap-2">
+                <span class="text-xs font-extrabold text-slate-900">${escapeHtml(p.full_name)}</span>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${p.active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'}">
+                  ${p.active ? 'Activo' : 'Suspendido'}
+                </span>
+              </div>
+              <p class="text-xs text-slate-600">
+                Usuario: <code class="bg-white border border-slate-200 px-1.5 py-0.5 rounded font-bold text-indigo-700">${escapeHtml(p.username)}</code>
+                • Contraseña: <code class="bg-white border border-slate-200 px-1.5 py-0.5 rounded font-bold text-slate-800">${escapeHtml(p.password)}</code>
+              </p>
+            </div>
+            <div class="flex items-center gap-2">
+              <button
+                type="button"
+                onclick="toggleProPhotographerStatus('${p.id}', ${!p.active})"
+                class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-[11px] font-bold text-slate-700 transition"
+              >
+                ${p.active ? 'Suspender' : 'Reactivar'}
+              </button>
+              <button
+                type="button"
+                onclick="deleteProPhotographer('${p.id}', '${escapeHtml(p.full_name)}')"
+                class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-[11px] font-bold transition"
+              >
+                Eliminar
+              </button>
+            </div>
+          </div>
+        `).join('');
+      } catch (err) {
+        console.error(err);
+        listEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-4 text-xs">Asegúrate de haber ejecutado el SQL de la tabla <b>foto_estudio.photographers</b>. (${escapeHtml(err.message)})</div>`;
+      }
+    }
+
+    async function createProPhotographer(event) {
+      event.preventDefault();
+      if (!isSupabaseConfigured || !supabaseClient) {
+        showToast('Configura Supabase primero.', 'warning');
+        return;
+      }
+
+      const nameInp = document.getElementById('newProFullName');
+      const userInp = document.getElementById('newProUsername');
+      const passInp = document.getElementById('newProPassword');
+      const btn = document.getElementById('createProBtn');
+
+      const fullName = nameInp.value.trim();
+      const username = userInp.value.trim().toLowerCase().replace(/\s+/g, '');
+      const password = passInp.value.trim();
+
+      if (!fullName || !username || !password) return;
+
+      btn.disabled = true;
+      btn.textContent = 'Guardando...';
+
+      try {
+        const { error } = await supabaseClient
+          .from('photographers')
+          .insert([{ full_name: fullName, username, password, active: true }]);
+
+        if (error) throw error;
+
+        nameInp.value = '';
+        userInp.value = '';
+        passInp.value = '';
+        showToast(`Fotógrafo "${fullName}" registrado.`, 'success');
+        fetchLabPhotographers();
+      } catch (err) {
+        console.error(err);
+        showToast(`Error al crear fotógrafo: ${err.message}`, 'error');
+      } finally {
+        btn.disabled = false;
+        btn.textContent = '+ Agregar';
+      }
+    }
+
+    async function toggleProPhotographerStatus(id, nextActive) {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient
+        .from('photographers')
+        .update({ active: nextActive })
+        .eq('id', id);
+
+      if (error) {
+        showToast(`Error: ${error.message}`, 'error');
+        return;
+      }
+      showToast(nextActive ? 'Cuenta reactivada.' : 'Cuenta suspendida.', 'info');
+      fetchLabPhotographers();
+    }
+
+    async function deleteProPhotographer(id, name) {
+      if (!supabaseClient) return;
+      const { error } = await supabaseClient
+        .from('photographers')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        showToast(`Error al eliminar: ${error.message}`, 'error');
+        return;
+      }
+      showToast(`Cuenta de "${name}" eliminada.`, 'info');
+      fetchLabPhotographers();
     }
 
     function logoutLabSession() {
@@ -3302,6 +3638,9 @@
       recalculateOrderSummary();
 
       const params = new URLSearchParams(window.location.search);
+      if (params.get('pro') === '1') {
+        openProPinModal();
+      }
       if (params.get('tienda') === '1') {
         setCustomerInStore(true);
       }
