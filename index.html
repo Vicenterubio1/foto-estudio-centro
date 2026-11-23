@@ -88,7 +88,12 @@
               ⭐ Gremio Pro
             </span>
           </div>
-          <p class="text-[11px] sm:text-xs text-slate-500 truncate">Impresión fotográfica profesional a 300 DPI</p>
+          <div class="flex items-center gap-2">
+            <p class="text-[11px] sm:text-xs text-slate-500 truncate">Impresión fotográfica profesional a 300 DPI</p>
+            <span id="cloudStatusPill" class="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600">
+              ● Modo Local
+            </span>
+          </div>
         </div>
       </div>
 
@@ -403,8 +408,8 @@
           <label for="proPasswordInput" class="block text-xs font-semibold text-slate-700 mb-1">Contraseña</label>
           <div class="relative">
             <input id="proPasswordInput" type="password" placeholder="••••••••" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 pr-10 text-sm focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/20 outline-none" onkeydown="if(event.key==='Enter') verifyProPhotographerLogin()" />
-            <button type="button" onclick="togglePasswordVisibility('proPasswordInput', 'proEyeIcon')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600">
-              <svg id="proEyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="button" onclick="togglePasswordVisibility('proPasswordInput')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
@@ -431,8 +436,8 @@
       <p class="text-xs text-slate-500">Ingresa la contraseña operativa para bloquear esta tablet/computadora en modo autoservicio en tienda.</p>
       <div class="relative">
         <input id="kioskPinInput" type="password" placeholder="Contraseña operativa" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 pr-10 text-sm focus:border-brand-500 outline-none" onkeydown="if(event.key==='Enter') verifyKioskPin()" />
-        <button type="button" onclick="togglePasswordVisibility('kioskPinInput', 'kioskEyeIcon')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600">
-          <svg id="kioskEyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button type="button" onclick="togglePasswordVisibility('kioskPinInput')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
           </svg>
@@ -476,8 +481,8 @@
         <div class="flex items-center gap-2 w-full max-w-xs">
           <div class="relative flex-1">
             <input id="cashierPinInput" type="password" placeholder="Contraseña operativa" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 pr-10 text-sm text-center focus:border-emerald-500 outline-none" onkeydown="if(event.key==='Enter') verifyCashierPin()" />
-            <button type="button" onclick="togglePasswordVisibility('cashierPinInput', 'cashierEyeIcon')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600">
-              <svg id="cashierEyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <button type="button" onclick="togglePasswordVisibility('cashierPinInput')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
@@ -515,21 +520,17 @@
           <button id="labTabOrdersBtn" type="button" onclick="switchLabModalTab('orders')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-brand-600 text-white transition">
             Órdenes
           </button>
-          <button id="labTabProBtn" type="button" onclick="switchLabModalTab('photographers')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition flex items-center gap-1.5">
-            <span>📷 Fotógrafos Pro</span>
-            <span class="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">Dueño</span>
+          <button id="labTabProBtn" type="button" onclick="switchLabModalTab('photographers')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
+            📷 Fotógrafos Pro
           </button>
-          <button id="labTabPricingBtn" type="button" onclick="switchLabModalTab('pricing')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition flex items-center gap-1.5">
-            <span>💲 Productos y Tarifas</span>
-            <span class="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">Dueño</span>
+          <button id="labTabPricingBtn" type="button" onclick="switchLabModalTab('pricing')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
+            💲 Productos y Tarifas
           </button>
-          <button id="labTabStudioBtn" type="button" onclick="switchLabModalTab('studio')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition flex items-center gap-1.5">
-            <span>⚙️ Estudio y Bancos</span>
-            <span class="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">Dueño</span>
+          <button id="labTabStudioBtn" type="button" onclick="switchLabModalTab('studio')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
+            ⚙️ Estudio y Bancos
           </button>
-          <button id="labTabSecurityBtn" type="button" onclick="switchLabModalTab('security')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition flex items-center gap-1.5">
-            <span>🔐 Claves</span>
-            <span class="text-[9px] uppercase tracking-wider px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 border border-amber-400/30">Dueño</span>
+          <button id="labTabSecurityBtn" type="button" onclick="switchLabModalTab('security')" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
+            🔐 Claves y Nube
           </button>
           <button id="labRefreshBtn" type="button" onclick="fetchLabOrders()" class="px-3 py-1.5 text-xs font-semibold rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-200 transition">
             Actualizar
@@ -541,30 +542,35 @@
         </div>
       </div>
 
-      <!-- Barra de estado de rol (Operador vs Dueño) -->
-      <div id="labRoleBanner" class="hidden px-5 py-2 bg-slate-100 border-b border-slate-200 flex items-center justify-between gap-3 text-xs">
+      <!-- Barra de estado de rol y acceso a Administrar -->
+      <div id="labRoleBanner" class="hidden px-5 py-2.5 bg-slate-100 border-b border-slate-200 flex flex-wrap items-center justify-between gap-3 text-xs">
         <div class="flex items-center gap-2">
           <span id="labRoleBadge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold bg-slate-200 text-slate-700">
-            👤 Sesión Operativa (Caja / Lab / Kiosko)
+            👤 Sesión Operativa
           </span>
-          <span id="labRoleHint" class="text-slate-500 hidden sm:inline">Las pestañas de tarifas, bancos y fotógrafos requieren contraseña de Dueño.</span>
+          <span id="labRoleHint" class="text-slate-500 hidden sm:inline">Usa "Administrar" e ingresa la contraseña para habilitar todas las opciones.</span>
         </div>
-        <button id="labLockOwnerBtn" type="button" onclick="lockOwnerSession()" class="hidden px-2.5 py-1 rounded-lg bg-amber-100 hover:bg-amber-200 text-amber-900 font-semibold transition">
-          Bloquear modo Dueño
-        </button>
+        <div class="flex items-center gap-2">
+          <button id="labAdminAccessBtn" type="button" onclick="openAdminUnlockPrompt()" class="px-3 py-1 rounded-lg bg-slate-900 hover:bg-slate-800 text-white font-semibold transition">
+            🔑 Administrar
+          </button>
+          <button id="labLockOwnerBtn" type="button" onclick="lockOwnerSession()" class="hidden px-2.5 py-1 rounded-lg bg-slate-200 hover:bg-slate-300 text-slate-800 font-semibold transition">
+            Bloquear administración
+          </button>
+        </div>
       </div>
 
       <!-- Pantalla de bloqueo inicial Laboratorio -->
       <div id="labPinGate" class="p-8 sm:p-10 flex flex-col items-center justify-center text-center">
         <h4 class="text-base font-bold text-slate-900">Acceso a Panel de Laboratorio</h4>
         <p class="text-xs text-slate-500 mt-1 mb-4 max-w-sm">
-          Ingresa la contraseña operativa para gestionar órdenes, o la contraseña de Dueño para administrar precios, bancos y fotógrafos.
+          Ingresa la contraseña operativa para trabajar en órdenes, o la contraseña de administración para habilitar todas las opciones.
         </p>
         <div class="flex items-center gap-2 w-full max-w-xs">
           <div class="relative flex-1">
-            <input id="labPinInput" type="password" placeholder="Contraseña operativa o Dueño" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 pr-10 text-sm text-center focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none" onkeydown="if(event.key==='Enter') verifyLabPin()" />
-            <button type="button" onclick="togglePasswordVisibility('labPinInput', 'labEyeIcon')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600 transition" aria-label="Mostrar u ocultar contraseña">
-              <svg id="labEyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <input id="labPinInput" type="password" placeholder="Contraseña de acceso" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 pr-10 text-sm text-center focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none" onkeydown="if(event.key==='Enter') verifyLabPin()" />
+            <button type="button" onclick="togglePasswordVisibility('labPinInput')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600 transition" aria-label="Mostrar u ocultar contraseña">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
@@ -577,28 +583,28 @@
         <p id="labPinError" class="hidden text-xs text-red-600 font-medium mt-2">Contraseña incorrecta. Verifica e intenta de nuevo.</p>
       </div>
 
-      <!-- Gate exclusivo de Dueño -->
+      <!-- Gate de contraseña al pulsar Administrar -->
       <div id="ownerPinGateSection" class="hidden p-8 sm:p-10 flex-1 overflow-y-auto flex flex-col items-center justify-center text-center bg-slate-50">
-        <div class="w-12 h-12 rounded-2xl bg-amber-100 text-amber-700 flex items-center justify-center mb-3">🔐</div>
-        <h4 class="text-base font-bold text-slate-900">Área Exclusiva del Dueño / Administrador</h4>
+        <div class="w-12 h-12 rounded-2xl bg-brand-100 text-brand-700 flex items-center justify-center mb-3">🔐</div>
+        <h4 class="text-base font-bold text-slate-900">Administrar Configuración del Sistema</h4>
         <p class="text-xs text-slate-500 mt-1 mb-4 max-w-sm">
-          Solo el dueño puede modificar precios, catálogo de productos, cuentas bancarias, fotógrafos Pro o contraseñas.
+          Ingresa la contraseña de administración para habilitar tarifas, catálogo, cuentas bancarias, fotógrafos Pro y configuración.
         </p>
         <div class="flex items-center gap-2 w-full max-w-xs">
           <div class="relative flex-1">
-            <input id="ownerPinInput" type="password" placeholder="Contraseña de Dueño" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 pr-10 text-sm text-center focus:border-amber-500 focus:ring-2 focus:ring-amber-500/20 outline-none" onkeydown="if(event.key==='Enter') verifyOwnerPin()" />
-            <button type="button" onclick="togglePasswordVisibility('ownerPinInput', 'ownerEyeIcon')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600 transition">
-              <svg id="ownerEyeIcon" class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <input id="ownerPinInput" type="password" placeholder="Contraseña de administración" class="w-full rounded-xl border border-slate-300 bg-white px-3.5 py-2.5 pr-10 text-sm text-center focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 outline-none" onkeydown="if(event.key==='Enter') verifyOwnerPin()" />
+            <button type="button" onclick="togglePasswordVisibility('ownerPinInput')" class="absolute inset-y-0 right-0 px-3 flex items-center text-slate-400 hover:text-slate-600 transition">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
               </svg>
             </button>
           </div>
-          <button type="button" onclick="verifyOwnerPin()" class="px-4 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-sm font-semibold transition">
-            Desbloquear
+          <button type="button" onclick="verifyOwnerPin()" class="px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-sm font-semibold transition">
+            Habilitar todo
           </button>
         </div>
-        <p id="ownerPinError" class="hidden text-xs text-red-600 font-medium mt-2">Contraseña de dueño incorrecta.</p>
+        <p id="ownerPinError" class="hidden text-xs text-red-600 font-medium mt-2">Contraseña incorrecta.</p>
       </div>
 
       <!-- Pestaña 1: Órdenes autorizadas por Caja -->
@@ -713,14 +719,14 @@
         </div>
       </div>
 
-      <!-- Pestaña 5: Contraseñas Operativa vs Dueño -->
+      <!-- Pestaña 5: Contraseñas y Conexión Supabase -->
       <div id="labSecuritySection" class="hidden p-5 overflow-y-auto flex-1 bg-slate-50">
         <div class="max-w-2xl mx-auto space-y-5">
           <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
             <div>
               <h4 class="text-sm font-bold text-slate-900">Control de Accesos y Contraseñas</h4>
               <p class="text-xs text-slate-500 mt-0.5">
-                El personal operativo usa una sola clave compartida para <strong>Caja, Laboratorio y Kiosko</strong>. La clave de <strong>Dueño</strong> protege precios, bancos y fotógrafos.
+                La clave operativa se usa en <strong>Caja, Laboratorio y Kiosko</strong>. La clave de <strong>Administrar</strong> habilita todas las opciones de configuración.
               </p>
             </div>
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -729,13 +735,46 @@
                 <input id="securityStaffPinInput" type="text" placeholder="Ej: LabCaja2026" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono outline-none" />
               </div>
               <div>
-                <label for="securityOwnerPinInput" class="block text-xs font-semibold text-slate-700 mb-1">Contraseña Exclusiva del Dueño</label>
-                <input id="securityOwnerPinInput" type="text" placeholder="Ej: DuenoAdmin2026" class="w-full rounded-xl border border-amber-300 px-3.5 py-2.5 text-sm font-mono outline-none" />
+                <label for="securityOwnerPinInput" class="block text-xs font-semibold text-slate-700 mb-1">Contraseña de Administrar</label>
+                <input id="securityOwnerPinInput" type="text" placeholder="Ej: Admin2026" class="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm font-mono outline-none" />
               </div>
             </div>
             <div class="flex justify-end">
-              <button type="button" onclick="saveSecurityPinsFromEditor()" class="px-5 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-700 text-white text-xs sm:text-sm font-semibold">
+              <button type="button" onclick="saveSecurityPinsFromEditor()" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold">
                 Guardar contraseñas
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 sm:p-5 shadow-sm space-y-4">
+            <div>
+              <h4 class="text-sm font-bold text-slate-900">Conexión Nube Supabase (por Laboratorio)</h4>
+              <p class="text-xs text-slate-500 mt-0.5">
+                Conecta este navegador al proyecto Supabase del laboratorio cliente (URL, Anon Key y esquema) o limpia la conexión local.
+              </p>
+            </div>
+            <div class="space-y-3">
+              <div>
+                <label for="supabaseUrlInput" class="block text-xs font-semibold text-slate-700 mb-1">Project URL</label>
+                <input id="supabaseUrlInput" type="text" placeholder="https://xxxx.supabase.co" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-mono outline-none" />
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="sm:col-span-2">
+                  <label for="supabaseAnonKeyInput" class="block text-xs font-semibold text-slate-700 mb-1">Anon / Publishable Key</label>
+                  <input id="supabaseAnonKeyInput" type="text" placeholder="eyJhbGciOi..." class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-mono outline-none" />
+                </div>
+                <div>
+                  <label for="supabaseSchemaInput" class="block text-xs font-semibold text-slate-700 mb-1">Esquema DB</label>
+                  <input id="supabaseSchemaInput" type="text" placeholder="foto_estudio" class="w-full rounded-xl border border-slate-300 px-3.5 py-2 text-xs font-mono outline-none" />
+                </div>
+              </div>
+            </div>
+            <div class="flex flex-wrap justify-end gap-2">
+              <button type="button" onclick="resetSupabaseConnectionConfig()" class="px-4 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold">
+                Usar valores del código
+              </button>
+              <button type="button" onclick="saveSupabaseConnectionFromEditor()" class="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs sm:text-sm font-semibold">
+                Conectar y sincronizar Supabase
               </button>
             </div>
           </div>
@@ -749,367 +788,330 @@
 
   <script>
     // =========================================================================
-    // 1. CONFIGURACIÓN SUPABASE Y MARCA BLANCA MULTI-LABORATORIO
+    // 0. CONFIGURACIÓN BASE Y ESTADO GLOBAL
     // =========================================================================
-    const SUPABASE_URL = 'https://tu-proyecto.supabase.co';
-    const SUPABASE_ANON_KEY = 'tu-anon-key';
-    const SUPABASE_SCHEMA = 'foto_estudio';
-    const STORAGE_BUCKET = 'lab-orders';
-
     const DEFAULT_LAB_BRAND_NAME = 'Laboratorio Fotográfico';
     const CURRENCY_SYMBOL = 'L';
+    const STORAGE_BUCKET = 'lab-orders';
+    const DEFAULT_SUPABASE_URL = 'https://tu-proyecto.supabase.co';
+    const DEFAULT_SUPABASE_ANON_KEY = 'tu-anon-key';
+    const DEFAULT_SUPABASE_SCHEMA = 'foto_estudio';
 
-    let supabaseClient = null;
-    let isSupabaseConfigured = false;
-
-    try {
-      if (
-        window.supabase &&
-        SUPABASE_URL &&
-        SUPABASE_ANON_KEY &&
-        !SUPABASE_URL.includes('tu-proyecto')
-      ) {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
-          db: { schema: SUPABASE_SCHEMA }
-        });
-        isSupabaseConfigured = true;
-      }
-    } catch (err) {
-      console.warn('Supabase en modo local:', err);
-    }
-
-    // =========================================================================
-    // 2. CONTRASEÑAS SEPARADAS: OPERATIVA (CAJA / LAB / KIOSKO) VS DUEÑO
-    // =========================================================================
-    const DEFAULT_STAFF_PIN = 'Master_Color_Elvin';
-    const DEFAULT_OWNER_PIN = 'Dueno_Master_2026';
-
-    let securityPins = {
-      staffPin: DEFAULT_STAFF_PIN,
-      ownerPin: DEFAULT_OWNER_PIN
+    let PRINT_SIZES = JSON.parse(localStorage.getItem('mc_print_sizes') || 'null') || {
+      '4x6': { label: '4x6" (10x15 cm)', widthIn: 4, heightIn: 6, price: 8.0, proPrice: 5.5 },
+      '5x7': { label: '5x7" (13x18 cm)', widthIn: 5, heightIn: 7, price: 15.0, proPrice: 11.0 },
+      '6x8': { label: '6x8" (15x20 cm)', widthIn: 6, heightIn: 8, price: 25.0, proPrice: 18.0 },
+      '8x10': { label: '8x10" (20x25 cm)', widthIn: 8, heightIn: 10, price: 45.0, proPrice: 34.0 },
+      'wallet': { label: 'Set 4 Wallet', widthIn: 2, heightIn: 3, price: 12.0, proPrice: 8.5 }
     };
 
-    let isLabAuthenticated = false;
-    let isOwnerUnlocked = false;
-    let isCashierAuthenticated = false;
-    let pendingOwnerTab = null;
-
-    function getStaffPin() {
-      return (securityPins.staffPin || DEFAULT_STAFF_PIN).trim();
-    }
-
-    function getOwnerPin() {
-      return (securityPins.ownerPin || DEFAULT_OWNER_PIN).trim();
-    }
-
-    function loadLocalSecurityPins() {
-      try {
-        const raw = localStorage.getItem('mc_security_pins');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed?.staffPin) securityPins.staffPin = String(parsed.staffPin).trim();
-          if (parsed?.ownerPin) securityPins.ownerPin = String(parsed.ownerPin).trim();
-        }
-      } catch (e) {}
-    }
-
-    async function syncSecurityPinsFromCloud() {
-      loadLocalSecurityPins();
-      if (!isSupabaseConfigured || !supabaseClient) return;
-      try {
-        const { data, error } = await supabaseClient
-          .from('studio_settings')
-          .select('*')
-          .eq('setting_key', 'security_pins')
-          .limit(1);
-        if (!error && Array.isArray(data) && data.length > 0 && data[0].setting_value) {
-          const val = data[0].setting_value;
-          if (val.staffPin) securityPins.staffPin = String(val.staffPin).trim();
-          if (val.ownerPin) securityPins.ownerPin = String(val.ownerPin).trim();
-          localStorage.setItem('mc_security_pins', JSON.stringify(securityPins));
-        }
-      } catch (e) {}
-    }
-
-    // =========================================================================
-    // 3. IDENTIDAD DEL ESTUDIO Y BANCOS (EDITABLES POR DUEÑO)
-    // =========================================================================
-    let studioConfig = {
+    let studioConfig = JSON.parse(localStorage.getItem('mc_studio_config') || 'null') || {
       brandName: DEFAULT_LAB_BRAND_NAME,
-      shippingFee: 85.00,
+      shippingFee: 65,
       bankAccounts: [
-        { bank: 'BAC Credomatic', account: '741258963', holder: 'Laboratorio Fotográfico' },
-        { bank: 'Banco Atlántida', account: '110022334455', holder: 'Laboratorio Fotográfico' }
+        { bank: 'BAC', account: '700000000', holder: 'Laboratorio Fotográfico' }
       ]
     };
 
-    function applyBrandNameToDOM() {
-      const urlParams = new URLSearchParams(window.location.search);
-      const urlBrand = (urlParams.get('lab') || urlParams.get('estudio') || '').trim();
-      const effectiveName = urlBrand || studioConfig.brandName || DEFAULT_LAB_BRAND_NAME;
-
-      document.title = `${effectiveName} — Impresión Fotográfica 300 DPI`;
-      const headerEl = document.getElementById('headerBrandName');
-      if (headerEl) headerEl.textContent = effectiveName;
-      const footerEl = document.getElementById('footerBrandText');
-      if (footerEl) footerEl.textContent = `© 2026 ${effectiveName} • Calidad Profesional 300 DPI`;
-
-      document.querySelectorAll('.dynamic-brand-name').forEach((el) => {
-        el.textContent = effectiveName;
-      });
-      renderBankAccountsDisplay();
-    }
-
-    function renderBankAccountsDisplay() {
-      const container = document.getElementById('bankAccountsListDisplay');
-      if (!container) return;
-      container.innerHTML = studioConfig.bankAccounts.map((acc) => `
-        <div class="flex flex-wrap justify-between gap-1 bg-white px-2.5 py-1.5 rounded-lg border border-slate-200/70">
-          <span class="font-semibold text-slate-800">${escapeHtml(acc.bank)}:</span>
-          <span class="font-mono text-slate-700">${escapeHtml(acc.account)}</span>
-          <span class="w-full text-[10px] text-slate-500">Titular: ${escapeHtml(acc.holder)}</span>
-        </div>
-      `).join('');
-    }
-
-    function copyBankAccounts() {
-      const text = studioConfig.bankAccounts
-        .map((a) => `${a.bank}: ${a.account} (${a.holder})`)
-        .join('\n');
-      const ta = document.createElement('textarea');
-      ta.value = text;
-      document.body.appendChild(ta);
-      ta.select();
-      document.execCommand('copy');
-      document.body.removeChild(ta);
-      showToast('Datos bancarios copiados al portapapeles.');
-    }
-
-    async function syncStudioConfigFromCloud() {
-      try {
-        const raw = localStorage.getItem('mc_studio_config');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && typeof parsed === 'object') {
-            studioConfig = { ...studioConfig, ...parsed };
-          }
-        }
-      } catch (e) {}
-
-      if (isSupabaseConfigured && supabaseClient) {
-        try {
-          const { data, error } = await supabaseClient
-            .from('studio_settings')
-            .select('*')
-            .eq('setting_key', 'general')
-            .limit(1);
-          if (!error && Array.isArray(data) && data.length > 0 && data[0].setting_value) {
-            studioConfig = { ...studioConfig, ...data[0].setting_value };
-            localStorage.setItem('mc_studio_config', JSON.stringify(studioConfig));
-          }
-        } catch (e) {}
-      }
-      applyBrandNameToDOM();
-    }
-
-    // =========================================================================
-    // 4. CATÁLOGO DE PRODUCTOS Y TARIFAS (AFICIONADO VS FOTÓGRAFO PRO)
-    // =========================================================================
-    let PRINT_SIZES = {
-      '4x6': { label: '4x6" (10x15 cm)', widthIn: 4, heightIn: 6, price: 8.00, proPrice: 5.50 },
-      '5x7': { label: '5x7" (13x18 cm)', widthIn: 5, heightIn: 7, price: 15.00, proPrice: 11.00 },
-      '6x8': { label: '6x8" (15x20 cm)', widthIn: 6, heightIn: 8, price: 25.00, proPrice: 18.00 },
-      '8x10': { label: '8x10" (20x25 cm)', widthIn: 8, heightIn: 10, price: 45.00, proPrice: 32.00 },
-      'wallet': { label: 'Set 4 Wallet (2.5x3.5")', widthIn: 2.5, heightIn: 3.5, price: 20.00, proPrice: 14.00 }
+    let securityPins = JSON.parse(localStorage.getItem('mc_security_pins') || 'null') || {
+      staffPin: 'Master_Color_Elvin',
+      ownerPin: 'Admin_Lab_2026'
     };
 
-    let activeProPhotographer = null; // { username, full_name }
+    let activeSupabaseConfig = {
+      url: DEFAULT_SUPABASE_URL,
+      anonKey: DEFAULT_SUPABASE_ANON_KEY,
+      schema: DEFAULT_SUPABASE_SCHEMA
+    };
+    let supabaseClient = null;
+    let isSupabaseConfigured = false;
 
-    function getUnitPriceForSize(sizeKey) {
-      const item = PRINT_SIZES[sizeKey] || Object.values(PRINT_SIZES)[0];
-      if (!item) return 0;
-      return activeProPhotographer ? Number(item.proPrice) : Number(item.price);
+    // Estado de sesión y roles
+    let isLabAuthenticated = false;
+    let isOwnerUnlocked = false;
+    let pendingOwnerTab = null;
+
+    // Estado del pedido del cliente
+    let uploadedPhotos = [];
+    let customerLocationMode = 'home'; // 'home' | 'store'
+    let deliveryMethod = 'pickup'; // 'pickup' | 'shipping'
+    let activeProPhotographer = null;
+    let receiptFile = null;
+    let editingPhotoId = null;
+
+    function getStaffPin() {
+      return (securityPins && securityPins.staffPin) ? String(securityPins.staffPin) : 'Master_Color_Elvin';
     }
 
-    function refreshAllSizeSelectorsAndGuide() {
-      const batchSel = document.getElementById('batchSizeSelect');
-      if (batchSel) {
-        batchSel.innerHTML = '<option value="">Tamaño...</option>' +
-          Object.entries(PRINT_SIZES).map(([k, v]) => `<option value="${k}">${escapeHtml(v.label)}</option>`).join('');
-      }
-      const guide = document.getElementById('pricingGuideList');
-      if (guide) {
-        guide.innerHTML = Object.entries(PRINT_SIZES).map(([k, v]) => {
-          const p = getUnitPriceForSize(k);
-          return `
-            <div class="flex items-center justify-between py-1 border-b border-slate-100 last:border-0">
-              <span class="text-slate-700 font-medium">${escapeHtml(v.label)}</span>
-              <span class="font-bold ${activeProPhotographer ? 'text-indigo-700' : 'text-slate-900'}">${CURRENCY_SYMBOL} ${p.toFixed(2)}</span>
+    function getOwnerPin() {
+      return (securityPins && securityPins.ownerPin) ? String(securityPins.ownerPin) : 'Admin_Lab_2026';
+    }
+
+    function getBrandName() {
+      const params = new URLSearchParams(window.location.search);
+      const urlBrand = (params.get('lab') || params.get('estudio') || '').trim();
+      if (urlBrand) return urlBrand;
+      if (studioConfig && studioConfig.brandName) return String(studioConfig.brandName);
+      return DEFAULT_LAB_BRAND_NAME;
+    }
+
+    function applyBrandNameToDOM() {
+      const brand = getBrandName();
+      document.title = `${brand} — Impresión a 300 DPI`;
+      const headerEl = document.getElementById('headerBrandName');
+      if (headerEl) headerEl.textContent = brand;
+      document.querySelectorAll('.dynamic-brand-name').forEach((el) => {
+        el.textContent = brand;
+      });
+      const footerEl = document.getElementById('footerBrandText');
+      if (footerEl) footerEl.textContent = `© 2026 ${brand} • Calidad Profesional 300 DPI`;
+
+      const bankContainer = document.getElementById('bankAccountsListDisplay');
+      if (bankContainer) {
+        const accounts = Array.isArray(studioConfig.bankAccounts) ? studioConfig.bankAccounts : [];
+        if (accounts.length === 0) {
+          bankContainer.innerHTML = '<p class="text-slate-500">Consulta las cuentas vigentes en mostrador.</p>';
+        } else {
+          bankContainer.innerHTML = accounts.map((a) => `
+            <div class="flex flex-col">
+              <span class="font-bold text-slate-800">${escapeHtml(a.bank)} — <span class="font-mono">${escapeHtml(a.account)}</span></span>
+              ${a.holder ? `<span class="text-[11px] text-slate-500">A nombre de: ${escapeHtml(a.holder)}</span>` : ''}
             </div>
-          `;
-        }).join('');
+          `).join('');
+        }
       }
     }
 
-    async function syncPricingFromCloud() {
+    function initSupabaseConnection() {
       try {
-        const raw = localStorage.getItem('mc_print_sizes');
-        if (raw) {
-          const parsed = JSON.parse(raw);
-          if (parsed && Object.keys(parsed).length > 0) PRINT_SIZES = parsed;
-        }
-      } catch (e) {}
+        const saved = JSON.parse(localStorage.getItem('mc_supabase_config') || 'null');
+        const params = new URLSearchParams(window.location.search);
+        const url = (params.get('sb_url') || (saved && saved.url) || DEFAULT_SUPABASE_URL).trim();
+        const anonKey = (params.get('sb_key') || (saved && saved.anonKey) || DEFAULT_SUPABASE_ANON_KEY).trim();
+        const schema = (params.get('sb_schema') || (saved && saved.schema) || DEFAULT_SUPABASE_SCHEMA).trim() || DEFAULT_SUPABASE_SCHEMA;
 
-      if (isSupabaseConfigured && supabaseClient) {
-        try {
-          const { data, error } = await supabaseClient.from('pricing_config').select('*');
-          if (!error && Array.isArray(data) && data.length > 0) {
-            const loaded = {};
-            data.forEach((row) => {
-              loaded[row.size_key] = {
-                label: row.label || row.size_key,
-                widthIn: Number(row.width_in) || 4,
-                heightIn: Number(row.height_in) || 6,
-                price: Number(row.amateur_price) || 8,
-                proPrice: Number(row.pro_price) || 5.5
-              };
-            });
+        activeSupabaseConfig = { url, anonKey, schema };
+        const looksValid = url.startsWith('https://') && !url.includes('tu-proyecto') && anonKey.length > 15 && !anonKey.includes('tu-anon-key');
+
+        if (looksValid && window.supabase && typeof window.supabase.createClient === 'function') {
+          supabaseClient = window.supabase.createClient(url, anonKey, { db: { schema } });
+          isSupabaseConfigured = true;
+        } else {
+          supabaseClient = null;
+          isSupabaseConfigured = false;
+        }
+      } catch (err) {
+        supabaseClient = null;
+        isSupabaseConfigured = false;
+      }
+      updateCloudStatusPill();
+    }
+
+    function updateCloudStatusPill() {
+      const pill = document.getElementById('cloudStatusPill');
+      if (!pill) return;
+      if (isSupabaseConfigured) {
+        pill.className = 'hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200';
+        pill.textContent = `● Supabase (${activeSupabaseConfig.schema})`;
+      } else {
+        pill.className = 'hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold bg-slate-100 text-slate-600';
+        pill.textContent = '● Modo Local';
+      }
+    }
+
+    async function refreshAllCloudData() {
+      initSupabaseConnection();
+      if (!isSupabaseConfigured || !supabaseClient) {
+        applyBrandNameToDOM();
+        refreshAllSizeSelectorsAndGuide();
+        recalculateOrderTotals();
+        return;
+      }
+
+      try {
+        const { data: settingsRows } = await supabaseClient.from('studio_settings').select('*');
+        if (Array.isArray(settingsRows)) {
+          const generalRow = settingsRows.find((r) => r.setting_key === 'general');
+          if (generalRow && generalRow.setting_value) {
+            studioConfig = { ...studioConfig, ...generalRow.setting_value };
+            localStorage.setItem('mc_studio_config', JSON.stringify(studioConfig));
+          }
+          const pinsRow = settingsRows.find((r) => r.setting_key === 'security_pins');
+          if (pinsRow && pinsRow.setting_value) {
+            securityPins = { ...securityPins, ...pinsRow.setting_value };
+            localStorage.setItem('mc_security_pins', JSON.stringify(securityPins));
+          }
+        }
+
+        const { data: pricingRows } = await supabaseClient.from('pricing_config').select('*');
+        if (Array.isArray(pricingRows) && pricingRows.length > 0) {
+          const loaded = {};
+          pricingRows.forEach((row) => {
+            if (!row.size_key) return;
+            loaded[row.size_key] = {
+              label: row.label || row.size_key,
+              widthIn: Number(row.width_in) || 4,
+              heightIn: Number(row.height_in) || 6,
+              price: Number(row.amateur_price) || 0,
+              proPrice: Number(row.pro_price) || 0
+            };
+          });
+          if (Object.keys(loaded).length > 0) {
             PRINT_SIZES = loaded;
             localStorage.setItem('mc_print_sizes', JSON.stringify(PRINT_SIZES));
           }
-        } catch (e) {}
+        }
+      } catch (e) {
+        // Mantiene caché local si alguna tabla aún no existe
       }
+
+      applyBrandNameToDOM();
       refreshAllSizeSelectorsAndGuide();
       renderPhotosGrid();
       recalculateOrderTotals();
     }
 
     // =========================================================================
-    // 5. ESTADO DE PEDIDO, KIOSKO Y ARCHIVOS DEL CLIENTE
-    // =========================================================================
-    let uploadedPhotos = [];
-    let deliveryMethod = 'pickup'; // 'pickup' | 'shipping'
-    let customerLocationMode = 'home'; // 'home' | 'store'
-    let isKioskMode = false;
-    let selectedReceiptFile = null;
-    let editingPhotoId = null;
-
-    function setCustomerLocationMode(mode) {
-      customerLocationMode = mode;
-      const homeBtn = document.getElementById('locHomeBtn');
-      const storeBtn = document.getElementById('locStoreBtn');
-      const transferSec = document.getElementById('transferPaymentSection');
-      const deliverySec = document.getElementById('deliveryMethodSection');
-      const storeNotice = document.getElementById('inStorePayNotice');
-      const headerBannerText = document.getElementById('inStoreQuickBannerText');
-
-      if (mode === 'store') {
-        homeBtn.className = 'px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition text-center';
-        storeBtn.className = 'px-3 py-2.5 rounded-xl border-2 border-emerald-600 bg-emerald-50 text-emerald-900 text-xs font-bold transition text-center';
-        transferSec.classList.add('hidden');
-        deliverySec.classList.add('hidden');
-        storeNotice.classList.remove('hidden');
-        deliveryMethod = 'pickup';
-        if (headerBannerText) headerBannerText.textContent = '✓ En tienda (Pago en caja)';
-      } else {
-        homeBtn.className = 'px-3 py-2.5 rounded-xl border-2 border-brand-600 bg-brand-50 text-brand-900 text-xs font-bold transition text-center';
-        storeBtn.className = 'px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition text-center';
-        transferSec.classList.remove('hidden');
-        deliverySec.classList.remove('hidden');
-        storeNotice.classList.add('hidden');
-        if (headerBannerText) headerBannerText.textContent = '¿Estás en la tienda?';
-      }
-      recalculateOrderTotals();
-    }
-
-    function toggleInStoreModeFromHeader() {
-      setCustomerLocationMode(customerLocationMode === 'store' ? 'home' : 'store');
-    }
-
-    function setDeliveryMethod(method) {
-      deliveryMethod = method;
-      const pickupBtn = document.getElementById('pickupBtn');
-      const shippingBtn = document.getElementById('shippingBtn');
-      const addrWrap = document.getElementById('shippingAddressWrapper');
-
-      if (method === 'shipping') {
-        shippingBtn.className = 'px-3 py-2 rounded-xl border-2 border-brand-600 bg-brand-50 text-brand-900 text-xs font-semibold transition';
-        pickupBtn.className = 'px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold transition';
-        addrWrap.classList.remove('hidden');
-      } else {
-        pickupBtn.className = 'px-3 py-2 rounded-xl border-2 border-brand-600 bg-brand-50 text-brand-900 text-xs font-semibold transition';
-        shippingBtn.className = 'px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold transition';
-        addrWrap.classList.add('hidden');
-      }
-      recalculateOrderTotals();
-    }
-
-    function handleReceiptSelected(event) {
-      const file = event.target.files?.[0];
-      selectedReceiptFile = file || null;
-      const label = document.getElementById('receiptFileNameDisplay');
-      if (file && label) {
-        label.textContent = `✓ Comprobante adjunto: ${file.name}`;
-        label.classList.remove('hidden');
-      } else if (label) {
-        label.classList.add('hidden');
-      }
-    }
-
-    // =========================================================================
-    // 6. CARGA Y RENDERIZADO DE FOTOGRAFÍAS
+    // CARGA DE IMÁGENES, CATÁLOGO Y CÁLCULO DE PEDIDO
     // =========================================================================
     function setupDropzoneListeners() {
       const dropZone = document.getElementById('dropZone');
       const fileInput = document.getElementById('fileInput');
       if (!dropZone || !fileInput) return;
 
-      dropZone.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        dropZone.classList.add('dropzone-active');
+      dropZone.addEventListener('click', (e) => {
+        if (e.target.closest('button')) return;
+        fileInput.click();
       });
-      dropZone.addEventListener('dragleave', () => {
-        dropZone.classList.remove('dropzone-active');
+
+      ['dragenter', 'dragover'].forEach((evtName) => {
+        dropZone.addEventListener(evtName, (e) => {
+          e.preventDefault();
+          dropZone.classList.add('dropzone-active');
+        });
       });
+
+      ['dragleave', 'drop'].forEach((evtName) => {
+        dropZone.addEventListener(evtName, (e) => {
+          e.preventDefault();
+          dropZone.classList.remove('dropzone-active');
+        });
+      });
+
       dropZone.addEventListener('drop', (e) => {
-        e.preventDefault();
-        dropZone.classList.remove('dropzone-active');
-        if (e.dataTransfer?.files?.length) handleFilesAdded(e.dataTransfer.files);
+        const files = Array.from(e.dataTransfer?.files || []).filter((f) => f.type.startsWith('image/'));
+        if (files.length > 0) addPhotoFiles(files);
       });
+
       fileInput.addEventListener('change', (e) => {
-        if (e.target.files?.length) {
-          handleFilesAdded(e.target.files);
-          e.target.value = '';
-        }
+        const files = Array.from(e.target.files || []).filter((f) => f.type.startsWith('image/'));
+        if (files.length > 0) addPhotoFiles(files);
+        e.target.value = '';
       });
     }
 
-    function handleFilesAdded(fileList) {
-      const defaultSizeKey = Object.keys(PRINT_SIZES)[0] || '4x6';
-      Array.from(fileList).forEach((file) => {
-        if (!file.type.startsWith('image/')) return;
+    function addPhotoFiles(files) {
+      const firstSizeKey = Object.keys(PRINT_SIZES)[0] || '4x6';
+      files.forEach((file) => {
+        const id = 'photo_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
         const previewUrl = URL.createObjectURL(file);
-        const img = new Image();
-        img.onload = () => {
-          uploadedPhotos.push({
-            id: 'photo_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7),
-            file,
-            name: file.name,
-            previewUrl,
-            widthPx: img.naturalWidth,
-            heightPx: img.naturalHeight,
-            sizeKey: defaultSizeKey,
-            paper: 'Brillante',
-            border: 'none',
-            caption: '',
-            copies: 1,
-            crop: { zoom: 100, panX: 0, panY: 0 }
-          });
-          renderPhotosGrid();
-          recalculateOrderTotals();
-        };
-        img.src = previewUrl;
+        uploadedPhotos.push({
+          id,
+          file,
+          fileName: file.name,
+          previewUrl,
+          sizeKey: firstSizeKey,
+          paper: 'Brillante',
+          border: 'none',
+          copies: 1,
+          zoom: 100,
+          panX: 0,
+          panY: 0
+        });
       });
+      renderPhotosGrid();
+      recalculateOrderTotals();
+    }
+
+    function clearAllPhotos() {
+      uploadedPhotos.forEach((p) => {
+        if (p.previewUrl) URL.revokeObjectURL(p.previewUrl);
+      });
+      uploadedPhotos = [];
+      renderPhotosGrid();
+      recalculateOrderTotals();
+    }
+
+    function removePhoto(photoId) {
+      const idx = uploadedPhotos.findIndex((p) => p.id === photoId);
+      if (idx === -1) return;
+      if (uploadedPhotos[idx].previewUrl) URL.revokeObjectURL(uploadedPhotos[idx].previewUrl);
+      uploadedPhotos.splice(idx, 1);
+      renderPhotosGrid();
+      recalculateOrderTotals();
+    }
+
+    function updatePhotoField(photoId, field, value) {
+      const photo = uploadedPhotos.find((p) => p.id === photoId);
+      if (!photo) return;
+      if (field === 'copies') {
+        photo.copies = Math.max(1, parseInt(value, 10) || 1);
+      } else {
+        photo[field] = value;
+      }
+      renderPhotosGrid();
+      recalculateOrderTotals();
+    }
+
+    function applyBatchSize(sizeKey) {
+      if (!sizeKey || !PRINT_SIZES[sizeKey]) return;
+      uploadedPhotos.forEach((p) => { p.sizeKey = sizeKey; });
+      document.getElementById('batchSizeSelect').value = '';
+      renderPhotosGrid();
+      recalculateOrderTotals();
+      showToast('Tamaño aplicado a todas las fotos.');
+    }
+
+    function applyBatchPaper(paper) {
+      if (!paper) return;
+      uploadedPhotos.forEach((p) => { p.paper = paper; });
+      document.getElementById('batchPaperSelect').value = '';
+      renderPhotosGrid();
+      showToast(`Papel ${paper} aplicado a todas las fotos.`);
+    }
+
+    function applyBatchBorder(border) {
+      if (!border) return;
+      uploadedPhotos.forEach((p) => { p.border = border; });
+      document.getElementById('batchBorderSelect').value = '';
+      renderPhotosGrid();
+      showToast('Acabado aplicado a todas las fotos.');
+    }
+
+    function getUnitPrice(sizeKey) {
+      const item = PRINT_SIZES[sizeKey] || Object.values(PRINT_SIZES)[0] || { price: 10, proPrice: 8 };
+      return activeProPhotographer ? Number(item.proPrice ?? item.price ?? 0) : Number(item.price ?? 0);
+    }
+
+    function refreshAllSizeSelectorsAndGuide() {
+      const entries = Object.entries(PRINT_SIZES);
+      const batchSel = document.getElementById('batchSizeSelect');
+      if (batchSel) {
+        batchSel.innerHTML = '<option value="">Tamaño...</option>' + entries.map(([k, v]) => `<option value="${escapeHtml(k)}">${escapeHtml(v.label)}</option>`).join('');
+      }
+
+      const guide = document.getElementById('pricingGuideList');
+      if (guide) {
+        guide.innerHTML = entries.map(([k, v]) => {
+          const unit = getUnitPrice(k);
+          return `
+            <div class="flex items-center justify-between py-1 border-b border-slate-100 last:border-0">
+              <span class="font-medium text-slate-700">${escapeHtml(v.label)}</span>
+              <span class="font-bold text-slate-900">${CURRENCY_SYMBOL} ${unit.toFixed(2)}</span>
+            </div>
+          `;
+        }).join('');
+      }
     }
 
     function renderPhotosGrid() {
@@ -1117,230 +1119,106 @@
       const emptyHint = document.getElementById('emptyStateHint');
       const batchBar = document.getElementById('batchControlsBar');
       const clearBtn = document.getElementById('clearAllPhotosBtn');
-      const batchBadge = document.getElementById('photoBatchCountBadge');
-
+      const countBadge = document.getElementById('photoBatchCountBadge');
       if (!grid) return;
 
-      if (uploadedPhotos.length === 0) {
+      const hasPhotos = uploadedPhotos.length > 0;
+      if (emptyHint) emptyHint.classList.toggle('hidden', hasPhotos);
+      if (batchBar) batchBar.classList.toggle('hidden', !hasPhotos);
+      if (clearBtn) clearBtn.classList.toggle('hidden', !hasPhotos);
+      if (countBadge) countBadge.textContent = `${uploadedPhotos.length} ${uploadedPhotos.length === 1 ? 'foto' : 'fotos'}`;
+
+      if (!hasPhotos) {
         grid.innerHTML = '';
-        emptyHint?.classList.remove('hidden');
-        batchBar?.classList.add('hidden');
-        clearBtn?.classList.add('hidden');
         return;
       }
 
-      emptyHint?.classList.add('hidden');
-      batchBar?.classList.remove('hidden');
-      clearBtn?.classList.remove('hidden');
-      if (batchBadge) batchBadge.textContent = `${uploadedPhotos.length} ${uploadedPhotos.length === 1 ? 'foto' : 'fotos'}`;
-
-      grid.innerHTML = uploadedPhotos.map((p) => {
-        const sizeObj = PRINT_SIZES[p.sizeKey] || Object.values(PRINT_SIZES)[0];
-        const unitPrice = getUnitPriceForSize(p.sizeKey);
-        const subtotal = unitPrice * p.copies;
-
-        const borderClass = p.border === 'polaroid'
-          ? 'p-3 pb-7 bg-white border border-slate-300 shadow-md'
-          : p.border === 'classic'
-            ? 'p-2.5 bg-white border border-slate-300 shadow-sm'
-            : 'bg-slate-900';
+      const sizeEntries = Object.entries(PRINT_SIZES);
+      grid.innerHTML = uploadedPhotos.map((photo) => {
+        const unitPrice = getUnitPrice(photo.sizeKey);
+        const subtotal = unitPrice * photo.copies;
+        const borderClass = photo.border === 'classic'
+          ? 'p-2.5 bg-white shadow-inner'
+          : photo.border === 'polaroid'
+            ? 'p-2.5 pb-7 bg-white shadow-inner'
+            : '';
+        const imgStyle = `transform: scale(${(photo.zoom || 100) / 100}) translate(${photo.panX || 0}%, ${photo.panY || 0}%);`;
 
         return `
-          <div class="rounded-2xl bg-white border border-slate-200/90 overflow-hidden shadow-sm flex flex-col justify-between">
-            <div>
-              <div class="relative h-52 bg-slate-100 flex items-center justify-center p-3 overflow-hidden">
-                <div class="print-frame max-h-full max-w-full flex flex-col items-center justify-center rounded-sm overflow-hidden ${borderClass}">
-                  <img src="${p.previewUrl}" alt="${escapeHtml(p.name)}" class="max-h-36 object-contain" style="transform: scale(${p.crop.zoom / 100}) translate(${p.crop.panX}%, ${p.crop.panY}%);" />
-                  ${p.border === 'polaroid' && p.caption ? `<span class="text-[10px] font-medium text-slate-700 mt-1.5 truncate max-w-[160px]">${escapeHtml(p.caption)}</span>` : ''}
-                </div>
-                <button type="button" onclick="removePhoto('${p.id}')" class="absolute top-2.5 right-2.5 w-7 h-7 rounded-full bg-white/90 hover:bg-red-600 text-slate-700 hover:text-white text-xs font-bold shadow transition" title="Eliminar foto">✕</button>
-                <button type="button" onclick="openCropEditor('${p.id}')" class="absolute bottom-2.5 left-2.5 px-2.5 py-1 rounded-lg bg-slate-900/80 hover:bg-slate-900 text-white text-[11px] font-semibold backdrop-blur-sm transition">
-                  ✂️ Encuadre
-                </button>
+          <div class="rounded-2xl bg-white border border-slate-200/80 p-4 shadow-sm flex flex-col justify-between gap-4">
+            <div class="space-y-3">
+              <div class="flex items-center justify-between gap-2">
+                <span class="text-xs font-bold text-slate-800 truncate" title="${escapeHtml(photo.fileName)}">${escapeHtml(photo.fileName)}</span>
+                <button type="button" onclick="removePhoto('${photo.id}')" class="text-xs text-red-500 hover:text-red-700 font-semibold shrink-0">Quitar</button>
               </div>
-
-              <div class="p-4 space-y-3">
-                <div class="flex items-center justify-between gap-2">
-                  <p class="text-xs font-semibold text-slate-800 truncate" title="${escapeHtml(p.name)}">${escapeHtml(p.name)}</p>
-                  <span class="text-[11px] text-slate-400 shrink-0">${p.widthPx}×${p.heightPx}px</span>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2">
-                  <div>
-                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">Tamaño</label>
-                    <select onchange="updatePhotoField('${p.id}', 'sizeKey', this.value)" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs font-medium bg-white outline-none focus:border-brand-500">
-                      ${Object.entries(PRINT_SIZES).map(([k, v]) => `
-                        <option value="${k}" ${p.sizeKey === k ? 'selected' : ''}>${escapeHtml(v.label)} — ${CURRENCY_SYMBOL}${getUnitPriceForSize(k).toFixed(2)}</option>
-                      `).join('')}
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">Papel</label>
-                    <select onchange="updatePhotoField('${p.id}', 'paper', this.value)" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs font-medium bg-white outline-none focus:border-brand-500">
-                      <option value="Brillante" ${p.paper === 'Brillante' ? 'selected' : ''}>Brillante</option>
-                      <option value="Mate" ${p.paper === 'Mate' ? 'selected' : ''}>Mate</option>
-                    </select>
-                  </div>
-                </div>
-
-                <div class="grid grid-cols-2 gap-2 items-end">
-                  <div>
-                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">Acabado / Borde</label>
-                    <select onchange="updatePhotoField('${p.id}', 'border', this.value)" class="w-full rounded-xl border border-slate-300 px-2.5 py-1.5 text-xs font-medium bg-white outline-none focus:border-brand-500">
-                      <option value="none" ${p.border === 'none' ? 'selected' : ''}>Sin borde (sangrado)</option>
-                      <option value="classic" ${p.border === 'classic' ? 'selected' : ''}>Borde blanco clásico</option>
-                      <option value="polaroid" ${p.border === 'polaroid' ? 'selected' : ''}>Estilo Polaroid</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="block text-[11px] font-semibold text-slate-500 mb-1">Copias</label>
-                    <div class="flex items-center border border-slate-300 rounded-xl overflow-hidden">
-                      <button type="button" onclick="changePhotoCopies('${p.id}', -1)" class="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs">−</button>
-                      <span class="flex-1 text-center text-xs font-bold text-slate-900">${p.copies}</span>
-                      <button type="button" onclick="changePhotoCopies('${p.id}', 1)" class="px-2.5 py-1 bg-slate-50 hover:bg-slate-100 text-slate-700 font-bold text-xs">+</button>
-                    </div>
-                  </div>
-                </div>
-
-                ${p.border === 'polaroid' ? `
-                  <div>
-                    <input type="text" maxlength="40" value="${escapeHtml(p.caption)}" oninput="updatePhotoField('${p.id}', 'caption', this.value)" placeholder="Texto o dedicatoria abajo (opcional)" class="w-full rounded-xl border border-slate-300 px-3 py-1.5 text-xs outline-none focus:border-brand-500" />
-                  </div>
-                ` : ''}
+              <div class="h-44 rounded-xl bg-slate-100 overflow-hidden flex items-center justify-center ${borderClass}">
+                <img src="${photo.previewUrl}" alt="${escapeHtml(photo.fileName)}" style="${imgStyle}" class="max-h-full max-w-full object-contain transition-transform duration-150" />
+              </div>
+              <div class="flex items-center justify-between text-xs">
+                <button type="button" onclick="openCropEditor('${photo.id}')" class="text-brand-600 hover:text-brand-700 font-semibold">
+                  ✂️ Encuadre / Zoom (${photo.zoom}%)
+                </button>
+                <span class="font-bold text-slate-900">${CURRENCY_SYMBOL} ${subtotal.toFixed(2)}</span>
               </div>
             </div>
 
-            <div class="px-4 py-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between text-xs">
-              <span class="text-slate-500">${escapeHtml(sizeObj?.label || p.sizeKey)} × ${p.copies}</span>
-              <span class="font-bold text-slate-900">${CURRENCY_SYMBOL} ${subtotal.toFixed(2)}</span>
+            <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-100 text-xs">
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-0.5">Tamaño</label>
+                <select onchange="updatePhotoField('${photo.id}', 'sizeKey', this.value)" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 bg-white font-medium">
+                  ${sizeEntries.map(([k, v]) => `<option value="${escapeHtml(k)}" ${photo.sizeKey === k ? 'selected' : ''}>${escapeHtml(v.label)}</option>`).join('')}
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-0.5">Copias</label>
+                <input type="number" min="1" value="${photo.copies}" onchange="updatePhotoField('${photo.id}', 'copies', this.value)" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 font-semibold" />
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-0.5">Papel</label>
+                <select onchange="updatePhotoField('${photo.id}', 'paper', this.value)" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 bg-white">
+                  <option value="Brillante" ${photo.paper === 'Brillante' ? 'selected' : ''}>Brillante</option>
+                  <option value="Mate" ${photo.paper === 'Mate' ? 'selected' : ''}>Mate</option>
+                </select>
+              </div>
+              <div>
+                <label class="block text-[11px] text-slate-500 mb-0.5">Acabado</label>
+                <select onchange="updatePhotoField('${photo.id}', 'border', this.value)" class="w-full rounded-lg border border-slate-300 px-2 py-1.5 bg-white">
+                  <option value="none" ${photo.border === 'none' ? 'selected' : ''}>Sin borde</option>
+                  <option value="classic" ${photo.border === 'classic' ? 'selected' : ''}>Borde blanco</option>
+                  <option value="polaroid" ${photo.border === 'polaroid' ? 'selected' : ''}>Polaroid</option>
+                </select>
+              </div>
             </div>
           </div>
         `;
       }).join('');
     }
 
-    function updatePhotoField(id, field, value) {
-      const item = uploadedPhotos.find((p) => p.id === id);
-      if (!item) return;
-      item[field] = value;
-      renderPhotosGrid();
-      recalculateOrderTotals();
-    }
-
-    function changePhotoCopies(id, delta) {
-      const item = uploadedPhotos.find((p) => p.id === id);
-      if (!item) return;
-      item.copies = Math.max(1, Math.min(200, item.copies + delta));
-      renderPhotosGrid();
-      recalculateOrderTotals();
-    }
-
-    function removePhoto(id) {
-      const idx = uploadedPhotos.findIndex((p) => p.id === id);
-      if (idx >= 0) {
-        URL.revokeObjectURL(uploadedPhotos[idx].previewUrl);
-        uploadedPhotos.splice(idx, 1);
-        renderPhotosGrid();
-        recalculateOrderTotals();
-      }
-    }
-
-    function clearAllPhotos() {
-      uploadedPhotos.forEach((p) => URL.revokeObjectURL(p.previewUrl));
-      uploadedPhotos = [];
-      renderPhotosGrid();
-      recalculateOrderTotals();
-    }
-
-    function applyBatchSize(sizeKey) {
-      if (!sizeKey) return;
-      uploadedPhotos.forEach((p) => { p.sizeKey = sizeKey; });
-      renderPhotosGrid();
-      recalculateOrderTotals();
-    }
-
-    function applyBatchPaper(paper) {
-      if (!paper) return;
-      uploadedPhotos.forEach((p) => { p.paper = paper; });
-      renderPhotosGrid();
-    }
-
-    function applyBatchBorder(border) {
-      if (!border) return;
-      uploadedPhotos.forEach((p) => { p.border = border; });
-      renderPhotosGrid();
-    }
-
-    function recalculateOrderTotals() {
-      let totalCopies = 0;
-      let printsSubtotal = 0;
-      const summaryBySize = {};
-
-      uploadedPhotos.forEach((p) => {
-        const unitPrice = getUnitPriceForSize(p.sizeKey);
-        const lineTotal = unitPrice * p.copies;
-        totalCopies += p.copies;
-        printsSubtotal += lineTotal;
-        const label = PRINT_SIZES[p.sizeKey]?.label || p.sizeKey;
-        if (!summaryBySize[label]) summaryBySize[label] = { copies: 0, total: 0 };
-        summaryBySize[label].copies += p.copies;
-        summaryBySize[label].total += lineTotal;
-      });
-
-      const pill = document.getElementById('totalCopiesPill');
-      if (pill) pill.textContent = `${totalCopies} ${totalCopies === 1 ? 'copia' : 'copias'}`;
-
-      const breakdownEl = document.getElementById('priceBreakdownList');
-      if (breakdownEl) {
-        breakdownEl.innerHTML = Object.entries(summaryBySize).map(([label, data]) => `
-          <div class="flex justify-between">
-            <span>${escapeHtml(label)} (${data.copies})</span>
-            <span class="font-semibold text-slate-800">${CURRENCY_SYMBOL} ${data.total.toFixed(2)}</span>
-          </div>
-        `).join('');
-      }
-
-      const shippingRow = document.getElementById('shippingFeeRow');
-      const shippingAmt = document.getElementById('shippingFeeAmount');
-      const applyShipping = customerLocationMode === 'home' && deliveryMethod === 'shipping' && totalCopies > 0;
-      const shippingCost = applyShipping ? Number(studioConfig.shippingFee || 0) : 0;
-
-      if (shippingRow && shippingAmt) {
-        if (applyShipping) {
-          shippingRow.classList.remove('hidden');
-          shippingAmt.textContent = `${CURRENCY_SYMBOL} ${shippingCost.toFixed(2)}`;
-        } else {
-          shippingRow.classList.add('hidden');
-        }
-      }
-
-      const grandTotal = printsSubtotal + shippingCost;
-      const totalEl = document.getElementById('orderTotalAmount');
-      if (totalEl) totalEl.textContent = `${CURRENCY_SYMBOL} ${grandTotal.toFixed(2)}`;
-      return { totalCopies, printsSubtotal, shippingCost, grandTotal };
-    }
-
-    // =========================================================================
-    // 7. EDITOR DE ENCUADRE Y ZOOM
-    // =========================================================================
+    // --- Editor de Encuadre ---
     function openCropEditor(photoId) {
-      const p = uploadedPhotos.find((x) => x.id === photoId);
-      if (!p) return;
+      const photo = uploadedPhotos.find((p) => p.id === photoId);
+      if (!photo) return;
       editingPhotoId = photoId;
-      document.getElementById('cropPreviewImg').src = p.previewUrl;
-      document.getElementById('cropZoomRange').value = p.crop.zoom;
-      document.getElementById('cropPanXRange').value = p.crop.panX;
-      document.getElementById('cropPanYRange').value = p.crop.panY;
+      document.getElementById('cropPreviewImg').src = photo.previewUrl;
+      document.getElementById('cropZoomRange').value = photo.zoom || 100;
+      document.getElementById('cropPanXRange').value = photo.panX || 0;
+      document.getElementById('cropPanYRange').value = photo.panY || 0;
       updateCropPreviewTransform();
       document.getElementById('cropEditorModal').classList.remove('hidden');
     }
 
+    function closeCropEditor() {
+      editingPhotoId = null;
+      document.getElementById('cropEditorModal').classList.add('hidden');
+    }
+
     function updateCropPreviewTransform() {
-      const zoom = Number(document.getElementById('cropZoomRange').value);
-      const panX = Number(document.getElementById('cropPanXRange').value);
-      const panY = Number(document.getElementById('cropPanYRange').value);
+      const zoom = Number(document.getElementById('cropZoomRange')?.value || 100);
+      const panX = Number(document.getElementById('cropPanXRange')?.value || 0);
+      const panY = Number(document.getElementById('cropPanYRange')?.value || 0);
       document.getElementById('cropZoomLabel').textContent = `${zoom}%`;
-      document.getElementById('cropPreviewImg').style.transform = `scale(${zoom / 100}) translate(${panX}%, ${panY}%)`;
+      const img = document.getElementById('cropPreviewImg');
+      if (img) img.style.transform = `scale(${zoom / 100}) translate(${panX}%, ${panY}%)`;
     }
 
     function resetCropEditorValues() {
@@ -1351,167 +1229,243 @@
     }
 
     function saveCropEditorChanges() {
-      const p = uploadedPhotos.find((x) => x.id === editingPhotoId);
-      if (p) {
-        p.crop = {
-          zoom: Number(document.getElementById('cropZoomRange').value),
-          panX: Number(document.getElementById('cropPanXRange').value),
-          panY: Number(document.getElementById('cropPanYRange').value)
-        };
+      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
+      if (photo) {
+        photo.zoom = Number(document.getElementById('cropZoomRange')?.value || 100);
+        photo.panX = Number(document.getElementById('cropPanXRange')?.value || 0);
+        photo.panY = Number(document.getElementById('cropPanYRange')?.value || 0);
         renderPhotosGrid();
       }
       closeCropEditor();
     }
 
-    function closeCropEditor() {
-      editingPhotoId = null;
-      document.getElementById('cropEditorModal').classList.add('hidden');
+    // --- Ubicación, Entrega, Pago y Totales ---
+    function setCustomerLocationMode(mode) {
+      customerLocationMode = mode === 'store' ? 'store' : 'home';
+      const isStore = customerLocationMode === 'store';
+      document.getElementById('locHomeBtn').className = isStore
+        ? 'px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition text-center'
+        : 'px-3 py-2.5 rounded-xl border-2 border-brand-600 bg-brand-50 text-brand-900 text-xs font-bold transition text-center';
+      document.getElementById('locStoreBtn').className = isStore
+        ? 'px-3 py-2.5 rounded-xl border-2 border-brand-600 bg-brand-50 text-brand-900 text-xs font-bold transition text-center'
+        : 'px-3 py-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-bold transition text-center';
+
+      document.getElementById('deliveryMethodSection').classList.toggle('hidden', isStore);
+      document.getElementById('transferPaymentSection').classList.toggle('hidden', isStore);
+      document.getElementById('inStorePayNotice').classList.toggle('hidden', !isStore);
+      if (isStore) setDeliveryMethod('pickup');
+      recalculateOrderTotals();
     }
 
-    // =========================================================================
-    // 8. ENVÍO DE PEDIDO A SUPABASE (Y RESPALDO LOCAL)
-    // =========================================================================
-    async function submitPhotoOrder() {
-      if (uploadedPhotos.length === 0) {
-        showToast('Agrega al menos una fotografía antes de enviar el pedido.', true);
-        return;
-      }
+    function toggleInStoreModeFromHeader() {
+      setCustomerLocationMode(customerLocationMode === 'store' ? 'home' : 'store');
+      document.getElementById('inStoreQuickBannerText').textContent = customerLocationMode === 'store' ? 'En tienda activo' : '¿Estás en la tienda?';
+    }
 
+    function setDeliveryMethod(method) {
+      deliveryMethod = method === 'shipping' ? 'shipping' : 'pickup';
+      const isShip = deliveryMethod === 'shipping';
+      document.getElementById('pickupBtn').className = !isShip
+        ? 'px-3 py-2 rounded-xl border-2 border-brand-600 bg-brand-50 text-brand-900 text-xs font-semibold transition'
+        : 'px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold transition';
+      document.getElementById('shippingBtn').className = isShip
+        ? 'px-3 py-2 rounded-xl border-2 border-brand-600 bg-brand-50 text-brand-900 text-xs font-semibold transition'
+        : 'px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-semibold transition';
+      document.getElementById('shippingAddressWrapper').classList.toggle('hidden', !isShip);
+      recalculateOrderTotals();
+    }
+
+    function handleReceiptSelected(e) {
+      receiptFile = e.target.files?.[0] || null;
+      const disp = document.getElementById('receiptFileNameDisplay');
+      if (!disp) return;
+      if (receiptFile) {
+        disp.textContent = `Comprobante adjunto: ${receiptFile.name}`;
+        disp.classList.remove('hidden');
+      } else {
+        disp.classList.add('hidden');
+      }
+    }
+
+    function copyBankAccounts() {
+      const accounts = Array.isArray(studioConfig.bankAccounts) ? studioConfig.bankAccounts : [];
+      const text = accounts.map((a) => `${a.bank}: ${a.account}${a.holder ? ` (${a.holder})` : ''}`).join('\n');
+      if (!text) return;
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('Datos bancarios copiados.');
+    }
+
+    function recalculateOrderTotals() {
+      const grouped = {};
+      let totalCopies = 0;
+      let subtotal = 0;
+
+      uploadedPhotos.forEach((p) => {
+        const unit = getUnitPrice(p.sizeKey);
+        const lineTotal = unit * p.copies;
+        totalCopies += p.copies;
+        subtotal += lineTotal;
+        const label = PRINT_SIZES[p.sizeKey]?.label || p.sizeKey;
+        if (!grouped[label]) grouped[label] = { copies: 0, amount: 0 };
+        grouped[label].copies += p.copies;
+        grouped[label].amount += lineTotal;
+      });
+
+      const shippingFee = (customerLocationMode === 'home' && deliveryMethod === 'shipping' && totalCopies > 0)
+        ? Number(studioConfig.shippingFee || 0)
+        : 0;
+      const grandTotal = subtotal + shippingFee;
+
+      document.getElementById('totalCopiesPill').textContent = `${totalCopies} ${totalCopies === 1 ? 'copia' : 'copias'}`;
+      document.getElementById('priceBreakdownList').innerHTML = Object.entries(grouped).map(([label, info]) => `
+        <div class="flex justify-between">
+          <span>${escapeHtml(label)} × ${info.copies}</span>
+          <span class="font-semibold">${CURRENCY_SYMBOL} ${info.amount.toFixed(2)}</span>
+        </div>
+      `).join('');
+
+      const shipRow = document.getElementById('shippingFeeRow');
+      if (shipRow) {
+        shipRow.classList.toggle('hidden', shippingFee <= 0);
+        document.getElementById('shippingFeeAmount').textContent = `${CURRENCY_SYMBOL} ${shippingFee.toFixed(2)}`;
+      }
+      document.getElementById('orderTotalAmount').textContent = `${CURRENCY_SYMBOL} ${grandTotal.toFixed(2)}`;
+    }
+
+    // --- Envío de Pedido ---
+    async function submitPhotoOrder() {
       const name = (document.getElementById('customerName')?.value || '').trim();
       const phone = (document.getElementById('customerPhone')?.value || '').trim();
       const address = (document.getElementById('customerAddress')?.value || '').trim();
-      const rawNotes = (document.getElementById('orderNotes')?.value || '').trim();
+      let notes = (document.getElementById('orderNotes')?.value || '').trim();
 
+      if (uploadedPhotos.length === 0) {
+        showToast('Agrega al menos una fotografía antes de enviar.', true);
+        return;
+      }
       if (!name || !phone) {
-        showToast('Por favor completa tu nombre y número de teléfono.', true);
+        showToast('Ingresa tu nombre y teléfono/WhatsApp.', true);
         return;
       }
-
       if (customerLocationMode === 'home' && deliveryMethod === 'shipping' && !address) {
-        showToast('Ingresa tu dirección exacta para envío a domicilio.', true);
+        showToast('Ingresa la dirección de envío a domicilio.', true);
+        return;
+      }
+      if (customerLocationMode === 'home' && !receiptFile) {
+        showToast('Adjunta tu comprobante de transferencia bancaria.', true);
         return;
       }
 
-      if (customerLocationMode === 'home' && !selectedReceiptFile) {
-        showToast('Adjunta el comprobante de transferencia o selecciona "En la tienda" para pagar en caja.', true);
-        return;
+      if (activeProPhotographer) {
+        const tag = `[FOTÓGRAFO PRO: ${activeProPhotographer.full_name}]`;
+        notes = notes ? `${tag} ${notes}` : tag;
+      }
+      if (customerLocationMode === 'store') {
+        const storeTag = '[PAGO EN TIENDA / CAJA]';
+        notes = notes ? `${storeTag} ${notes}` : storeTag;
       }
 
       const btn = document.getElementById('submitOrderBtn');
       btn.disabled = true;
-      btn.innerHTML = '<span>Subiendo fotos en alta calidad...</span>';
+      btn.textContent = 'Enviando pedido...';
 
-      const prefix = (isKioskMode || customerLocationMode === 'store') ? 'K' : 'W';
+      const prefix = customerLocationMode === 'store' ? 'K' : 'W';
       const orderCode = `#${prefix}-${Math.floor(1000 + Math.random() * 9000)}`;
-      const { totalCopies, grandTotal } = recalculateOrderTotals();
-
-      const proPrefix = activeProPhotographer
-        ? `[FOTÓGRAFO PRO: ${activeProPhotographer.full_name} (@${activeProPhotographer.username})] `
-        : '';
-      const finalNotes = `${proPrefix}${rawNotes}`.trim();
+      let totalCopies = 0;
+      let subtotal = 0;
+      const itemsSummary = [];
 
       try {
-        let receiptPath = null;
-        const itemsPayload = [];
-
         for (let i = 0; i < uploadedPhotos.length; i++) {
           const p = uploadedPhotos[i];
-          const cleanFolder = orderCode.replace('#', '');
-          const ext = (p.name.split('.').pop() || 'jpg').toLowerCase();
-          const storagePath = `${cleanFolder}/${p.sizeKey}_${p.paper}_${i + 1}_${p.copies}copias.${ext}`;
+          const unit = getUnitPrice(p.sizeKey);
+          totalCopies += p.copies;
+          subtotal += unit * p.copies;
+          let storagePath = null;
 
           if (isSupabaseConfigured && supabaseClient) {
+            const safeName = p.fileName.replace(/[^a-zA-Z0-9._-]/g, '_');
+            storagePath = `${orderCode.replace('#', '')}/${i + 1}_${safeName}`;
             await supabaseClient.storage.from(STORAGE_BUCKET).upload(storagePath, p.file, { upsert: true });
           }
 
-          itemsPayload.push({
-            file_name: p.name,
-            storage_path: storagePath,
+          itemsSummary.push({
+            file_name: p.fileName,
             size_key: p.sizeKey,
-            size_label: PRINT_SIZES[p.sizeKey]?.label || p.sizeKey,
-            width_in: PRINT_SIZES[p.sizeKey]?.widthIn || 4,
-            height_in: PRINT_SIZES[p.sizeKey]?.heightIn || 6,
             paper: p.paper,
             border: p.border,
-            caption: p.caption,
             copies: p.copies,
-            unit_price: getUnitPriceForSize(p.sizeKey),
-            crop: p.crop
+            unit_price: unit,
+            storage_path: storagePath
           });
         }
 
-        if (customerLocationMode === 'home' && selectedReceiptFile && isSupabaseConfigured && supabaseClient) {
-          const cleanFolder = orderCode.replace('#', '');
-          const recExt = (selectedReceiptFile.name.split('.').pop() || 'jpg').toLowerCase();
-          receiptPath = `${cleanFolder}/comprobante_pago.${recExt}`;
-          await supabaseClient.storage.from(STORAGE_BUCKET).upload(receiptPath, selectedReceiptFile, { upsert: true });
+        let receiptPath = null;
+        if (receiptFile && isSupabaseConfigured && supabaseClient) {
+          const safeRec = receiptFile.name.replace(/[^a-zA-Z0-9._-]/g, '_');
+          receiptPath = `${orderCode.replace('#', '')}/comprobante_${safeRec}`;
+          await supabaseClient.storage.from(STORAGE_BUCKET).upload(receiptPath, receiptFile, { upsert: true });
         }
 
-        const orderRecord = {
+        const shippingFee = (customerLocationMode === 'home' && deliveryMethod === 'shipping') ? Number(studioConfig.shippingFee || 0) : 0;
+        const totalAmount = subtotal + shippingFee;
+
+        const orderPayload = {
           order_code: orderCode,
           customer_name: name,
           customer_phone: phone,
-          delivery_method: customerLocationMode === 'store' ? 'tienda_mostrador' : deliveryMethod,
+          delivery_method: customerLocationMode === 'store' ? 'store_pickup' : deliveryMethod,
           shipping_address: deliveryMethod === 'shipping' ? address : '',
           payment_status: 'pending_cashier',
-          lab_status: 'waiting_payment',
           total_copies: totalCopies,
-          total_amount: grandTotal,
+          total_amount: totalAmount,
           receipt_path: receiptPath,
-          notes: finalNotes,
-          items: itemsPayload,
+          notes,
+          items: itemsSummary,
           created_at: new Date().toISOString()
         };
 
         if (isSupabaseConfigured && supabaseClient) {
-          const { error } = await supabaseClient.from('orders').insert([orderRecord]);
+          const { error } = await supabaseClient.from('orders').insert([orderPayload]);
           if (error) throw error;
         } else {
           const localOrders = JSON.parse(localStorage.getItem('mc_local_orders') || '[]');
-          localOrders.unshift(orderRecord);
+          localOrders.unshift(orderPayload);
           localStorage.setItem('mc_local_orders', JSON.stringify(localOrders));
         }
 
         document.getElementById('successOrderCode').textContent = orderCode;
-        document.getElementById('successOrderMessage').textContent =
-          customerLocationMode === 'store'
-            ? 'Pasa al mostrador de Caja con este código para realizar tu pago y autorizar la impresión.'
-            : 'Recibimos tu pedido y comprobante. En cuanto Caja valide la transferencia pasará a impresión.';
-
         document.getElementById('successOrderSummaryBox').innerHTML = `
-          <div class="flex justify-between"><span class="text-slate-500">Cliente:</span><span class="font-bold text-slate-900">${escapeHtml(name)}</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">Total copias:</span><span class="font-bold text-slate-900">${totalCopies}</span></div>
-          <div class="flex justify-between"><span class="text-slate-500">Total a pagar:</span><span class="font-bold text-brand-700">${CURRENCY_SYMBOL} ${grandTotal.toFixed(2)}</span></div>
+          <div><strong>Cliente:</strong> ${escapeHtml(name)}</div>
+          <div><strong>Copias:</strong> ${totalCopies} • <strong>Total:</strong> ${CURRENCY_SYMBOL} ${totalAmount.toFixed(2)}</div>
+          <div><strong>Estado:</strong> Pendiente de autorización en Caja</div>
         `;
         document.getElementById('orderSuccessModal').classList.remove('hidden');
       } catch (err) {
-        console.error(err);
-        showToast('No se pudo enviar el pedido. Revisa tu conexión e intenta de nuevo.', true);
+        showToast('No se pudo registrar el pedido. Intenta nuevamente.', true);
       } finally {
         btn.disabled = false;
-        btn.innerHTML = '<span>Enviar Pedido al Laboratorio</span>';
+        btn.textContent = 'Enviar Pedido al Laboratorio';
       }
     }
 
     function resetOrderAfterSuccess() {
       document.getElementById('orderSuccessModal').classList.add('hidden');
       clearAllPhotos();
-      if (!activeProPhotographer) {
-        document.getElementById('customerName').value = '';
-      }
-      document.getElementById('customerPhone').value = '';
-      document.getElementById('customerAddress').value = '';
-      document.getElementById('orderNotes').value = '';
-      selectedReceiptFile = null;
+      receiptFile = null;
       const recInput = document.getElementById('receiptInput');
       if (recInput) recInput.value = '';
       document.getElementById('receiptFileNameDisplay')?.classList.add('hidden');
+      document.getElementById('orderNotes').value = '';
       recalculateOrderTotals();
     }
 
-    // =========================================================================
-    // 9. FOTÓGRAFOS PROFESIONALES (LOGIN Y GESTIÓN POR DUEÑO)
-    // =========================================================================
+    // --- Fotógrafos Pro, Kiosko y Caja ---
     function openProPinModal() {
       document.getElementById('proLoginError')?.classList.add('hidden');
       document.getElementById('proPinModal')?.classList.remove('hidden');
@@ -1526,42 +1480,33 @@
       const pass = (document.getElementById('proPasswordInput')?.value || '').trim();
       const err = document.getElementById('proLoginError');
 
-      if (!user || !pass) {
+      let pros = [];
+      if (isSupabaseConfigured && supabaseClient) {
+        const { data } = await supabaseClient.from('photographers').select('*').eq('active', true);
+        pros = data || [];
+      } else {
+        pros = JSON.parse(localStorage.getItem('mc_local_photographers') || '[]').filter((p) => p.active !== false);
+      }
+
+      const found = pros.find((p) => String(p.username).toLowerCase() === user && String(p.password) === pass);
+      if (!found) {
         err?.classList.remove('hidden');
         return;
       }
 
-      let found = null;
-      if (isSupabaseConfigured && supabaseClient) {
-        const { data, error } = await supabaseClient
-          .from('photographers')
-          .select('*')
-          .eq('username', user)
-          .eq('password', pass)
-          .eq('active', true)
-          .limit(1);
-        if (!error && Array.isArray(data) && data.length > 0) found = data[0];
-      } else {
-        const localPros = JSON.parse(localStorage.getItem('mc_local_photographers') || '[]');
-        found = localPros.find((p) => p.username === user && p.password === pass && p.active !== false);
-      }
+      activeProPhotographer = found;
+      err?.classList.add('hidden');
+      closeProPinModal();
+      document.getElementById('proSessionBanner')?.classList.remove('hidden');
+      document.getElementById('proActiveHeaderBadge')?.classList.remove('hidden');
+      document.getElementById('proPhotographerDisplayName').textContent = found.full_name;
+      const nameInp = document.getElementById('customerName');
+      if (nameInp && !nameInp.value.trim()) nameInp.value = found.full_name;
 
-      if (found) {
-        activeProPhotographer = found;
-        err?.classList.add('hidden');
-        closeProPinModal();
-        document.getElementById('proSessionBanner')?.classList.remove('hidden');
-        document.getElementById('proActiveHeaderBadge')?.classList.remove('hidden');
-        document.getElementById('proPhotographerDisplayName').textContent = found.full_name;
-        const nameInput = document.getElementById('customerName');
-        if (nameInput && !nameInput.value.trim()) nameInput.value = found.full_name;
-        refreshAllSizeSelectorsAndGuide();
-        renderPhotosGrid();
-        recalculateOrderTotals();
-        showToast(`Tarifa Gremio activada para ${found.full_name}.`);
-      } else {
-        err?.classList.remove('hidden');
-      }
+      refreshAllSizeSelectorsAndGuide();
+      renderPhotosGrid();
+      recalculateOrderTotals();
+      showToast(`Tarifa Gremio Pro activada para ${found.full_name}.`);
     }
 
     function logoutProPhotographer() {
@@ -1571,12 +1516,9 @@
       refreshAllSizeSelectorsAndGuide();
       renderPhotosGrid();
       recalculateOrderTotals();
-      showToast('Sesión de fotógrafo cerrada.');
+      showToast('Sesión de Fotógrafo Pro cerrada.');
     }
 
-    // =========================================================================
-    // 10. MODO KIOSKO EN TIENDA
-    // =========================================================================
     function openKioskPinModal() {
       document.getElementById('kioskPinError')?.classList.add('hidden');
       document.getElementById('kioskPinInput').value = '';
@@ -1588,43 +1530,28 @@
     }
 
     function verifyKioskPin() {
-      const entered = (document.getElementById('kioskPinInput')?.value || '').trim();
-      if (entered === getStaffPin() || entered === getOwnerPin()) {
-        closeKioskPinModal();
-        enableKioskMode();
-      } else {
+      const pin = (document.getElementById('kioskPinInput')?.value || '').trim();
+      if (pin !== getStaffPin() && pin !== getOwnerPin()) {
         document.getElementById('kioskPinError')?.classList.remove('hidden');
+        return;
       }
-    }
-
-    function enableKioskMode() {
-      isKioskMode = true;
+      closeKioskPinModal();
       setCustomerLocationMode('store');
-      const badge = document.getElementById('kioskActiveBadge');
-      if (badge) {
-        badge.classList.remove('hidden');
-        badge.classList.add('inline-flex');
-      }
-      showToast('Modo Kiosko activado. Pago configurado en Caja.');
+      document.getElementById('kioskActiveBadge')?.classList.remove('hidden');
+      document.getElementById('kioskActiveBadge')?.classList.add('inline-flex');
+      showToast('Modo Kiosko activado.');
     }
 
     function exitKioskMode() {
-      isKioskMode = false;
-      const badge = document.getElementById('kioskActiveBadge');
-      if (badge) {
-        badge.classList.add('hidden');
-        badge.classList.remove('inline-flex');
-      }
+      document.getElementById('kioskActiveBadge')?.classList.add('hidden');
+      document.getElementById('kioskActiveBadge')?.classList.remove('inline-flex');
+      setCustomerLocationMode('home');
       showToast('Modo Kiosko desactivado.');
     }
 
-    // =========================================================================
-    // 11. PANEL DE CAJA (CHECK DE PAGO ANTES DE ENVIAR A LABORATORIO)
-    // =========================================================================
+    let isCashierAuthenticated = false;
     function openCashierPanelView() {
-      const modal = document.getElementById('cashierPanelModal');
-      if (!modal) return;
-      modal.classList.remove('hidden');
+      document.getElementById('cashierPanelModal')?.classList.remove('hidden');
       if (isCashierAuthenticated) {
         document.getElementById('cashierPinGate')?.classList.add('hidden');
         document.getElementById('cashierOrdersSection')?.classList.remove('hidden');
@@ -1639,32 +1566,30 @@
       document.getElementById('cashierPanelModal')?.classList.add('hidden');
     }
 
-    function verifyCashierPin() {
-      const entered = (document.getElementById('cashierPinInput')?.value || '').trim();
-      if (entered === getStaffPin() || entered === getOwnerPin()) {
-        isCashierAuthenticated = true;
-        document.getElementById('cashierPinError')?.classList.add('hidden');
-        document.getElementById('cashierPinGate')?.classList.add('hidden');
-        document.getElementById('cashierOrdersSection')?.classList.remove('hidden');
-        fetchCashierOrders();
-      } else {
-        document.getElementById('cashierPinError')?.classList.remove('hidden');
-      }
-    }
-
     function logoutCashierSession() {
       isCashierAuthenticated = false;
       document.getElementById('cashierPinInput').value = '';
-      document.getElementById('cashierPinGate')?.classList.remove('hidden');
-      document.getElementById('cashierOrdersSection')?.classList.add('hidden');
       closeCashierPanelModal();
       showToast('Sesión de Caja cerrada.');
+    }
+
+    function verifyCashierPin() {
+      const pin = (document.getElementById('cashierPinInput')?.value || '').trim();
+      if (pin !== getStaffPin() && pin !== getOwnerPin()) {
+        document.getElementById('cashierPinError')?.classList.remove('hidden');
+        return;
+      }
+      isCashierAuthenticated = true;
+      document.getElementById('cashierPinError')?.classList.add('hidden');
+      document.getElementById('cashierPinGate')?.classList.add('hidden');
+      document.getElementById('cashierOrdersSection')?.classList.remove('hidden');
+      fetchCashierOrders();
     }
 
     async function fetchCashierOrders() {
       const container = document.getElementById('cashierOrdersContainer');
       if (!container) return;
-      container.innerHTML = '<p class="text-xs text-slate-500 text-center py-6">Cargando órdenes en caja...</p>';
+      container.innerHTML = '<p class="text-xs text-slate-500 text-center py-6">Cargando órdenes en Caja...</p>';
 
       let orders = [];
       if (isSupabaseConfigured && supabaseClient) {
@@ -1682,74 +1607,49 @@
       container.innerHTML = orders.map((ord) => {
         const isPaid = ord.payment_status === 'paid';
         return `
-          <div class="bg-white rounded-2xl border ${isPaid ? 'border-emerald-200' : 'border-amber-300'} p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="space-y-1">
               <div class="flex flex-wrap items-center gap-2">
                 <span class="text-sm font-extrabold text-slate-900">${escapeHtml(ord.order_code)}</span>
                 <span class="px-2 py-0.5 rounded-full text-[11px] font-bold ${isPaid ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
-                  ${isPaid ? '✓ Pagado (Enviado a Lab)' : '⏳ Pendiente de cobro'}
+                  ${isPaid ? '✓ Pagado / Enviado a Lab' : '⏳ Pendiente de pago'}
                 </span>
-                <span class="text-xs text-slate-500">${ord.delivery_method === 'tienda_mostrador' ? '🏪 En tienda' : '🌐 Web'}</span>
               </div>
               <p class="text-xs font-semibold text-slate-800">${escapeHtml(ord.customer_name)} • Tel: ${escapeHtml(ord.customer_phone)}</p>
               <p class="text-xs text-slate-600">${ord.total_copies} copias • Total: <strong>${CURRENCY_SYMBOL} ${Number(ord.total_amount).toFixed(2)}</strong></p>
-              ${ord.notes ? `<p class="text-[11px] text-indigo-700 font-medium">${escapeHtml(ord.notes)}</p>` : ''}
+              ${ord.notes ? `<p class="text-[11px] text-slate-500">${escapeHtml(ord.notes)}</p>` : ''}
             </div>
-
-            <div class="flex flex-wrap items-center gap-2">
-              ${ord.receipt_path ? `
-                <button type="button" onclick="viewOrderReceipt('${escapeHtml(ord.receipt_path)}')" class="px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold">
-                  Ver comprobante
-                </button>
-              ` : ''}
-              ${!isPaid ? `
-                <button type="button" onclick="markOrderPaidInCashier('${escapeHtml(ord.order_code)}')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-sm transition">
-                  ✓ Check pagado → Enviar a Lab
-                </button>
-              ` : `
-                <span class="text-xs font-semibold text-emerald-700">Autorizado en Laboratorio</span>
-              `}
+            <div class="flex items-center gap-2">
+              ${!isPaid
+                ? `<button type="button" onclick="markOrderPaidInCashier('${escapeHtml(ord.order_code)}')" class="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold transition">✓ Check pagado</button>`
+                : `<span class="text-xs font-semibold text-emerald-700">Autorizada para Laboratorio</span>`
+              }
             </div>
           </div>
         `;
       }).join('');
     }
 
-    async function viewOrderReceipt(receiptPath) {
-      if (!isSupabaseConfigured || !supabaseClient) {
-        showToast('Vista de comprobante disponible al conectar Supabase.', true);
-        return;
-      }
-      const { data } = await supabaseClient.storage.from(STORAGE_BUCKET).createSignedUrl(receiptPath, 300);
-      if (data?.signedUrl) window.open(data.signedUrl, '_blank');
-    }
-
     async function markOrderPaidInCashier(orderCode) {
       if (isSupabaseConfigured && supabaseClient) {
-        await supabaseClient
-          .from('orders')
-          .update({ payment_status: 'paid', lab_status: 'ready_to_print' })
-          .eq('order_code', orderCode);
+        await supabaseClient.from('orders').update({ payment_status: 'paid' }).eq('order_code', orderCode);
       } else {
-        const localOrders = JSON.parse(localStorage.getItem('mc_local_orders') || '[]');
-        const target = localOrders.find((o) => o.order_code === orderCode);
-        if (target) {
-          target.payment_status = 'paid';
-          target.lab_status = 'ready_to_print';
-          localStorage.setItem('mc_local_orders', JSON.stringify(localOrders));
-        }
+        const list = JSON.parse(localStorage.getItem('mc_local_orders') || '[]');
+        list.forEach((o) => { if (o.order_code === orderCode) o.payment_status = 'paid'; });
+        localStorage.setItem('mc_local_orders', JSON.stringify(list));
       }
-      showToast(`Orden ${orderCode} marcada como pagada y enviada a Laboratorio.`);
       fetchCashierOrders();
+      showToast(`Orden ${orderCode} marcada como pagada y enviada a Laboratorio.`);
     }
 
     // =========================================================================
-    // 12. PANEL DE LABORATORIO Y CONTROLES DE DUEÑO
+    // 12. PANEL DE LABORATORIO Y ACCESO ADMINISTRAR
     // =========================================================================
     function updateLabRoleBannerUI() {
       const banner = document.getElementById('labRoleBanner');
       const badge = document.getElementById('labRoleBadge');
       const hint = document.getElementById('labRoleHint');
+      const adminBtn = document.getElementById('labAdminAccessBtn');
       const lockBtn = document.getElementById('labLockOwnerBtn');
       if (!banner || !badge) return;
 
@@ -1760,15 +1660,34 @@
 
       banner.classList.remove('hidden');
       if (isOwnerUnlocked) {
-        badge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold bg-amber-100 text-amber-900 border border-amber-300';
-        badge.textContent = '👑 Modo Dueño Desbloqueado (Acceso total)';
-        if (hint) hint.textContent = 'Puedes modificar precios, productos, bancos, fotógrafos y claves.';
+        badge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold bg-emerald-100 text-emerald-900 border border-emerald-300';
+        badge.textContent = '🔓 Modo Administrar Activo (Todas las opciones habilitadas)';
+        if (hint) hint.textContent = 'Todas las secciones están habilitadas para editar.';
+        if (adminBtn) adminBtn.classList.add('hidden');
         if (lockBtn) lockBtn.classList.remove('hidden');
       } else {
         badge.className = 'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full font-semibold bg-slate-200 text-slate-700';
         badge.textContent = '👤 Sesión Operativa (Caja / Lab / Kiosko)';
-        if (hint) hint.textContent = 'Tarifas, bancos y fotógrafos requieren contraseña de Dueño.';
+        if (hint) hint.textContent = 'Haz clic en "Administrar" para ingresar la contraseña y habilitar todas las opciones.';
+        if (adminBtn) adminBtn.classList.remove('hidden');
         if (lockBtn) lockBtn.classList.add('hidden');
+      }
+    }
+
+    function openAdminUnlockPrompt() {
+      pendingOwnerTab = 'pricing';
+      ['labOrdersSection', 'labPhotographersSection', 'labPricingSection', 'labStudioSection', 'labSecuritySection'].forEach((id) => {
+        document.getElementById(id)?.classList.add('hidden');
+      });
+      const gate = document.getElementById('ownerPinGateSection');
+      if (gate) {
+        gate.classList.remove('hidden');
+        document.getElementById('ownerPinError')?.classList.add('hidden');
+        const inp = document.getElementById('ownerPinInput');
+        if (inp) {
+          inp.value = '';
+          setTimeout(() => inp.focus(), 60);
+        }
       }
     }
 
@@ -1835,7 +1754,7 @@
         const target = pendingOwnerTab || 'pricing';
         pendingOwnerTab = null;
         switchLabModalTab(target);
-        showToast('Modo Dueño desbloqueado.');
+        showToast('Todas las opciones de administración habilitadas.');
       } else {
         err?.classList.remove('hidden');
       }
@@ -1846,7 +1765,7 @@
       pendingOwnerTab = null;
       updateLabRoleBannerUI();
       switchLabModalTab('orders');
-      showToast('Modo Dueño bloqueado.');
+      showToast('Acceso de administración bloqueado.');
     }
 
     function logoutLabSession() {
@@ -1893,8 +1812,8 @@
         }
       });
 
-      const ownerOnlyTabs = ['photographers', 'pricing', 'studio', 'security'];
-      if (ownerOnlyTabs.includes(tab) && !isOwnerUnlocked) {
+      const adminTabs = ['photographers', 'pricing', 'studio', 'security'];
+      if (adminTabs.includes(tab) && !isOwnerUnlocked) {
         pendingOwnerTab = tab;
         if (sections.ownerGate) {
           sections.ownerGate.classList.remove('hidden');
@@ -1917,6 +1836,9 @@
       else if (tab === 'security') {
         document.getElementById('securityStaffPinInput').value = getStaffPin();
         document.getElementById('securityOwnerPinInput').value = getOwnerPin();
+        document.getElementById('supabaseUrlInput').value = activeSupabaseConfig.url || '';
+        document.getElementById('supabaseAnonKeyInput').value = activeSupabaseConfig.anonKey || '';
+        document.getElementById('supabaseSchemaInput').value = activeSupabaseConfig.schema || DEFAULT_SUPABASE_SCHEMA;
       }
     }
 
@@ -1927,12 +1849,12 @@
 
       let orders = [];
       if (isSupabaseConfigured && supabaseClient) {
-        const { data } = await supabaseClient
+        const { data, error } = await supabaseClient
           .from('orders')
           .select('*')
           .eq('payment_status', 'paid')
           .order('created_at', { ascending: false });
-        orders = data || [];
+        if (!error) orders = data || [];
       } else {
         orders = JSON.parse(localStorage.getItem('mc_local_orders') || '[]').filter((o) => o.payment_status === 'paid');
       }
@@ -2030,7 +1952,11 @@
       }
       const record = { full_name: fullName, username, password, active: true };
       if (isSupabaseConfigured && supabaseClient) {
-        await supabaseClient.from('photographers').insert([record]);
+        const { error } = await supabaseClient.from('photographers').insert([record]);
+        if (error) {
+          showToast('Error al guardar en Supabase. Verifica la tabla photographers.', true);
+          return;
+        }
       } else {
         const pros = JSON.parse(localStorage.getItem('mc_local_photographers') || '[]');
         pros.unshift(record);
@@ -2142,7 +2068,7 @@
       document.getElementById('studioBrandNameInput').value = studioConfig.brandName || '';
       document.getElementById('studioShippingFeeInput').value = studioConfig.shippingFee || 0;
       const list = document.getElementById('bankAccountsEditorList');
-      list.innerHTML = studioConfig.bankAccounts.map((acc, idx) => `
+      list.innerHTML = studioConfig.bankAccounts.map((acc) => `
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 bank-row">
           <input type="text" value="${escapeHtml(acc.bank)}" placeholder="Banco" class="bank-name rounded-xl border border-slate-300 px-3 py-2 text-xs" />
           <input type="text" value="${escapeHtml(acc.account)}" placeholder="Número de cuenta" class="bank-num rounded-xl border border-slate-300 px-3 py-2 text-xs font-mono" />
@@ -2197,7 +2123,7 @@
       showToast('Identidad del laboratorio y cuentas bancarias guardadas.');
     }
 
-    // --- Gestión de Contraseñas (Dueño) ---
+    // --- Gestión de Contraseñas y Conexión Supabase (Dueño) ---
     async function saveSecurityPinsFromEditor() {
       if (!isOwnerUnlocked) return;
       const newStaff = (document.getElementById('securityStaffPinInput')?.value || '').trim();
@@ -2224,6 +2150,37 @@
       }
 
       showToast('Contraseñas operativa y de Dueño actualizadas.');
+    }
+
+    async function saveSupabaseConnectionFromEditor() {
+      if (!isOwnerUnlocked) return;
+      const url = (document.getElementById('supabaseUrlInput')?.value || '').trim();
+      const anonKey = (document.getElementById('supabaseAnonKeyInput')?.value || '').trim();
+      const schema = (document.getElementById('supabaseSchemaInput')?.value || '').trim() || DEFAULT_SUPABASE_SCHEMA;
+
+      if (!url || !anonKey) {
+        showToast('Ingresa la Project URL y la Anon Key de Supabase.', true);
+        return;
+      }
+
+      localStorage.setItem('mc_supabase_config', JSON.stringify({ url, anonKey, schema }));
+      await refreshAllCloudData();
+
+      if (isSupabaseConfigured && supabaseClient) {
+        showToast(`Conectado a Supabase (${schema}) y datos sincronizados.`);
+      } else {
+        showToast('Revisa que la URL y Anon Key sean válidas.', true);
+      }
+    }
+
+    async function resetSupabaseConnectionConfig() {
+      if (!isOwnerUnlocked) return;
+      localStorage.removeItem('mc_supabase_config');
+      await refreshAllCloudData();
+      document.getElementById('supabaseUrlInput').value = activeSupabaseConfig.url || '';
+      document.getElementById('supabaseAnonKeyInput').value = activeSupabaseConfig.anonKey || '';
+      document.getElementById('supabaseSchemaInput').value = activeSupabaseConfig.schema || DEFAULT_SUPABASE_SCHEMA;
+      showToast('Configuración de nube restablecida a los valores del código.');
     }
 
     // =========================================================================
@@ -2260,16 +2217,13 @@
       applyBrandNameToDOM();
       refreshAllSizeSelectorsAndGuide();
       recalculateOrderTotals();
+      updateCloudStatusPill();
 
       const params = new URLSearchParams(window.location.search);
       if (params.get('tienda') === '1') setCustomerLocationMode('store');
       if (params.get('pro') === '1') openProPinModal();
 
-      await Promise.all([
-        syncSecurityPinsFromCloud(),
-        syncStudioConfigFromCloud(),
-        syncPricingFromCloud()
-      ]);
+      await refreshAllCloudData();
     });
   </script>
 </body>
