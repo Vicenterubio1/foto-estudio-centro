@@ -645,6 +645,15 @@
           </button>
           <button
             type="button"
+            id="labTabPricingBtn"
+            onclick="switchLabPanelSection('pricing')"
+            class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition inline-flex items-center gap-1.5"
+          >
+            <span>💲</span>
+            <span>Tarifas</span>
+          </button>
+          <button
+            type="button"
             onclick="fetchLabOrders()"
             class="px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition"
           >
@@ -771,6 +780,46 @@
               <span id="proPhotographersCountLabel" class="text-xs font-bold text-indigo-700 bg-indigo-50 px-2.5 py-0.5 rounded-full">0 cuentas</span>
             </div>
             <div id="labPhotographersList" class="space-y-2.5"></div>
+          </div>
+        </div>
+
+        <!-- Sección: Editor Visual de Tarifas (Aficionado y Fotógrafo Pro) -->
+        <div id="labPricingSection" class="hidden space-y-4">
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <div>
+                <h4 class="text-sm font-extrabold text-slate-900">Configurar Tarifas de Impresión</h4>
+                <p class="text-xs text-slate-500 mt-0.5">Define el precio público (Aficionado) y el precio preferencial para Fotógrafos Pro en cada tamaño.</p>
+              </div>
+              <span id="pricingSyncStatusBadge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Tarifas activas
+              </span>
+            </div>
+
+            <form onsubmit="saveLabPricingSettings(event)" class="space-y-3">
+              <div class="overflow-x-auto rounded-xl border border-slate-200">
+                <table class="w-full text-left text-xs">
+                  <thead class="bg-slate-50 border-b border-slate-200 text-slate-600 uppercase text-[11px]">
+                    <tr>
+                      <th class="py-2.5 px-3 font-bold">Tamaño de impresión</th>
+                      <th class="py-2.5 px-3 font-bold">Precio Aficionado (L)</th>
+                      <th class="py-2.5 px-3 font-bold text-indigo-700">Precio Fotógrafo Pro (L)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="labPricingTableBody" class="divide-y divide-slate-100"></tbody>
+                </table>
+              </div>
+
+              <div class="flex flex-wrap items-center justify-end gap-2 pt-1">
+                <button
+                  type="submit"
+                  id="savePricingBtn"
+                  class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-sm transition"
+                >
+                  Guardar tarifas
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       </div>
@@ -1152,6 +1201,56 @@
 
     const SHIPPING_FEE = 60.00;
     const CURRENCY_SYMBOL = 'L';
+
+    function applySavedPricingOverrides(customMap) {
+      if (!customMap || typeof customMap !== 'object') return;
+      Object.entries(customMap).forEach(([key, vals]) => {
+        if (PRINT_SIZES[key] && vals) {
+          const p = parseFloat(vals.price);
+          const pro = parseFloat(vals.proPrice);
+          if (!Number.isNaN(p) && p >= 0) PRINT_SIZES[key].price = p;
+          if (!Number.isNaN(pro) && pro >= 0) PRINT_SIZES[key].proPrice = pro;
+        }
+      });
+    }
+
+    function loadLocalPricingOverrides() {
+      try {
+        const raw = localStorage.getItem('mc_custom_pricing');
+        if (raw) applySavedPricingOverrides(JSON.parse(raw));
+      } catch (e) {}
+    }
+
+    async function syncPricingFromCloud() {
+      loadLocalPricingOverrides();
+      if (!isSupabaseConfigured || !supabaseClient) return;
+      try {
+        const { data, error } = await supabaseClient
+          .from('pricing_config')
+          .select('*');
+
+        if (!error && Array.isArray(data) && data.length > 0) {
+          const cloudMap = {};
+          data.forEach((row) => {
+            cloudMap[row.size_key] = {
+              price: Number(row.amateur_price),
+              proPrice: Number(row.pro_price)
+            };
+          });
+          applySavedPricingOverrides(cloudMap);
+          try {
+            localStorage.setItem('mc_custom_pricing', JSON.stringify(cloudMap));
+          } catch (e) {}
+          renderPriceGuide();
+          renderPhotosGrid();
+          recalculateOrderSummary();
+        }
+      } catch (err) {
+        console.warn('Usando tarifas locales:', err);
+      }
+    }
+
+    loadLocalPricingOverrides();
 
     function getUnitPriceForSize(sizeKey) {
       const spec = PRINT_SIZES[sizeKey] || PRINT_SIZES['4x6'];
@@ -2736,268 +2835,131 @@
     function switchLabPanelSection(section) {
       const ordersSec = document.getElementById('labOrdersSection');
       const photoSec = document.getElementById('labPhotographersSection');
+      const pricingSec = document.getElementById('labPricingSection');
       const ordersBtn = document.getElementById('labTabOrdersBtn');
       const photoBtn = document.getElementById('labTabPhotographersBtn');
+      const pricingBtn = document.getElementById('labTabPricingBtn');
 
       if (!ordersSec || !photoSec) return;
 
+      ordersSec.classList.add('hidden');
+      photoSec.classList.add('hidden');
+      if (pricingSec) pricingSec.classList.add('hidden');
+
+      if (ordersBtn) ordersBtn.className = 'px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition';
+      if (photoBtn) photoBtn.className = 'px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition inline-flex items-center gap-1.5';
+      if (pricingBtn) pricingBtn.className = 'px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition inline-flex items-center gap-1.5';
+
       if (section === 'photographers') {
-        ordersSec.classList.add('hidden');
         photoSec.classList.remove('hidden');
-        if (ordersBtn) ordersBtn.className = 'px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition';
         if (photoBtn) photoBtn.className = 'px-3 py-1.5 rounded-xl bg-indigo-600 text-xs font-bold text-white transition inline-flex items-center gap-1.5';
         fetchLabPhotographers();
+      } else if (section === 'pricing' && pricingSec) {
+        pricingSec.classList.remove('hidden');
+        if (pricingBtn) pricingBtn.className = 'px-3 py-1.5 rounded-xl bg-emerald-600 text-xs font-bold text-white transition inline-flex items-center gap-1.5';
+        renderLabPricingEditor();
       } else {
-        photoSec.classList.add('hidden');
         ordersSec.classList.remove('hidden');
         if (ordersBtn) ordersBtn.className = 'px-3 py-1.5 rounded-xl bg-brand-600 text-xs font-bold text-white transition';
-        if (photoBtn) photoBtn.className = 'px-3 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 text-xs font-semibold text-white transition inline-flex items-center gap-1.5';
       }
     }
 
-    async function fetchLabPhotographers() {
-      const listEl = document.getElementById('labPhotographersList');
-      const countEl = document.getElementById('proPhotographersCountLabel');
-      if (!listEl) return;
+    async function renderLabPricingEditor() {
+      const tbody = document.getElementById('labPricingTableBody');
+      const statusBadge = document.getElementById('pricingSyncStatusBadge');
+      if (!tbody) return;
 
-      if (!isSupabaseConfigured || !supabaseClient) {
-        listEl.innerHTML = `<div class="bg-amber-50 border border-amber-200 text-amber-800 rounded-xl p-4 text-xs">Conecta Supabase primero para administrar fotógrafos desde aquí.</div>`;
-        return;
+      await syncPricingFromCloud();
+
+      if (statusBadge) {
+        statusBadge.textContent = isSupabaseConfigured ? '🟢 Sincronizado con la nube' : '💾 Guardado en este equipo';
       }
 
-      listEl.innerHTML = `<p class="text-xs text-slate-400">Cargando directorio...</p>`;
+      tbody.innerHTML = Object.entries(PRINT_SIZES).map(([key, spec]) => `
+        <tr class="hover:bg-slate-50/70">
+          <td class="py-2.5 px-3 font-bold text-slate-800">${escapeHtml(spec.label)}</td>
+          <td class="py-2.5 px-3">
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              required
+              data-price-tier="amateur"
+              data-size-key="${key}"
+              value="${Number(spec.price).toFixed(2)}"
+              class="w-28 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs font-bold text-slate-900 focus:outline-none focus:ring-2 focus:ring-brand-500"
+            />
+          </td>
+          <td class="py-2.5 px-3">
+            <input
+              type="number"
+              step="0.01"
+              min="0"
+              required
+              data-price-tier="pro"
+              data-size-key="${key}"
+              value="${Number(spec.proPrice).toFixed(2)}"
+              class="w-28 rounded-lg border border-indigo-200 bg-indigo-50/40 px-2.5 py-1.5 text-xs font-bold text-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            />
+          </td>
+        </tr>
+      `).join('');
+    }
+
+    async function saveLabPricingSettings(event) {
+      event.preventDefault();
+      const btn = document.getElementById('savePricingBtn');
+      if (btn) {
+        btn.disabled = true;
+        btn.textContent = 'Guardando...';
+      }
 
       try {
-        const { data, error } = await supabaseClient
-          .from('photographers')
-          .select('*')
-          .order('created_at', { ascending: false });
+        const updatedMap = {};
+        const upsertRows = [];
 
-        if (error) throw error;
+        Object.keys(PRINT_SIZES).forEach((sizeKey) => {
+          const amateurInp = document.querySelector(`input[data-price-tier="amateur"][data-size-key="${sizeKey}"]`);
+          const proInp = document.querySelector(`input[data-price-tier="pro"][data-size-key="${sizeKey}"]`);
+          const amateurVal = Math.max(0, parseFloat(amateurInp?.value || PRINT_SIZES[sizeKey].price) || 0);
+          const proVal = Math.max(0, parseFloat(proInp?.value || PRINT_SIZES[sizeKey].proPrice) || 0);
 
-        const rows = data || [];
-        if (countEl) countEl.textContent = `${rows.length} ${rows.length === 1 ? 'cuenta' : 'cuentas'}`;
+          updatedMap[sizeKey] = { price: amateurVal, proPrice: proVal };
+          upsertRows.push({
+            size_key: sizeKey,
+            amateur_price: amateurVal,
+            pro_price: proVal,
+            updated_at: new Date().toISOString()
+          });
+        });
 
-        if (rows.length === 0) {
-          listEl.innerHTML = `<div class="text-xs text-slate-500 bg-slate-50 border border-slate-200 rounded-xl p-4 text-center">Aún no has creado cuentas de fotógrafos en la nube. Agrega el primero arriba.</div>`;
-          return;
+        applySavedPricingOverrides(updatedMap);
+        try {
+          localStorage.setItem('mc_custom_pricing', JSON.stringify(updatedMap));
+        } catch (e) {}
+
+        if (isSupabaseConfigured && supabaseClient) {
+          const { error } = await supabaseClient
+            .from('pricing_config')
+            .upsert(upsertRows, { onConflict: 'size_key' });
+
+          if (error) {
+            console.warn('Guardado local, aviso nube:', error.message);
+            showToast('Tarifas guardadas en este navegador. (Crea la tabla pricing_config para sincronizar en todos los celulares).', 'warning');
+          } else {
+            showToast('¡Tarifas de Aficionado y Fotógrafo Pro actualizadas en toda la plataforma!', 'success');
+          }
+        } else {
+          showToast('¡Tarifas actualizadas!', 'success');
         }
 
-        listEl.innerHTML = rows.map((p) => `
-          <div class="flex flex-wrap items-center justify-between gap-3 p-3.5 rounded-xl border ${p.active ? 'border-slate-200 bg-slate-50/70' : 'border-rose-200 bg-rose-50/40'}">
-            <div class="space-y-0.5">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-extrabold text-slate-900">${escapeHtml(p.full_name)}</span>
-                <span class="text-[10px] font-bold px-2 py-0.5 rounded-full ${p.active ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'}">
-                  ${p.active ? 'Activo' : 'Suspendido'}
-                </span>
-              </div>
-              <p class="text-xs text-slate-600">
-                Usuario: <code class="bg-white border border-slate-200 px-1.5 py-0.5 rounded font-bold text-indigo-700">${escapeHtml(p.username)}</code>
-                • Contraseña: <code class="bg-white border border-slate-200 px-1.5 py-0.5 rounded font-bold text-slate-800">${escapeHtml(p.password)}</code>
-              </p>
-            </div>
-            <div class="flex items-center gap-2">
-              <button
-                type="button"
-                onclick="toggleProPhotographerStatus('${p.id}', ${!p.active})"
-                class="px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-100 text-[11px] font-bold text-slate-700 transition"
-              >
-                ${p.active ? 'Suspender' : 'Reactivar'}
-              </button>
-              <button
-                type="button"
-                onclick="deleteProPhotographer('${p.id}', '${escapeHtml(p.full_name)}')"
-                class="px-2.5 py-1.5 rounded-lg bg-rose-50 hover:bg-rose-600 text-rose-700 hover:text-white border border-rose-200 text-[11px] font-bold transition"
-              >
-                Eliminar
-              </button>
-            </div>
-          </div>
-        `).join('');
-      } catch (err) {
-        console.error(err);
-        listEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-4 text-xs">Asegúrate de haber ejecutado el SQL de la tabla <b>foto_estudio.photographers</b>. (${escapeHtml(err.message)})</div>`;
-      }
-    }
-
-    async function createProPhotographer(event) {
-      event.preventDefault();
-      if (!isSupabaseConfigured || !supabaseClient) {
-        showToast('Configura Supabase primero.', 'warning');
-        return;
-      }
-
-      const nameInp = document.getElementById('newProFullName');
-      const userInp = document.getElementById('newProUsername');
-      const passInp = document.getElementById('newProPassword');
-      const btn = document.getElementById('createProBtn');
-
-      const fullName = nameInp.value.trim();
-      const username = userInp.value.trim().toLowerCase().replace(/\s+/g, '');
-      const password = passInp.value.trim();
-
-      if (!fullName || !username || !password) return;
-
-      btn.disabled = true;
-      btn.textContent = 'Guardando...';
-
-      try {
-        const { error } = await supabaseClient
-          .from('photographers')
-          .insert([{ full_name: fullName, username, password, active: true }]);
-
-        if (error) throw error;
-
-        nameInp.value = '';
-        userInp.value = '';
-        passInp.value = '';
-        showToast(`Fotógrafo "${fullName}" registrado.`, 'success');
-        fetchLabPhotographers();
-      } catch (err) {
-        console.error(err);
-        showToast(`Error al crear fotógrafo: ${err.message}`, 'error');
+        renderPriceGuide();
+        renderPhotosGrid();
+        recalculateOrderSummary();
       } finally {
-        btn.disabled = false;
-        btn.textContent = '+ Agregar';
-      }
-    }
-
-    async function toggleProPhotographerStatus(id, nextActive) {
-      if (!supabaseClient) return;
-      const { error } = await supabaseClient
-        .from('photographers')
-        .update({ active: nextActive })
-        .eq('id', id);
-
-      if (error) {
-        showToast(`Error: ${error.message}`, 'error');
-        return;
-      }
-      showToast(nextActive ? 'Cuenta reactivada.' : 'Cuenta suspendida.', 'info');
-      fetchLabPhotographers();
-    }
-
-    async function deleteProPhotographer(id, name) {
-      if (!supabaseClient) return;
-      const { error } = await supabaseClient
-        .from('photographers')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        showToast(`Error al eliminar: ${error.message}`, 'error');
-        return;
-      }
-      showToast(`Cuenta de "${name}" eliminada.`, 'info');
-      fetchLabPhotographers();
-    }
-
-    function logoutLabSession() {
-      isLabUnlocked = false;
-      stopStaffAutoSyncIfIdle();
-      document.getElementById('labPinInput').value = '';
-      document.getElementById('labPinGate').classList.remove('hidden');
-      document.getElementById('labOrdersContent').classList.add('hidden');
-      showToast('Sesión de laboratorio cerrada.', 'info');
-      setTimeout(() => document.getElementById('labPinInput').focus(), 60);
-    }
-
-    function closeLabPanelModal() {
-      // Bloquear sesión automáticamente al salir del panel de laboratorio
-      isLabUnlocked = false;
-      stopStaffAutoSyncIfIdle();
-      document.getElementById('labPinInput').value = '';
-      document.getElementById('labPanelModal').classList.add('hidden');
-    }
-
-    // =========================================================================
-    // VENTANA DE CAJERO (CHECK DE PAGO DE CLIENTES)
-    // =========================================================================
-    function openCashierPanelView() {
-      document.getElementById('cashierPanelModal').classList.remove('hidden');
-      if (isCashierUnlocked) {
-        document.getElementById('cashierPinGate').classList.add('hidden');
-        document.getElementById('cashierOrdersContent').classList.remove('hidden');
-        fetchCashierOrders();
-        startLabRealtimeSubscription();
-      } else {
-        document.getElementById('cashierPinInput').value = '';
-        document.getElementById('cashierPinGate').classList.remove('hidden');
-        document.getElementById('cashierOrdersContent').classList.add('hidden');
-        setTimeout(() => document.getElementById('cashierPinInput').focus(), 60);
-      }
-    }
-
-    function logoutCashierSession() {
-      isCashierUnlocked = false;
-      stopStaffAutoSyncIfIdle();
-      document.getElementById('cashierPinInput').value = '';
-      document.getElementById('cashierPinGate').classList.remove('hidden');
-      document.getElementById('cashierOrdersContent').classList.add('hidden');
-      showToast('Sesión de caja cerrada.', 'info');
-      setTimeout(() => document.getElementById('cashierPinInput').focus(), 60);
-    }
-
-    function closeCashierPanelModal() {
-      isCashierUnlocked = false;
-      stopStaffAutoSyncIfIdle();
-      document.getElementById('cashierPinInput').value = '';
-      document.getElementById('cashierPanelModal').classList.add('hidden');
-    }
-
-    function verifyCashierPin(event) {
-      event.preventDefault();
-      const entered = document.getElementById('cashierPinInput').value;
-      if (entered === LAB_ACCESS_PIN) {
-        isCashierUnlocked = true;
-        document.getElementById('cashierPinGate').classList.add('hidden');
-        document.getElementById('cashierOrdersContent').classList.remove('hidden');
-        fetchCashierOrders();
-        startLabRealtimeSubscription();
-      } else {
-        showToast('Contraseña incorrecta.', 'error');
-      }
-    }
-
-    function isOrderPaidInCashier(order) {
-      if (order.receipt_path === 'PAGADO_EN_CAJA') return true;
-      const isKioskOrder = order.delivery_method === 'kiosk_pickup' || String(order.order_code || '').startsWith('K-');
-      if (isKioskOrder && !order.receipt_path) return false;
-      return true;
-    }
-
-    function setCashierFilter(filterKey) {
-      currentCashierFilter = filterKey;
-      renderCashierOrdersList();
-    }
-
-    async function fetchCashierOrders(silent = false) {
-      const statusEl = document.getElementById('cashierConnectionStatus');
-      const listEl = document.getElementById('cashierOrdersList');
-
-      if (!isSupabaseConfigured || !supabaseClient) {
-        statusEl.textContent = 'Sin conexión a Supabase configurada';
-        listEl.innerHTML = `<div class="bg-amber-50 border border-amber-200 text-amber-900 rounded-xl p-4 text-xs">Configura Supabase desde el panel de Laboratorio primero.</div>`;
-        return;
-      }
-
-      if (!silent) statusEl.textContent = 'Actualizando cuentas...';
-      try {
-        const { data, error } = await supabaseClient
-          .from('orders')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(60);
-
-        if (error) throw error;
-        labOrdersCache = data || [];
-        renderCashierOrdersList();
-      } catch (err) {
-        console.error(err);
-        if (!silent) {
-          statusEl.textContent = 'Error de conexión';
-          listEl.innerHTML = `<div class="bg-rose-50 border border-rose-200 text-rose-700 rounded-xl p-4 text-xs">${escapeHtml(err.message)}</div>`;
+        if (btn) {
+          btn.disabled = false;
+          btn.textContent = 'Guardar tarifas';
         }
       }
     }
@@ -3633,6 +3595,7 @@
     // Inicialización al cargar
     document.addEventListener('DOMContentLoaded', () => {
       renderPriceGuide();
+      syncPricingFromCloud();
       setupFileUploadListeners();
       setupCropDragListeners();
       recalculateOrderSummary();
