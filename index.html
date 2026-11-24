@@ -644,9 +644,9 @@
     const DEFAULT_LAB_INFO_LINE = '';
     const DEVELOPER_BRAND_NAME = 'Tu Emprendimiento Digital';
     const DEVELOPER_CONTACT_EMAIL = 'ventas@tuemprendimiento.com';
-    const DEFAULT_SUPABASE_URL = 'https://txmnqxxxulrowbpkkmmh.supabase.co/rest/v1/';
+    const DEFAULT_SUPABASE_URL = 'https://txmnqxxxulrowbpkkmmh.supabase.co';
     const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_yRC66EjpAC9UrP7EgLVxAQ_Yt6Xm6mC';
-    const DEFAULT_SUPABASE_SCHEMA = 'Foto Estudio';
+    const DEFAULT_SUPABASE_SCHEMA = 'foto_estudio';
     const DEFAULT_SUPABASE_BUCKET = 'order-prints';
 
     // Catálogo de clientes laboratorios (puedes registrar aquí cada laboratorio y llamarlo con ?client=id)
@@ -977,8 +977,12 @@
     async function syncStudioSettingsToCloud() {
       if (!supabaseClient) return;
       try {
-        const { data: existing } = await supabaseClient.from('studio_settings').select('id').limit(1);
-        const targetId = existing?.[0]?.id || '00000000-0000-4000-8000-000000000001';
+        const { data: existing, error: readErr } = await supabaseClient.from('studio_settings').select('id').limit(1);
+        if (readErr) {
+          showToast(`Aviso nube (studio_settings): ${readErr.message}`);
+          return;
+        }
+        const targetId = existing?.[0]?.id || 'default_studio';
         const payload = {
           id: targetId,
           lab_name: studioConfig.labName,
@@ -990,12 +994,7 @@
         };
         const { error } = await supabaseClient.from('studio_settings').upsert(payload, { onConflict: 'id' });
         if (error) {
-          // Respaldo por si la tabla tiene columnas reducidas
-          await supabaseClient.from('studio_settings').upsert({
-            id: targetId,
-            lab_name: studioConfig.labName,
-            shipping_cost: Number(studioConfig.shippingCost) || 0
-          }, { onConflict: 'id' });
+          showToast(`Error guardando en nube: ${error.message}`);
         }
       } catch (err) {
         console.warn('Error sincronizando studio_settings:', err);
@@ -1013,7 +1012,8 @@
           price: Number(sz.price) || 0,
           pro_price: Number(sz.proPrice) || 0
         }));
-        await supabaseClient.from('pricing_config').upsert(rows, { onConflict: 'size_key' });
+        const { error } = await supabaseClient.from('pricing_config').upsert(rows, { onConflict: 'size_key' });
+        if (error) showToast(`Aviso nube (tarifas): ${error.message}`);
       } catch (err) {
         console.warn('Error sincronizando pricing_config:', err);
       }
@@ -1023,13 +1023,14 @@
       if (!supabaseClient) return;
       try {
         const rows = proPhotographers.map((p) => ({
-          id: /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(String(p.id)) ? p.id : generateUuidV4(),
+          id: String(p.id || generateUuidV4()),
           name: p.name,
           username: p.username,
           password: p.password,
           active: p.active !== false
         }));
-        await supabaseClient.from('photographers').upsert(rows, { onConflict: 'username' });
+        const { error } = await supabaseClient.from('photographers').upsert(rows, { onConflict: 'username' });
+        if (error) showToast(`Aviso nube (fotógrafos): ${error.message}`);
       } catch (err) {
         console.warn('Error sincronizando photographers:', err);
       }
@@ -2983,6 +2984,12 @@
       initBrandingAndCloud();
       setDeliveryMode('store');
       updateOrderTotals();
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible' && supabaseClient) {
+        loadCloudConfigurations();
+      }
     });
   </script>
 </body>
