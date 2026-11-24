@@ -840,10 +840,14 @@
 
       if (urlLab) studioConfig.labName = urlLab;
       if (urlLabInfo !== null) studioConfig.labInfo = urlLabInfo;
-      if (urlSbUrl) securityPins.supabaseUrl = urlSbUrl;
-      if (urlSbKey) securityPins.supabaseKey = urlSbKey;
-      if (urlSbSchema) securityPins.supabaseSchema = urlSbSchema;
-      if (!securityPins.supabaseSchema) securityPins.supabaseSchema = CLIENT_STORAGE_NS;
+
+      // Priorizar siempre las credenciales centrales del código (o parámetros explícitos en URL)
+      // para evitar que un navegador con caché viejo quede apuntando a una URL/esquema anterior.
+      securityPins.supabaseUrl = (urlSbUrl || DEFAULT_SUPABASE_URL || securityPins.supabaseUrl || '').trim();
+      securityPins.supabaseKey = (urlSbKey || DEFAULT_SUPABASE_ANON_KEY || securityPins.supabaseKey || '').trim();
+      securityPins.supabaseSchema = (urlSbSchema || profile?.supabaseSchema || clientKey || DEFAULT_SUPABASE_SCHEMA || 'foto_estudio')
+        .toLowerCase()
+        .replace(/[^a-z0-9_]/g, '_');
 
       saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
       saveJsonStorage(STORAGE_KEYS.securityPins, securityPins);
