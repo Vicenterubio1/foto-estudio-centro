@@ -894,84 +894,103 @@
     }
 
     async function loadCloudConfigurations() {
-      if (!supabaseClient) return;
+      const sbUrl = (securityPins.supabaseUrl || DEFAULT_SUPABASE_URL || '').replace(/\/+$/, '');
+      const sbKey = (securityPins.supabaseKey || DEFAULT_SUPABASE_ANON_KEY || '').trim();
+      const sbSchema = getActiveSupabaseSchema();
+      if (!sbUrl || !sbKey) return;
+
+      const restHeaders = {
+        'apikey': sbKey,
+        'Authorization': `Bearer ${sbKey}`,
+        'Accept-Profile': sbSchema,
+        'Content-Type': 'application/json'
+      };
+
       try {
-        // 1. Cargar configuración del estudio (studio_settings)
-        const { data: settingsRows } = await supabaseClient
-          .from('studio_settings')
-          .select('*')
-          .limit(1);
+        // 1. Cargar configuración del estudio (studio_settings) vía REST directo
+        const settingsRes = await fetch(`${sbUrl}/rest/v1/studio_settings?select=*&limit=1`, {
+          headers: restHeaders,
+          cache: 'no-store'
+        });
+        if (settingsRes.ok) {
+          const settingsRows = await settingsRes.json();
+          if (Array.isArray(settingsRows) && settingsRows.length > 0) {
+            const row = settingsRows[0];
+            const cloudLabName = row.lab_name || row.studio_name || row.name;
+            const cloudLabInfo = row.lab_info ?? row.studio_info ?? row.address ?? row.subtitle;
+            const cloudShipping = row.shipping_cost ?? row.delivery_fee;
+            let cloudBanks = row.bank_accounts || row.banks_json;
+            if (typeof cloudBanks === 'string') {
+              try { cloudBanks = JSON.parse(cloudBanks); } catch (e) { cloudBanks = null; }
+            }
 
-        if (Array.isArray(settingsRows) && settingsRows.length > 0) {
-          const row = settingsRows[0];
-          const cloudLabName = row.lab_name || row.studio_name || row.name;
-          const cloudLabInfo = row.lab_info ?? row.studio_info ?? row.address ?? row.subtitle;
-          const cloudShipping = row.shipping_cost ?? row.delivery_fee;
-          let cloudBanks = row.bank_accounts || row.banks_json;
-          if (typeof cloudBanks === 'string') {
-            try { cloudBanks = JSON.parse(cloudBanks); } catch (e) { cloudBanks = null; }
-          }
+            if (cloudLabName) studioConfig.labName = cloudLabName;
+            if (cloudLabInfo !== undefined && cloudLabInfo !== null) studioConfig.labInfo = cloudLabInfo;
+            if (cloudShipping !== undefined && cloudShipping !== null && !isNaN(Number(cloudShipping))) {
+              studioConfig.shippingCost = Number(cloudShipping);
+            }
+            if (Array.isArray(cloudBanks) && cloudBanks.length > 0) {
+              studioConfig.bankAccounts = cloudBanks;
+            }
+            if (row.staff_pin) securityPins.staffPin = String(row.staff_pin);
+            if (row.admin_pin) securityPins.adminPin = String(row.admin_pin);
 
-          if (cloudLabName) studioConfig.labName = cloudLabName;
-          if (cloudLabInfo !== undefined && cloudLabInfo !== null) studioConfig.labInfo = cloudLabInfo;
-          if (cloudShipping !== undefined && cloudShipping !== null && !isNaN(Number(cloudShipping))) {
-            studioConfig.shippingCost = Number(cloudShipping);
-          }
-          if (Array.isArray(cloudBanks) && cloudBanks.length > 0) {
-            studioConfig.bankAccounts = cloudBanks;
-          }
-          if (row.staff_pin) securityPins.staffPin = String(row.staff_pin);
-          if (row.admin_pin) securityPins.adminPin = String(row.admin_pin);
-
-          saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
-          saveJsonStorage(STORAGE_KEYS.securityPins, securityPins);
-          applyStudioBrandingUI();
-          renderBankAccountsForCustomer();
-          updateWebDeliveryFeeLabel();
-          updateOrderTotals();
-        }
-
-        // 2. Cargar precios y productos (pricing_config)
-        const { data: pricingRows } = await supabaseClient
-          .from('pricing_config')
-          .select('*');
-
-        if (Array.isArray(pricingRows) && pricingRows.length > 0) {
-          const loadedSizes = {};
-          pricingRows.forEach((r) => {
-            const key = r.size_key || r.key || r.id;
-            if (!key) return;
-            loadedSizes[key] = {
-              key: String(key),
-              label: r.label || r.size_label || String(key),
-              widthIn: Number(r.width_in ?? r.widthIn) || 4,
-              heightIn: Number(r.height_in ?? r.heightIn) || 6,
-              price: Number(r.price ?? r.public_price) || 0,
-              proPrice: Number(r.pro_price ?? r.proPrice ?? r.price) || 0
-            };
-          });
-          if (Object.keys(loadedSizes).length > 0) {
-            printSizes = loadedSizes;
-            saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
-            renderUploadedPhotosList();
+            saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
+            saveJsonStorage(STORAGE_KEYS.securityPins, securityPins);
+            applyStudioBrandingUI();
+            renderBankAccountsForCustomer();
+            updateWebDeliveryFeeLabel();
             updateOrderTotals();
           }
         }
 
-        // 3. Cargar fotógrafos Pro (photographers)
-        const { data: photoRows } = await supabaseClient
-          .from('photographers')
-          .select('*');
+        // 2. Cargar precios y productos (pricing_config)
+        const pricingRes = await fetch(`${sbUrl}/rest/v1/pricing_config?select=*`, {
+          headers: restHeaders,
+          cache: 'no-store'
+        });
+        if (pricingRes.ok) {
+          const pricingRows = await pricingRes.json();
+          if (Array.isArray(pricingRows) && pricingRows.length > 0) {
+            const loadedSizes = {};
+            pricingRows.forEach((r) => {
+              const key = r.size_key || r.key || r.id;
+              if (!key) return;
+              loadedSizes[key] = {
+                key: String(key),
+                label: r.label || r.size_label || String(key),
+                widthIn: Number(r.width_in ?? r.widthIn) || 4,
+                heightIn: Number(r.height_in ?? r.heightIn) || 6,
+                price: Number(r.price ?? r.public_price) || 0,
+                proPrice: Number(r.pro_price ?? r.proPrice ?? r.price) || 0
+              };
+            });
+            if (Object.keys(loadedSizes).length > 0) {
+              printSizes = loadedSizes;
+              saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
+              renderUploadedPhotosList();
+              updateOrderTotals();
+            }
+          }
+        }
 
-        if (Array.isArray(photoRows) && photoRows.length > 0) {
-          proPhotographers = photoRows.map((p) => ({
-            id: p.id || `pro-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-            name: p.name || p.studio_name || 'Fotógrafo Pro',
-            username: p.username || '',
-            password: p.password || p.pin || '',
-            active: p.active !== false
-          }));
-          saveJsonStorage(STORAGE_KEYS.proPhotographers, proPhotographers);
+        // 3. Cargar fotógrafos Pro (photographers)
+        const photoRes = await fetch(`${sbUrl}/rest/v1/photographers?select=*`, {
+          headers: restHeaders,
+          cache: 'no-store'
+        });
+        if (photoRes.ok) {
+          const photoRows = await photoRes.json();
+          if (Array.isArray(photoRows) && photoRows.length > 0) {
+            proPhotographers = photoRows.map((p) => ({
+              id: p.id || `pro-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+              name: p.name || p.studio_name || 'Fotógrafo Pro',
+              username: p.username || '',
+              password: p.password || p.pin || '',
+              active: p.active !== false
+            }));
+            saveJsonStorage(STORAGE_KEYS.proPhotographers, proPhotographers);
+          }
         }
       } catch (err) {
         console.warn('No se pudo cargar configuración remota:', err);
@@ -979,16 +998,31 @@
     }
 
     async function syncStudioSettingsToCloud() {
-      if (!supabaseClient) {
-        showToast('Sin conexión a Supabase: guardado solo localmente.');
+      const sbUrl = (securityPins.supabaseUrl || DEFAULT_SUPABASE_URL || '').replace(/\/+$/, '');
+      const sbKey = (securityPins.supabaseKey || DEFAULT_SUPABASE_ANON_KEY || '').trim();
+      const sbSchema = getActiveSupabaseSchema();
+      if (!sbUrl || !sbKey) {
+        showToast('Sin credenciales de Supabase configuradas.');
         return false;
       }
+
       try {
-        const { data: existing, error: readErr } = await supabaseClient.from('studio_settings').select('id').limit(1);
-        if (readErr) {
-          showToast(`Error leyendo studio_settings: ${readErr.message}`);
+        const readRes = await fetch(`${sbUrl}/rest/v1/studio_settings?select=id&limit=1`, {
+          headers: {
+            'apikey': sbKey,
+            'Authorization': `Bearer ${sbKey}`,
+            'Accept-Profile': sbSchema
+          },
+          cache: 'no-store'
+        });
+
+        if (!readRes.ok) {
+          const errText = await readRes.text();
+          showToast(`Error Supabase (${readRes.status}): ${errText.slice(0, 120)}`);
           return false;
         }
+
+        const existing = await readRes.json();
         const targetId = existing?.[0]?.id || 'default_studio';
         const payload = {
           id: targetId,
@@ -999,9 +1033,23 @@
           staff_pin: securityPins.staffPin,
           admin_pin: securityPins.adminPin
         };
-        const { error } = await supabaseClient.from('studio_settings').upsert(payload, { onConflict: 'id' });
-        if (error) {
-          showToast(`Error guardando en Supabase: ${error.message}`);
+
+        const writeRes = await fetch(`${sbUrl}/rest/v1/studio_settings?on_conflict=id`, {
+          method: 'POST',
+          headers: {
+            'apikey': sbKey,
+            'Authorization': `Bearer ${sbKey}`,
+            'Accept-Profile': sbSchema,
+            'Content-Profile': sbSchema,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates,return=representation'
+          },
+          body: JSON.stringify(payload)
+        });
+
+        if (!writeRes.ok) {
+          const errText = await writeRes.text();
+          showToast(`Error guardando (${writeRes.status}): ${errText.slice(0, 120)}`);
           return false;
         }
         return true;
