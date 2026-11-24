@@ -174,6 +174,10 @@
           Enviar Orden de Impresión
         </button>
 
+        <button id="cancelOrderBtn" type="button" onclick="handleCancelCustomerOrderClick()" class="w-full py-2.5 px-5 rounded-2xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs transition">
+          Cancelar orden
+        </button>
+
         <div id="orderConfirmationBox" class="hidden rounded-2xl bg-emerald-50 border border-emerald-200 p-4 text-xs text-emerald-900 space-y-1"></div>
       </div>
     </aside>
@@ -311,11 +315,7 @@
 
         <!-- Orientación y centrado -->
         <div class="flex flex-wrap items-center justify-between gap-2 rounded-2xl bg-slate-50 border border-slate-200 p-3 text-xs">
-          <div class="flex items-center gap-2">
-            <span class="font-bold text-slate-700">Orientación del marco:</span>
-            <button type="button" id="orientLandscapeBtn" onclick="setCropOrientation('landscape')" class="px-3 py-1.5 rounded-xl bg-sky-600 text-white font-bold">↔ Horizontal</button>
-            <button type="button" id="orientPortraitBtn" onclick="setCropOrientation('portrait')" class="px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-semibold">↕ Vertical</button>
-          </div>
+          <span class="font-semibold text-slate-600">Arrastra la fotografía en el marco para ajustar el encuadre</span>
           <button type="button" onclick="fitPhotoToFrame()" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white font-semibold">
             ⛶ Centrar
           </button>
@@ -755,6 +755,8 @@
     let cropDragState = null;
     let supabaseClient = null;
     let toastTimeoutId = null;
+    let cancelOrderConfirmPending = false;
+    let cancelOrderResetTimer = null;
 
     function showToast(message) {
       const banner = document.getElementById('toastBanner');
@@ -1514,9 +1516,6 @@
                     <button type="button" onclick="openCropEditor('${photo.id}')" class="px-3 py-1.5 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold transition">
                       ✂️ Encuadrar / Bordes / Texto
                     </button>
-                    <button type="button" onclick="togglePhotoOrientationQuick('${photo.id}')" class="px-2.5 py-1.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-100 text-xs font-semibold text-slate-700">
-                      ${photo.orientation === 'landscape' ? '↔ Horizontal' : '↕ Vertical'}
-                    </button>
                   </div>
                   <div class="text-xs font-extrabold text-sky-700">
                     L ${lineTotal.toFixed(2)}
@@ -2108,6 +2107,68 @@
       renderUploadedPhotosList();
       updateOrderTotals();
       showToast(`Orden ${orderCode} enviada a Caja.`);
+    }
+
+    function handleCancelCustomerOrderClick() {
+      const btn = document.getElementById('cancelOrderBtn');
+      const hasContent =
+        uploadedPhotos.length > 0 ||
+        Boolean((document.getElementById('customerNameInput')?.value || '').trim()) ||
+        Boolean((document.getElementById('customerPhoneInput')?.value || '').trim()) ||
+        Boolean((document.getElementById('deliveryAddressInput')?.value || '').trim()) ||
+        Boolean(receiptDataUrl);
+
+      if (!hasContent) {
+        showToast('No hay una orden activa para cancelar.');
+        return;
+      }
+
+      if (!cancelOrderConfirmPending) {
+        cancelOrderConfirmPending = true;
+        if (btn) {
+          btn.textContent = '¿Seguro? Haz clic de nuevo para cancelar la orden';
+          btn.className = 'w-full py-2.5 px-5 rounded-2xl bg-rose-600 hover:bg-rose-500 text-white font-bold text-xs shadow-xs transition';
+        }
+        clearTimeout(cancelOrderResetTimer);
+        cancelOrderResetTimer = setTimeout(() => {
+          resetCancelOrderButtonState();
+        }, 4000);
+        return;
+      }
+
+      clearTimeout(cancelOrderResetTimer);
+      resetCancelOrderButtonState();
+
+      uploadedPhotos = [];
+      receiptDataUrl = '';
+      webShippingEnabled = false;
+      const nameInput = document.getElementById('customerNameInput');
+      const phoneInput = document.getElementById('customerPhoneInput');
+      const addrInput = document.getElementById('deliveryAddressInput');
+      const receiptInput = document.getElementById('paymentReceiptInput');
+      const receiptLabel = document.getElementById('receiptFileName');
+      const confBox = document.getElementById('orderConfirmationBox');
+
+      if (nameInput) nameInput.value = '';
+      if (phoneInput) phoneInput.value = '';
+      if (addrInput) addrInput.value = '';
+      if (receiptInput) receiptInput.value = '';
+      if (receiptLabel) receiptLabel.textContent = '';
+      if (confBox) confBox.classList.add('hidden');
+
+      setDeliveryMode('store');
+      renderUploadedPhotosList();
+      updateOrderTotals();
+      showToast('Orden cancelada y formulario reiniciado.');
+    }
+
+    function resetCancelOrderButtonState() {
+      cancelOrderConfirmPending = false;
+      const btn = document.getElementById('cancelOrderBtn');
+      if (btn) {
+        btn.textContent = 'Cancelar orden';
+        btn.className = 'w-full py-2.5 px-5 rounded-2xl border border-rose-200 bg-rose-50 hover:bg-rose-100 text-rose-700 font-semibold text-xs transition';
+      }
     }
 
     // =========================================================================
