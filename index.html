@@ -50,7 +50,7 @@
   </header>
 
   <!-- Notificación tipo toast -->
-  <div id="toastBanner" class="hidden fixed bottom-5 right-5 z-50 max-w-sm rounded-2xl bg-slate-900 text-white px-4 py-3 shadow-2xl border border-slate-700 text-sm font-medium"></div>
+  <div id="toastBanner" class="hidden fixed bottom-5 right-5 z-[9999] max-w-sm rounded-2xl bg-slate-900 text-white px-4 py-3 shadow-2xl border border-slate-700 text-sm font-medium"></div>
 
   <!-- Contenido principal: Cliente / Kiosko -->
   <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -609,6 +609,7 @@
             </div>
 
             <button onclick="saveStudioSettings()" class="px-5 py-2.5 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold">Guardar Configuración del Estudio</button>
+            <p id="studioCloudSyncStatus" class="text-xs font-semibold text-slate-600 mt-1"></p>
           </div>
 
           <!-- Pestaña 5: Claves y Nube -->
@@ -1023,9 +1024,8 @@
         }
 
         const existing = await readRes.json();
-        const targetId = existing?.[0]?.id || 'default_studio';
+        const existingId = Array.isArray(existing) && existing.length > 0 ? existing[0].id : null;
         const payload = {
-          id: targetId,
           lab_name: studioConfig.labName,
           lab_info: studioConfig.labInfo || '',
           shipping_cost: Number(studioConfig.shippingCost) || 0,
@@ -1034,27 +1034,45 @@
           admin_pin: securityPins.adminPin
         };
 
-        const writeRes = await fetch(`${sbUrl}/rest/v1/studio_settings?on_conflict=id`, {
-          method: 'POST',
+        const writeUrl = existingId
+          ? `${sbUrl}/rest/v1/studio_settings?id=eq.${encodeURIComponent(existingId)}`
+          : `${sbUrl}/rest/v1/studio_settings`;
+        const writeMethod = existingId ? 'PATCH' : 'POST';
+        const writeBody = existingId ? payload : { id: 'default_studio', ...payload };
+
+        const writeRes = await fetch(writeUrl, {
+          method: writeMethod,
           headers: {
             'apikey': sbKey,
             'Authorization': `Bearer ${sbKey}`,
             'Accept-Profile': sbSchema,
             'Content-Profile': sbSchema,
             'Content-Type': 'application/json',
-            'Prefer': 'resolution=merge-duplicates,return=representation'
+            'Prefer': 'return=representation'
           },
-          body: JSON.stringify(payload)
+          body: JSON.stringify(writeBody)
         });
 
         if (!writeRes.ok) {
           const errText = await writeRes.text();
-          showToast(`Error guardando (${writeRes.status}): ${errText.slice(0, 120)}`);
+          const msg = `Error Supabase (${writeRes.status}): ${errText.slice(0, 140)}`;
+          const statusEl = document.getElementById('studioCloudSyncStatus');
+          if (statusEl) {
+            statusEl.textContent = msg;
+            statusEl.className = 'text-xs font-bold text-rose-600 mt-1';
+          }
+          showToast(msg);
           return false;
         }
         return true;
       } catch (err) {
-        showToast(`Fallo de red con Supabase: ${err.message || err}`);
+        const msg = `Fallo de red con Supabase: ${err.message || err}`;
+        const statusEl = document.getElementById('studioCloudSyncStatus');
+        if (statusEl) {
+          statusEl.textContent = msg;
+          statusEl.className = 'text-xs font-bold text-rose-600 mt-1';
+        }
+        showToast(msg);
         return false;
       }
     }
@@ -3016,8 +3034,14 @@
       applyStudioBrandingUI();
       updateWebDeliveryFeeLabel();
       updateOrderTotals();
+      const statusEl = document.getElementById('studioCloudSyncStatus');
       if (synced) {
-        showToast(`✓ Guardado en Supabase (${getActiveSupabaseSchema()}): "${studioConfig.labName}".`);
+        const okMsg = `✓ Sincronizado en Supabase (${getActiveSupabaseSchema()}): "${studioConfig.labName}".`;
+        if (statusEl) {
+          statusEl.textContent = okMsg;
+          statusEl.className = 'text-xs font-bold text-emerald-700 mt-1';
+        }
+        showToast(okMsg);
       }
     }
 
