@@ -298,11 +298,11 @@
         <!-- Vista previa interactiva -->
         <div class="w-full h-80 rounded-2xl bg-slate-900/95 border border-slate-700 flex items-center justify-center overflow-hidden relative p-4 select-none">
           <div id="cropAspectFrame" onpointerdown="startCropDrag(event)" onpointermove="moveCropDrag(event)" onpointerup="endCropDrag(event)" onpointercancel="endCropDrag(event)" class="relative box-border bg-white shadow-2xl overflow-hidden flex items-center justify-center cursor-grab active:cursor-grabbing transition-all duration-150" style="width: 300px; height: 200px;">
+            <div id="cropTopCaptionOverlay" class="hidden absolute flex items-center justify-center text-center font-bold z-20 pointer-events-none leading-none whitespace-nowrap"></div>
             <div id="cropInnerViewport" class="relative w-full h-full overflow-hidden flex items-center justify-center">
               <img id="cropPreviewImage" src="" alt="Vista previa" draggable="false" class="photo-preview-box max-w-none max-h-none pointer-events-none" />
-              <div id="cropTopCaptionOverlay" class="hidden absolute top-0 left-0 right-0 text-center text-xs font-bold truncate px-2 py-1 z-10"></div>
-              <div id="cropPolaroidCaptionOverlay" class="hidden absolute bottom-0 left-0 right-0 text-center text-xs font-bold truncate px-2 py-1 z-10"></div>
             </div>
+            <div id="cropPolaroidCaptionOverlay" class="hidden absolute flex items-center justify-center text-center font-bold z-20 pointer-events-none leading-none whitespace-nowrap"></div>
           </div>
           <button type="button" onclick="resetCropEditorValues()" class="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold border border-slate-600">
             ↺ Restablecer
@@ -444,7 +444,7 @@
           <h3 class="text-base font-bold">Caja — Verificación y Cobro de Órdenes</h3>
           <p class="text-xs text-slate-300">Las órdenes pasan a Laboratorio únicamente después de confirmar el pago aquí</p>
         </div>
-        <button onclick="closeCashierPanelModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-white">✕</button>
+        <button onclick="closeCashierPanelModal()" title="Cerrar y salir de sesión" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-white">✕</button>
       </div>
 
       <div class="p-6 space-y-5">
@@ -491,7 +491,7 @@
           <h3 class="text-base font-bold">Panel de Laboratorio y Producción</h3>
           <p class="text-xs text-slate-300">Órdenes pagadas listas para descargar en ZIP a 300 DPI y administración del estudio</p>
         </div>
-        <button onclick="closeLabPanelModal()" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-white">✕</button>
+        <button onclick="closeLabPanelModal()" title="Cerrar y salir de sesión" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-white">✕</button>
       </div>
 
       <div class="p-6 space-y-5">
@@ -642,10 +642,10 @@
     // =========================================================================
     const DEFAULT_LAB_BRAND_NAME = 'Laboratorio Fotográfico';
     const DEFAULT_LAB_INFO_LINE = '';
-    const DEVELOPER_BRAND_NAME = 'Vértice Apps';
-    const DEVELOPER_CONTACT_EMAIL = 'infoventatech@gmail.com';
-    const DEFAULT_SUPABASE_URL = 'https://txmnqxxxulrowbpkkmmh.supabase.co';
-    const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_yRC66EjpAC9UrP7EgLVxAQ_Yt6Xm6mC';
+    const DEVELOPER_BRAND_NAME = 'Tu Emprendimiento Digital';
+    const DEVELOPER_CONTACT_EMAIL = 'ventas@tuemprendimiento.com';
+    const DEFAULT_SUPABASE_URL = '';
+    const DEFAULT_SUPABASE_ANON_KEY = '';
     const DEFAULT_SUPABASE_SCHEMA = 'foto_estudio';
     const DEFAULT_SUPABASE_BUCKET = 'order-prints';
 
@@ -879,10 +879,157 @@
           badge.className = 'text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30';
           badge.textContent = `● Nube Conectada (${sbSchema})`;
         }
+        loadCloudConfigurations();
         refreshOrdersFromCloud(true);
       } catch (err) {
         console.warn('Error inicializando Supabase:', err);
         supabaseClient = null;
+      }
+    }
+
+    async function loadCloudConfigurations() {
+      if (!supabaseClient) return;
+      try {
+        // 1. Cargar configuración del estudio (studio_settings)
+        const { data: settingsRows } = await supabaseClient
+          .from('studio_settings')
+          .select('*')
+          .limit(1);
+
+        if (Array.isArray(settingsRows) && settingsRows.length > 0) {
+          const row = settingsRows[0];
+          const cloudLabName = row.lab_name || row.studio_name || row.name;
+          const cloudLabInfo = row.lab_info ?? row.studio_info ?? row.address ?? row.subtitle;
+          const cloudShipping = row.shipping_cost ?? row.delivery_fee;
+          let cloudBanks = row.bank_accounts || row.banks_json;
+          if (typeof cloudBanks === 'string') {
+            try { cloudBanks = JSON.parse(cloudBanks); } catch (e) { cloudBanks = null; }
+          }
+
+          if (cloudLabName) studioConfig.labName = cloudLabName;
+          if (cloudLabInfo !== undefined && cloudLabInfo !== null) studioConfig.labInfo = cloudLabInfo;
+          if (cloudShipping !== undefined && cloudShipping !== null && !isNaN(Number(cloudShipping))) {
+            studioConfig.shippingCost = Number(cloudShipping);
+          }
+          if (Array.isArray(cloudBanks) && cloudBanks.length > 0) {
+            studioConfig.bankAccounts = cloudBanks;
+          }
+          if (row.staff_pin) securityPins.staffPin = String(row.staff_pin);
+          if (row.admin_pin) securityPins.adminPin = String(row.admin_pin);
+
+          saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
+          saveJsonStorage(STORAGE_KEYS.securityPins, securityPins);
+          applyStudioBrandingUI();
+          renderBankAccountsForCustomer();
+          updateWebDeliveryFeeLabel();
+          updateOrderTotals();
+        }
+
+        // 2. Cargar precios y productos (pricing_config)
+        const { data: pricingRows } = await supabaseClient
+          .from('pricing_config')
+          .select('*');
+
+        if (Array.isArray(pricingRows) && pricingRows.length > 0) {
+          const loadedSizes = {};
+          pricingRows.forEach((r) => {
+            const key = r.size_key || r.key || r.id;
+            if (!key) return;
+            loadedSizes[key] = {
+              key: String(key),
+              label: r.label || r.size_label || String(key),
+              widthIn: Number(r.width_in ?? r.widthIn) || 4,
+              heightIn: Number(r.height_in ?? r.heightIn) || 6,
+              price: Number(r.price ?? r.public_price) || 0,
+              proPrice: Number(r.pro_price ?? r.proPrice ?? r.price) || 0
+            };
+          });
+          if (Object.keys(loadedSizes).length > 0) {
+            printSizes = loadedSizes;
+            saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
+            renderUploadedPhotosList();
+            updateOrderTotals();
+          }
+        }
+
+        // 3. Cargar fotógrafos Pro (photographers)
+        const { data: photoRows } = await supabaseClient
+          .from('photographers')
+          .select('*');
+
+        if (Array.isArray(photoRows) && photoRows.length > 0) {
+          proPhotographers = photoRows.map((p) => ({
+            id: p.id || `pro-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
+            name: p.name || p.studio_name || 'Fotógrafo Pro',
+            username: p.username || '',
+            password: p.password || p.pin || '',
+            active: p.active !== false
+          }));
+          saveJsonStorage(STORAGE_KEYS.proPhotographers, proPhotographers);
+        }
+      } catch (err) {
+        console.warn('No se pudo cargar configuración remota:', err);
+      }
+    }
+
+    async function syncStudioSettingsToCloud() {
+      if (!supabaseClient) return;
+      try {
+        const { data: existing } = await supabaseClient.from('studio_settings').select('id').limit(1);
+        const targetId = existing?.[0]?.id || '00000000-0000-4000-8000-000000000001';
+        const payload = {
+          id: targetId,
+          lab_name: studioConfig.labName,
+          lab_info: studioConfig.labInfo || '',
+          shipping_cost: Number(studioConfig.shippingCost) || 0,
+          bank_accounts: studioConfig.bankAccounts || [],
+          staff_pin: securityPins.staffPin,
+          admin_pin: securityPins.adminPin
+        };
+        const { error } = await supabaseClient.from('studio_settings').upsert(payload, { onConflict: 'id' });
+        if (error) {
+          // Respaldo por si la tabla tiene columnas reducidas
+          await supabaseClient.from('studio_settings').upsert({
+            id: targetId,
+            lab_name: studioConfig.labName,
+            shipping_cost: Number(studioConfig.shippingCost) || 0
+          }, { onConflict: 'id' });
+        }
+      } catch (err) {
+        console.warn('Error sincronizando studio_settings:', err);
+      }
+    }
+
+    async function syncPricingToCloud() {
+      if (!supabaseClient) return;
+      try {
+        const rows = Object.values(printSizes).map((sz) => ({
+          size_key: sz.key,
+          label: sz.label,
+          width_in: Number(sz.widthIn) || 4,
+          height_in: Number(sz.heightIn) || 6,
+          price: Number(sz.price) || 0,
+          pro_price: Number(sz.proPrice) || 0
+        }));
+        await supabaseClient.from('pricing_config').upsert(rows, { onConflict: 'size_key' });
+      } catch (err) {
+        console.warn('Error sincronizando pricing_config:', err);
+      }
+    }
+
+    async function syncPhotographersToCloud() {
+      if (!supabaseClient) return;
+      try {
+        const rows = proPhotographers.map((p) => ({
+          id: /^[0-9a-f]{8}-[0-9a-f]{4}-/i.test(String(p.id)) ? p.id : generateUuidV4(),
+          name: p.name,
+          username: p.username,
+          password: p.password,
+          active: p.active !== false
+        }));
+        await supabaseClient.from('photographers').upsert(rows, { onConflict: 'username' });
+      } catch (err) {
+        console.warn('Error sincronizando photographers:', err);
       }
     }
 
@@ -1233,7 +1380,7 @@
           if (!dataUrl) return;
           const img = new Image();
           img.onload = () => {
-            const isLandscape = img.naturalWidth >= img.naturalHeight;
+            const imgIsLandscape = (img.naturalWidth || 1) >= (img.naturalHeight || 1);
             uploadedPhotos.push({
               id: `photo-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
               name: file.name,
@@ -1243,11 +1390,11 @@
               sizeKey: defaultSizeKey,
               paper: PAPER_FINISHES[0],
               copies: 1,
-              orientation: isLandscape ? 'landscape' : 'portrait',
+              orientation: 'landscape',
               zoom: 100,
               panX: 0,
               panY: 0,
-              rotation: 0,
+              rotation: imgIsLandscape ? 0 : 90,
               flipH: false,
               brightness: 100,
               contrast: 100,
@@ -1299,13 +1446,30 @@
         .map((photo, index) => {
           const unitPrice = getUnitPriceForSize(photo.sizeKey);
           const lineTotal = unitPrice * (Number(photo.copies) || 1);
+          const sizeObj = printSizes[photo.sizeKey] || { widthIn: 4, heightIn: 6 };
+          const shortIn = Math.min(Number(sizeObj.widthIn) || 4, Number(sizeObj.heightIn) || 6);
+          const longIn = Math.max(Number(sizeObj.widthIn) || 4, Number(sizeObj.heightIn) || 6);
+          const isLandscape = photo.orientation === 'landscape';
+          const frameW = isLandscape ? 144 : Math.round(128 * (shortIn / longIn));
+          const frameH = isLandscape ? Math.round(144 * (shortIn / longIn)) : 128;
+
+          const rot = Number(photo.rotation) || 0;
+          const isQuarterTurn = rot % 180 !== 0;
+          const natW = photo.naturalWidth || 1000;
+          const natH = photo.naturalHeight || 1000;
+          const effW = isQuarterTurn ? natH : natW;
+          const effH = isQuarterTurn ? natW : natH;
+          const coverScale = Math.max(frameW / effW, frameH / effH) * ((Number(photo.zoom) || 100) / 100);
+          const imgDrawW = Math.round(natW * coverScale);
+          const imgDrawH = Math.round(natH * coverScale);
+
           const filterCss = `brightness(${photo.brightness}%) contrast(${photo.contrast}%) ${photo.filter !== 'none' ? photo.filter : ''}`;
-          const transformCss = `translate(${photo.panX}px, ${photo.panY}px) scale(${photo.zoom / 100}) rotate(${photo.rotation}deg) scaleX(${photo.flipH ? -1 : 1})`;
+          const transformCss = `translate(${photo.panX}px, ${photo.panY}px) rotate(${rot}deg) scaleX(${photo.flipH ? -1 : 1})`;
 
           return `
             <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 flex flex-col sm:flex-row gap-4 items-start">
-              <div class="w-full sm:w-28 h-28 rounded-xl bg-slate-900 overflow-hidden flex items-center justify-center shrink-0 relative border border-slate-300">
-                <img src="${photo.dataUrl}" alt="${escapeHtml(photo.name)}" style="filter: ${filterCss}; transform: ${transformCss};" class="w-full h-full object-cover" />
+              <div style="width: ${frameW}px; height: ${frameH}px;" class="rounded-xl bg-slate-900 overflow-hidden flex items-center justify-center shrink-0 relative border border-slate-300 transition-all">
+                <img src="${photo.dataUrl}" alt="${escapeHtml(photo.name)}" style="width: ${imgDrawW}px; height: ${imgDrawH}px; filter: ${filterCss}; transform: ${transformCss};" class="max-w-none max-h-none" />
                 <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-slate-950/75 text-white text-[10px] font-bold">#${index + 1}</span>
               </div>
 
@@ -1614,26 +1778,91 @@
       previewImg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom / 100}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1})`;
 
       const pxBorder = Math.max(4, Math.round(borderMm * 2.4));
+      const hasCaption = caption.trim().length > 0;
+      const fontPx = Math.max(11, Math.round(captionSize * 0.72));
+      const captionBandPx = hasCaption ? Math.max(26, fontPx + 12) : 0;
+      const isSideways = rotation % 180 !== 0;
+
       frame.style.backgroundColor = borderStyle === 'none' ? '#0f172a' : borderColor;
+      let topPad = 0;
+      let bottomPad = 0;
+      let leftPad = 0;
+      let rightPad = 0;
+
       if (borderStyle === 'none') {
-        frame.style.padding = '0px';
+        topPad = 0;
+        bottomPad = 0;
+        leftPad = 0;
+        rightPad = 0;
+      } else if (isSideways) {
+        topPad = pxBorder;
+        bottomPad = pxBorder;
+        const feetPad = borderStyle === 'polaroid'
+          ? Math.max(30, pxBorder * 2.6, captionPos === 'bottom' ? captionBandPx : 0)
+          : (hasCaption && captionPos === 'bottom' ? Math.max(pxBorder, captionBandPx) : pxBorder);
+        const headPad = hasCaption && captionPos === 'top'
+          ? Math.max(pxBorder, captionBandPx)
+          : pxBorder;
+        if (rotation === 90) {
+          leftPad = feetPad;
+          rightPad = headPad;
+        } else {
+          rightPad = feetPad;
+          leftPad = headPad;
+        }
       } else if (borderStyle === 'polaroid') {
-        frame.style.padding = `${pxBorder}px ${pxBorder}px ${Math.max(26, pxBorder * 2.6)}px ${pxBorder}px`;
+        leftPad = pxBorder;
+        rightPad = pxBorder;
+        topPad = pxBorder;
+        bottomPad = Math.max(30, pxBorder * 2.6, captionPos === 'bottom' ? captionBandPx : 0);
+        if (hasCaption && captionPos === 'top') topPad = Math.max(topPad, captionBandPx);
       } else {
-        frame.style.padding = `${pxBorder}px`;
+        leftPad = pxBorder;
+        rightPad = pxBorder;
+        topPad = hasCaption && captionPos === 'top' ? Math.max(pxBorder, captionBandPx) : pxBorder;
+        bottomPad = hasCaption && captionPos === 'bottom' ? Math.max(pxBorder, captionBandPx) : pxBorder;
       }
+      frame.style.padding = `${topPad}px ${rightPad}px ${bottomPad}px ${leftPad}px`;
 
       const topOverlay = document.getElementById('cropTopCaptionOverlay');
       const bottomOverlay = document.getElementById('cropPolaroidCaptionOverlay');
       topOverlay.classList.add('hidden');
       bottomOverlay.classList.add('hidden');
 
-      if (caption.trim()) {
+      if (hasCaption) {
         const targetOverlay = captionPos === 'top' ? topOverlay : bottomOverlay;
         targetOverlay.textContent = caption.trim();
         targetOverlay.style.color = captionColor;
-        targetOverlay.style.fontSize = `${Math.max(10, Math.round(captionSize * 0.72))}px`;
-        targetOverlay.style.backgroundColor = borderStyle === 'none' ? 'rgba(255,255,255,0.78)' : 'transparent';
+        targetOverlay.style.fontSize = `${fontPx}px`;
+        targetOverlay.style.backgroundColor = 'transparent';
+        targetOverlay.style.textShadow = borderStyle === 'none' ? '0 1px 4px rgba(0,0,0,0.45)' : 'none';
+
+        if (isSideways) {
+          const isLeftEdge = (rotation === 90 && captionPos === 'bottom') || (rotation === 270 && captionPos === 'top');
+          const bandWidth = borderStyle === 'none'
+            ? captionBandPx
+            : (isLeftEdge ? leftPad : rightPad);
+          targetOverlay.style.top = '0px';
+          targetOverlay.style.bottom = '0px';
+          targetOverlay.style.height = '100%';
+          targetOverlay.style.width = `${bandWidth}px`;
+          targetOverlay.style.left = isLeftEdge ? '0px' : 'auto';
+          targetOverlay.style.right = isLeftEdge ? 'auto' : '0px';
+          targetOverlay.style.writingMode = 'vertical-rl';
+          targetOverlay.style.transform = rotation === 270 ? 'rotate(180deg)' : 'none';
+        } else {
+          const bandHeight = borderStyle === 'none'
+            ? captionBandPx
+            : (captionPos === 'top' ? topPad : bottomPad);
+          targetOverlay.style.left = '0px';
+          targetOverlay.style.right = '0px';
+          targetOverlay.style.width = '100%';
+          targetOverlay.style.height = `${bandHeight}px`;
+          targetOverlay.style.top = captionPos === 'top' ? '0px' : 'auto';
+          targetOverlay.style.bottom = captionPos === 'bottom' ? '0px' : 'auto';
+          targetOverlay.style.writingMode = 'horizontal-tb';
+          targetOverlay.style.transform = 'none';
+        }
         targetOverlay.classList.remove('hidden');
       }
     }
@@ -1951,6 +2180,7 @@
     }
 
     function closeCashierPanelModal() {
+      isCashierAuthenticated = false;
       document.getElementById('cashierPanelModal')?.classList.add('hidden');
     }
 
@@ -2068,6 +2298,11 @@
     }
 
     function closeLabPanelModal() {
+      isLabAuthenticated = false;
+      isAdminUnlocked = false;
+      pendingAdminTab = null;
+      updateAdminLockUI();
+      document.getElementById('adminPasswordPromptBox')?.classList.add('hidden');
       document.getElementById('labPanelModal')?.classList.add('hidden');
     }
 
@@ -2089,9 +2324,6 @@
     }
 
     function logoutLabSession() {
-      isLabAuthenticated = false;
-      isAdminUnlocked = false;
-      updateAdminLockUI();
       closeLabPanelModal();
       showToast('Sesión de Laboratorio cerrada.');
     }
@@ -2251,22 +2483,59 @@
           const borderStyle = item.borderStyle || 'none';
           const borderMm = Number(item.borderThicknessMm) || 5;
           const borderPx = borderStyle === 'none' ? 0 : Math.round((borderMm / 25.4) * 300);
-          const bottomExtraPx = borderStyle === 'polaroid' ? Math.max(borderPx * 2, Math.round(outH * 0.1)) : borderPx;
+          const hasCaption = Boolean(item.caption && item.caption.trim());
+          const fontPx = Math.round((Number(item.captionSize) || 18) * (outW / 320));
+          const minCaptionBandPx = hasCaption ? Math.round(fontPx * 1.65) : 0;
+          const rot = Number(item.rotation) || 0;
+          const isSideways = rot % 180 !== 0;
+
+          let topBorderPx = borderPx;
+          let bottomBorderPx = borderPx;
+          let leftBorderPx = borderPx;
+          let rightBorderPx = borderPx;
+
+          if (borderStyle !== 'none') {
+            if (isSideways) {
+              const feetBorderPx = borderStyle === 'polaroid'
+                ? Math.max(borderPx * 2, Math.round(outW * 0.1), item.captionPos === 'bottom' ? minCaptionBandPx : 0)
+                : (hasCaption && item.captionPos === 'bottom' ? Math.max(borderPx, minCaptionBandPx) : borderPx);
+              const headBorderPx = hasCaption && item.captionPos === 'top'
+                ? Math.max(borderPx, minCaptionBandPx)
+                : borderPx;
+              if (rot === 90) {
+                leftBorderPx = feetBorderPx;
+                rightBorderPx = headBorderPx;
+              } else {
+                rightBorderPx = feetBorderPx;
+                leftBorderPx = headBorderPx;
+              }
+            } else {
+              bottomBorderPx = borderStyle === 'polaroid'
+                ? Math.max(borderPx * 2, Math.round(outH * 0.1))
+                : borderPx;
+              if (hasCaption) {
+                if (item.captionPos === 'top') {
+                  topBorderPx = Math.max(topBorderPx, minCaptionBandPx);
+                } else {
+                  bottomBorderPx = Math.max(bottomBorderPx, minCaptionBandPx);
+                }
+              }
+            }
+          }
 
           ctx.fillStyle = borderStyle === 'none' ? '#ffffff' : (item.borderColor || '#ffffff');
           ctx.fillRect(0, 0, outW, outH);
 
-          const innerX = borderPx;
-          const innerY = borderPx;
-          const innerW = Math.max(10, outW - borderPx * 2);
-          const innerH = Math.max(10, outH - borderPx - bottomExtraPx);
+          const innerX = leftBorderPx;
+          const innerY = topBorderPx;
+          const innerW = Math.max(10, outW - leftBorderPx - rightBorderPx);
+          const innerH = Math.max(10, outH - topBorderPx - bottomBorderPx);
 
           ctx.save();
           ctx.beginPath();
           ctx.rect(innerX, innerY, innerW, innerH);
           ctx.clip();
 
-          const rot = Number(item.rotation) || 0;
           const rot90 = rot % 180 !== 0;
           const natW = img.naturalWidth || 1000;
           const natH = img.naturalHeight || 1000;
@@ -2285,16 +2554,45 @@
           ctx.drawImage(img, (-natW * coverScale) / 2, (-natH * coverScale) / 2, natW * coverScale, natH * coverScale);
           ctx.restore();
 
-          if (item.caption && item.caption.trim()) {
-            const fontPx = Math.round((Number(item.captionSize) || 18) * (outW / 320));
+          if (hasCaption) {
+            ctx.save();
             ctx.font = `bold ${fontPx}px Inter, Arial, sans-serif`;
-            ctx.fillStyle = item.captionColor || '#1e293b';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            const textY = item.captionPos === 'top'
-              ? Math.max(fontPx, borderPx > 0 ? borderPx / 2 : fontPx * 0.9)
-              : outH - Math.max(fontPx * 0.8, bottomExtraPx > 0 ? bottomExtraPx / 2 : fontPx * 0.9);
-            ctx.fillText(item.caption.trim(), outW / 2, textY, outW - 40);
+
+            if (isSideways) {
+              const isLeftEdge = (rot === 90 && item.captionPos === 'bottom') || (rot === 270 && item.captionPos === 'top');
+              const bandW = borderStyle === 'none'
+                ? minCaptionBandPx
+                : (isLeftEdge ? leftBorderPx : rightBorderPx);
+              const centerX = isLeftEdge ? bandW / 2 : outW - bandW / 2;
+
+              if (borderStyle === 'none') {
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+                ctx.shadowBlur = Math.max(4, Math.round(fontPx * 0.15));
+                ctx.shadowOffsetY = Math.max(2, Math.round(fontPx * 0.05));
+              }
+
+              ctx.translate(centerX, outH / 2);
+              ctx.rotate((rot * Math.PI) / 180);
+              ctx.fillStyle = item.captionColor || '#1e293b';
+              ctx.fillText(item.caption.trim(), 0, 0, outH - 40);
+            } else if (borderStyle === 'none') {
+              const barH = minCaptionBandPx;
+              const barY = item.captionPos === 'top' ? 0 : outH - barH;
+              ctx.shadowColor = 'rgba(0, 0, 0, 0.45)';
+              ctx.shadowBlur = Math.max(4, Math.round(fontPx * 0.15));
+              ctx.shadowOffsetY = Math.max(2, Math.round(fontPx * 0.05));
+              ctx.fillStyle = item.captionColor || '#1e293b';
+              ctx.fillText(item.caption.trim(), outW / 2, barY + barH / 2, outW - 40);
+            } else {
+              const textY = item.captionPos === 'top'
+                ? topBorderPx / 2
+                : outH - bottomBorderPx / 2;
+              ctx.fillStyle = item.captionColor || '#1e293b';
+              ctx.fillText(item.caption.trim(), outW / 2, textY, outW - leftBorderPx - rightBorderPx);
+            }
+            ctx.restore();
           }
 
           resolve(canvas.toDataURL('image/jpeg', 0.95));
@@ -2370,7 +2668,7 @@
         .join('');
     }
 
-    function addProPhotographer() {
+    async function addProPhotographer() {
       const name = (document.getElementById('newProNameInput').value || '').trim();
       const username = (document.getElementById('newProUserInput').value || '').trim();
       const password = (document.getElementById('newProPassInput').value || '').trim();
@@ -2379,13 +2677,14 @@
         return;
       }
       proPhotographers.push({
-        id: `pro-${Date.now()}`,
+        id: generateUuidV4(),
         name,
         username,
         password,
         active: true
       });
       saveJsonStorage(STORAGE_KEYS.proPhotographers, proPhotographers);
+      await syncPhotographersToCloud();
       document.getElementById('newProNameInput').value = '';
       document.getElementById('newProUserInput').value = '';
       document.getElementById('newProPassInput').value = '';
@@ -2393,9 +2692,13 @@
       showToast(`Fotógrafo Pro "${name}" guardado.`);
     }
 
-    function removeProPhotographer(id) {
+    async function removeProPhotographer(id) {
+      const target = proPhotographers.find((p) => p.id === id);
       proPhotographers = proPhotographers.filter((p) => p.id !== id);
       saveJsonStorage(STORAGE_KEYS.proPhotographers, proPhotographers);
+      if (supabaseClient && target?.username) {
+        await supabaseClient.from('photographers').delete().eq('username', target.username);
+      }
       renderAdminPhotographersList();
     }
 
@@ -2417,7 +2720,7 @@
         .join('');
     }
 
-    function addPrintSizeProduct() {
+    async function addPrintSizeProduct() {
       const key = (document.getElementById('newSizeKeyInput').value || '').trim();
       const label = (document.getElementById('newSizeLabelInput').value || '').trim();
       const widthIn = parseFloat(document.getElementById('newSizeWidthInput').value);
@@ -2439,6 +2742,7 @@
         proPrice: isNaN(proPrice) ? price : proPrice
       };
       saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
+      await syncPricingToCloud();
       ['newSizeKeyInput', 'newSizeLabelInput', 'newSizeWidthInput', 'newSizeHeightInput', 'newSizePriceInput', 'newSizeProPriceInput'].forEach((id) => {
         document.getElementById(id).value = '';
       });
@@ -2447,13 +2751,16 @@
       showToast(`Tamaño "${label}" agregado.`);
     }
 
-    function removePrintSizeProduct(key) {
+    async function removePrintSizeProduct(key) {
       if (Object.keys(printSizes).length <= 1) {
         showToast('Debe quedar al menos un tamaño disponible.');
         return;
       }
       delete printSizes[key];
       saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
+      if (supabaseClient) {
+        await supabaseClient.from('pricing_config').delete().eq('size_key', key);
+      }
       renderAdminPricingList();
       renderUploadedPhotosList();
     }
@@ -2508,15 +2815,16 @@
       renderBankAccountsForCustomer();
     }
 
-    function saveStudioSettings() {
+    async function saveStudioSettings() {
       studioConfig.labName = (document.getElementById('studioNameInput').value || '').trim() || DEFAULT_LAB_BRAND_NAME;
       studioConfig.shippingCost = parseFloat(document.getElementById('shippingCostInput').value) || 0;
       studioConfig.labInfo = (document.getElementById('studioInfoInput').value || '').trim();
       saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
+      await syncStudioSettingsToCloud();
       applyStudioBrandingUI();
       updateWebDeliveryFeeLabel();
       updateOrderTotals();
-      showToast('Configuración del estudio guardada.');
+      showToast('Configuración del estudio guardada y sincronizada en la nube.');
     }
 
     function loadSecurityFormInputs() {
@@ -2524,7 +2832,7 @@
       document.getElementById('adminPinConfigInput').value = securityPins.adminPin || '';
     }
 
-    function saveSecurityAndCloudSettings() {
+    async function saveSecurityAndCloudSettings() {
       const staffPin = (document.getElementById('staffPinConfigInput').value || '').trim();
       const adminPin = (document.getElementById('adminPinConfigInput').value || '').trim();
       if (!staffPin || !adminPin) {
@@ -2534,6 +2842,7 @@
       securityPins.staffPin = staffPin;
       securityPins.adminPin = adminPin;
       saveJsonStorage(STORAGE_KEYS.securityPins, securityPins);
+      await syncStudioSettingsToCloud();
       showToast('Claves de acceso actualizadas.');
     }
 
