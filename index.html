@@ -979,12 +979,15 @@
     }
 
     async function syncStudioSettingsToCloud() {
-      if (!supabaseClient) return;
+      if (!supabaseClient) {
+        showToast('Sin conexión a Supabase: guardado solo localmente.');
+        return false;
+      }
       try {
         const { data: existing, error: readErr } = await supabaseClient.from('studio_settings').select('id').limit(1);
         if (readErr) {
-          showToast(`Aviso nube (studio_settings): ${readErr.message}`);
-          return;
+          showToast(`Error leyendo studio_settings: ${readErr.message}`);
+          return false;
         }
         const targetId = existing?.[0]?.id || 'default_studio';
         const payload = {
@@ -998,10 +1001,13 @@
         };
         const { error } = await supabaseClient.from('studio_settings').upsert(payload, { onConflict: 'id' });
         if (error) {
-          showToast(`Error guardando en nube: ${error.message}`);
+          showToast(`Error guardando en Supabase: ${error.message}`);
+          return false;
         }
+        return true;
       } catch (err) {
-        console.warn('Error sincronizando studio_settings:', err);
+        showToast(`Fallo de red con Supabase: ${err.message || err}`);
+        return false;
       }
     }
 
@@ -2958,11 +2964,13 @@
       studioConfig.shippingCost = parseFloat(document.getElementById('shippingCostInput').value) || 0;
       studioConfig.labInfo = (document.getElementById('studioInfoInput').value || '').trim();
       saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
-      await syncStudioSettingsToCloud();
+      const synced = await syncStudioSettingsToCloud();
       applyStudioBrandingUI();
       updateWebDeliveryFeeLabel();
       updateOrderTotals();
-      showToast('Configuración del estudio guardada y sincronizada en la nube.');
+      if (synced) {
+        showToast(`✓ Guardado en Supabase (${getActiveSupabaseSchema()}): "${studioConfig.labName}".`);
+      }
     }
 
     function loadSecurityFormInputs() {
@@ -2988,6 +2996,11 @@
       initBrandingAndCloud();
       setDeliveryMode('store');
       updateOrderTotals();
+      setInterval(() => {
+        if (document.visibilityState === 'visible' && supabaseClient) {
+          loadCloudConfigurations();
+        }
+      }, 15000);
     });
 
     document.addEventListener('visibilitychange', () => {
