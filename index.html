@@ -1140,7 +1140,7 @@
         });
 
         const { error } = await supabaseClient.from('pricing_config').upsert(rows, { onConflict: 'size_key' });
-        if (error) showToast(`Aviso nube (tarifas): ${error.message}`);
+        if (error) console.warn('Aviso nube (tarifas):', error.message);
       } catch (err) {
         console.warn('Error sincronizando pricing_config:', err);
       }
