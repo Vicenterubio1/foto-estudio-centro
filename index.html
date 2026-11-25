@@ -627,8 +627,8 @@
             </div>
 
             <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4 text-xs text-slate-600 space-y-1">
-              <div class="font-bold text-slate-800">Seguridad activa en servidor (RLS + RPC)</div>
-              <p>Las contraseñas operativas y de administración se verifican directamente en Supabase sin descargarse al navegador.</p>
+              <div class="font-bold text-slate-800">Seguridad activa en servidor (RLS + RPC + Anti-Fuerza Bruta)</div>
+              <p>Las contraseñas operativas y de administración se verifican directamente en Supabase con bloqueo temporal tras 5 intentos fallidos.</p>
             </div>
 
             <button onclick="saveSecurityAndCloudSettings()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">Actualizar Claves de Acceso</button>
@@ -651,7 +651,6 @@
     const DEFAULT_SUPABASE_SCHEMA = 'foto_estudio';
     const MAX_UPLOAD_FILE_BYTES = 25 * 1024 * 1024; // 25 MB máximo por imagen
 
-    // Lista blanca cerrada de perfiles de clientes (bloquea inyección de URL/Key externa)
     const CLIENT_LAB_PROFILES = {
       // 'cliente1': { labName: 'Foto Estudio Central', labInfo: 'Centro • Tel: 9988-7766', supabaseSchema: 'foto_estudio' }
     };
@@ -714,12 +713,11 @@
     const CLIENT_STORAGE_NS = getClientNamespacePrefix();
     const STORAGE_KEYS = {
       printSizes: `${CLIENT_STORAGE_NS}_print_sizes_v2`,
-      studioConfig: `${CLIENT_STORAGE_NS}_studio_config_v2`,
-      ordersStore: `${CLIENT_STORAGE_NS}_orders_store_v2`
+      studioConfig: `${CLIENT_STORAGE_NS}_studio_config_v2`
     };
 
-    // Limpiar claves antiguas inseguras que almacenaban contraseñas en localStorage
-    ['security_pins_v1', 'pro_photographers_v1'].forEach((legacySuffix) => {
+    // Limpiar cualquier almacenamiento local previo con datos sensibles o imágenes
+    ['security_pins_v1', 'pro_photographers_v1', 'orders_store_v1', 'orders_store_v2'].forEach((legacySuffix) => {
       try { localStorage.removeItem(`${CLIENT_STORAGE_NS}_${legacySuffix}`); } catch (e) {}
     });
 
@@ -747,13 +745,13 @@
       ]
     });
 
-    // Sesión en memoria únicamente (nunca persistida en disco/localStorage)
+    // Sesión y órdenes en memoria únicamente (nunca se persisten imágenes en disco/localStorage)
     let sessionAuth = {
       staffPin: '',
       adminPin: ''
     };
     let proPhotographers = [];
-    let ordersStore = loadJsonStorage(STORAGE_KEYS.ordersStore, []);
+    let ordersStore = [];
 
     let uploadedPhotos = [];
     let deliveryMode = 'store';
@@ -886,6 +884,14 @@
       }
     }
 
+    function extractRpcErrorMessage(rawErrText, fallbackMsg) {
+      try {
+        const parsed = JSON.parse(rawErrText);
+        if (parsed?.message) return parsed.message;
+      } catch (e) {}
+      return fallbackMsg;
+    }
+
     async function callSupabaseRpc(fnName, paramsObj = {}) {
       const sbUrl = DEFAULT_SUPABASE_URL.replace(/\/+$/, '');
       const sbKey = DEFAULT_SUPABASE_ANON_KEY;
@@ -903,7 +909,7 @@
       });
       if (!res.ok) {
         const errText = await res.text();
-        throw new Error(errText || `Error HTTP ${res.status}`);
+        throw new Error(extractRpcErrorMessage(errText, `Error HTTP ${res.status}`));
       }
       return res.json();
     }
@@ -922,7 +928,6 @@
       };
 
       try {
-        // 1. Leer vista pública studio_public_info (sin columnas de PINs)
         const settingsRes = await fetch(`${sbUrl}/rest/v1/studio_public_info?select=*&limit=1`, {
           headers: restHeaders,
           cache: 'no-store'
@@ -952,7 +957,6 @@
           }
         }
 
-        // 2. Cargar precios públicos y Pro desde pricing_config (solo lectura)
         const pricingRes = await fetch(`${sbUrl}/rest/v1/pricing_config?select=*`, {
           headers: restHeaders,
           cache: 'no-store'
@@ -1112,7 +1116,6 @@
           };
         });
 
-        // Inserción estricta como orden pendiente (cumple política RLS anon_insert_pending_orders)
         const payload = {
           id: order.id,
           order_code: order.orderCode,
@@ -1164,7 +1167,7 @@
           ordersStore = data.map((row) => {
             const mapped = mapDbRowToOrder(row);
             const localExisting = localMap.get(mapped.id);
-            if (localExisting) {
+            if (localExisting && !mapped.storageCleaned) {
               if (!mapped.receiptUrl && localExisting.receiptUrl) mapped.receiptUrl = localExisting.receiptUrl;
               mapped.items = mapped.items.map((it, idx) => {
                 if (!it.dataUrl && localExisting.items?.[idx]?.dataUrl) {
@@ -1175,18 +1178,17 @@
             }
             return mapped;
           });
-          saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
           renderCashierOrdersList();
           renderLabOrdersList();
           if (!silent) showToast('Órdenes sincronizadas desde la nube.');
         }
       } catch (err) {
-        if (!silent) showToast('No se pudo actualizar desde Supabase.');
+        if (!silent) showToast(err.message || 'No se pudo actualizar desde Supabase.');
       }
     }
 
     // =========================================================================
-    // MODO KIOSKO EN TIENDA (VALIDACIÓN EN SERVIDOR)
+    // MODO KIOSKO EN TIENDA (VALIDACIÓN EN SERVIDOR + ANTI-FUERZA BRUTA)
     // =========================================================================
     function openKioskModeModal() {
       const titleEl = document.getElementById('kioskModalTitle');
@@ -1237,7 +1239,7 @@
         }
       } catch (err) {
         if (errEl) {
-          errEl.textContent = 'No se pudo validar la clave con el servidor.';
+          errEl.textContent = err.message || 'No se pudo validar la clave con el servidor.';
           errEl.classList.remove('hidden');
         }
         return;
@@ -2212,9 +2214,9 @@
         })
       };
 
+      // Mantener únicamente en memoria durante la sesión activa (sin persistir imágenes en disco)
       if (!isKioskModeActive) {
         ordersStore.unshift(newOrder);
-        saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
       }
       await syncOrderToSupabase(newOrder);
 
@@ -2311,7 +2313,7 @@
     }
 
     // =========================================================================
-    // FOTÓGRAFO PRO (VALIDACIÓN SEGURA EN SERVIDOR)
+    // FOTÓGRAFO PRO (VALIDACIÓN SEGURA EN SERVIDOR + ANTI-FUERZA BRUTA)
     // =========================================================================
     function openProLoginModal() {
       document.getElementById('proLoginError')?.classList.add('hidden');
@@ -2363,7 +2365,7 @@
         showToast(`Bienvenido ${found.name}. Tarifas Fotógrafo Pro activadas.`);
       } catch (err) {
         if (errEl) {
-          errEl.textContent = 'No se pudo verificar la sesión en el servidor.';
+          errEl.textContent = err.message || 'No se pudo verificar la sesión en el servidor.';
           errEl.classList.remove('hidden');
         }
       }
@@ -2382,7 +2384,7 @@
     }
 
     // =========================================================================
-    // PANEL DE CAJA (VERIFICACIÓN EN SERVIDOR)
+    // PANEL DE CAJA (VERIFICACIÓN EN SERVIDOR + ANTI-FUERZA BRUTA)
     // =========================================================================
     function openCashierPanelView() {
       document.getElementById('cashierPinError')?.classList.add('hidden');
@@ -2397,7 +2399,10 @@
 
     function closeCashierPanelModal() {
       isCashierAuthenticated = false;
-      if (!isLabAuthenticated) sessionAuth.staffPin = '';
+      if (!isLabAuthenticated) {
+        sessionAuth.staffPin = '';
+        ordersStore = [];
+      }
       document.getElementById('cashierPanelModal')?.classList.add('hidden');
     }
 
@@ -2423,15 +2428,13 @@
         renderCashierOrdersList();
       } catch (err) {
         if (errEl) {
-          errEl.textContent = 'Error verificando credenciales en servidor.';
+          errEl.textContent = err.message || 'Error verificando credenciales en servidor.';
           errEl.classList.remove('hidden');
         }
       }
     }
 
     function logoutCashierSession() {
-      isCashierAuthenticated = false;
-      if (!isLabAuthenticated) sessionAuth.staffPin = '';
       closeCashierPanelModal();
       showToast('Sesión de Caja cerrada.');
     }
@@ -2510,12 +2513,11 @@
         });
         order.paymentStatus = 'paid';
         order.labStatus = 'ready_to_print';
-        saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
         renderCashierOrdersList();
         renderLabOrdersList();
         showToast(`Pago confirmado para ${order.orderCode}. Orden enviada a Laboratorio.`);
       } catch (err) {
-        showToast('No se pudo confirmar el pago en el servidor.');
+        showToast(err.message || 'No se pudo confirmar el pago en el servidor.');
       }
     }
 
@@ -2538,7 +2540,10 @@
       isAdminUnlocked = false;
       pendingAdminTab = null;
       sessionAuth.adminPin = '';
-      if (!isCashierAuthenticated) sessionAuth.staffPin = '';
+      if (!isCashierAuthenticated) {
+        sessionAuth.staffPin = '';
+        ordersStore = [];
+      }
       updateAdminLockUI();
       document.getElementById('adminPasswordPromptBox')?.classList.add('hidden');
       document.getElementById('labPanelModal')?.classList.add('hidden');
@@ -2566,7 +2571,7 @@
         switchLabTab('orders');
       } catch (err) {
         if (errEl) {
-          errEl.textContent = 'Error verificando credenciales en servidor.';
+          errEl.textContent = err.message || 'Error verificando credenciales en servidor.';
           errEl.classList.remove('hidden');
         }
       }
@@ -2609,7 +2614,7 @@
         showToast('Modo Administrar desbloqueado.');
       } catch (err) {
         if (errEl) {
-          errEl.textContent = 'No se pudo validar la clave de administración.';
+          errEl.textContent = err.message || 'No se pudo validar la clave de administración.';
           errEl.classList.remove('hidden');
         }
       }
@@ -2698,7 +2703,7 @@
                 <div class="flex flex-wrap items-center gap-2">
                   <span class="font-extrabold text-slate-900 text-sm">${escapeHtml(order.orderCode)}</span>
                   <span class="px-2 py-0.5 rounded-full ${isDelivered ? 'bg-slate-200 text-slate-700' : 'bg-sky-600 text-white'} font-bold">
-                    ${isDelivered ? 'Entregado' : 'Listo para Imprimir'}
+                    ${isDelivered ? 'Entregado (Imágenes Purgadas)' : 'Listo para Imprimir'}
                   </span>
                 </div>
                 <div class="text-slate-700 font-semibold">${escapeHtml(order.customerName)} • ${escapeHtml(order.customerPhone)}</div>
@@ -2706,13 +2711,13 @@
               </div>
 
               <div class="flex flex-wrap items-center gap-2">
-                <button type="button" onclick="downloadOrderZip300DPI('${escapeHtml(order.id)}')" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs">
-                  📦 Descargar ZIP (300 DPI)
-                </button>
                 ${
                   !isDelivered
-                    ? `<button type="button" onclick="markOrderDeliveredAndClean('${escapeHtml(order.id)}')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">✓ Entregado</button>`
-                    : ''
+                    ? `<button type="button" onclick="downloadOrderZip300DPI('${escapeHtml(order.id)}')" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs">
+                        📦 Descargar ZIP (300 DPI)
+                      </button>
+                      <button type="button" onclick="markOrderDeliveredAndClean('${escapeHtml(order.id)}')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">✓ Entregado</button>`
+                    : `<span class="text-[11px] text-slate-500 font-medium">✓ Archivo finalizado y limpiado</span>`
                 }
               </div>
             </div>
@@ -2951,11 +2956,12 @@
         });
         order.labStatus = 'delivered';
         order.storageCleaned = true;
-        saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
+        order.receiptUrl = '';
+        order.items = order.items.map((it) => ({ ...it, dataUrl: '' }));
         renderLabOrdersList();
-        showToast(`Orden ${order.orderCode} marcada como entregada.`);
+        showToast(`Orden ${order.orderCode} entregada e imágenes purgadas.`);
       } catch (err) {
-        showToast('No se pudo actualizar el estado en el servidor.');
+        showToast(err.message || 'No se pudo actualizar el estado en el servidor.');
       }
     }
 
@@ -3016,7 +3022,7 @@
         await loadAndRenderAdminPhotographers();
         showToast(`Fotógrafo Pro "${name}" guardado.`);
       } catch (err) {
-        showToast('No se pudo guardar el fotógrafo en el servidor.');
+        showToast(err.message || 'No se pudo guardar el fotógrafo en el servidor.');
       }
     }
 
@@ -3029,7 +3035,7 @@
         await loadAndRenderAdminPhotographers();
         showToast('Fotógrafo eliminado.');
       } catch (err) {
-        showToast('No se pudo eliminar el fotógrafo.');
+        showToast(err.message || 'No se pudo eliminar el fotógrafo.');
       }
     }
 
@@ -3138,7 +3144,7 @@
         updateOrderTotals();
         showToast(`Producto "${label}" actualizado en la nube.`);
       } catch (err) {
-        showToast('Error guardando tarifa en el servidor.');
+        showToast(err.message || 'Error guardando tarifa en el servidor.');
       }
     }
 
@@ -3176,7 +3182,7 @@
         renderUploadedPhotosList();
         showToast(`Tamaño "${label}" agregado.`);
       } catch (err) {
-        showToast('Error agregando producto en el servidor.');
+        showToast(err.message || 'Error agregando producto en el servidor.');
       }
     }
 
@@ -3196,7 +3202,7 @@
         renderUploadedPhotosList();
         showToast('Producto eliminado.');
       } catch (err) {
-        showToast('No se pudo eliminar el producto.');
+        showToast(err.message || 'No se pudo eliminar el producto.');
       }
     }
 
@@ -3277,7 +3283,7 @@
         }
         showToast(okMsg);
       } catch (err) {
-        const errMsg = 'Error guardando configuración en Supabase.';
+        const errMsg = err.message || 'Error guardando configuración en Supabase.';
         if (statusEl) {
           statusEl.textContent = errMsg;
           statusEl.className = 'text-xs font-bold text-rose-600 mt-1';
@@ -3314,7 +3320,7 @@
         document.getElementById('adminPinConfigInput').value = '';
         showToast('Claves actualizadas de forma segura en el servidor.');
       } catch (err) {
-        showToast('No se pudieron actualizar las claves.');
+        showToast(err.message || 'No se pudieron actualizar las claves.');
       }
     }
 
