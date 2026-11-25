@@ -6,7 +6,7 @@
   <title id="pageTitle">Master Color — Pedidos e Impresión a 300 DPI</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js" integrity="sha384-+mbV2IY1Zk/X1p/nWllGySJSUN8uMs+gUAN10Or95UBH0fpj6GfKgPmgC5EXieXG" crossorigin="anonymous"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
@@ -60,11 +60,11 @@
         <div class="flex flex-wrap items-center justify-between gap-2 mb-4">
           <div>
             <h2 class="text-lg font-bold text-slate-900">1. Sube tus fotografías</h2>
-            <p class="text-xs sm:text-sm text-slate-500">Máxima calidad sin compresión de chat • Preparadas a 300 DPI</p>
+            <p class="text-xs sm:text-sm text-slate-500">Máxima calidad sin compresión de chat • Preparadas a 300 DPI (máx. 25 MB/foto)</p>
           </div>
           <label class="cursor-pointer inline-flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-sky-600 hover:bg-sky-500 text-white text-sm font-semibold transition shadow-xs">
             <span>+ Seleccionar fotos</span>
-            <input id="photoFileInput" type="file" accept="image/*" multiple class="hidden" onchange="handlePhotoFilesSelected(event)" />
+            <input id="photoFileInput" type="file" accept="image/jpeg,image/png,image/webp" multiple class="hidden" onchange="handlePhotoFilesSelected(event)" />
           </label>
         </div>
 
@@ -98,7 +98,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Nombre completo *</label>
-            <input id="customerNameInput" type="text" placeholder="Ej. María Fernanda López" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+            <input id="customerNameInput" type="text" maxlength="80" placeholder="Ej. María Fernanda López" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
           </div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Teléfono / WhatsApp *</label>
@@ -140,7 +140,7 @@
 
         <div id="deliveryAddressBox" class="hidden">
           <label class="block text-xs font-semibold text-slate-600 mb-1">Dirección de entrega *</label>
-          <input id="deliveryAddressInput" type="text" placeholder="Colonia, calle, referencia o ciudad" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
+          <input id="deliveryAddressInput" type="text" maxlength="160" placeholder="Colonia, calle, referencia o ciudad" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm focus:outline-none focus:ring-2 focus:ring-sky-500" />
         </div>
 
         <!-- Cuentas bancarias y comprobante para pedidos web -->
@@ -149,7 +149,7 @@
           <div id="bankAccountsList" class="space-y-2 text-xs text-slate-700"></div>
           <div>
             <label class="block text-xs font-semibold text-slate-600 mb-1">Comprobante de pago (imagen o captura) *</label>
-            <input id="paymentReceiptInput" type="file" accept="image/*" onchange="handleReceiptSelected(event)" class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800" />
+            <input id="paymentReceiptInput" type="file" accept="image/jpeg,image/png,image/webp" onchange="handleReceiptSelected(event)" class="w-full text-xs text-slate-600 file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-slate-900 file:text-white hover:file:bg-slate-800" />
             <p id="receiptFileName" class="text-[11px] text-emerald-700 font-medium mt-1"></p>
           </div>
         </div>
@@ -381,7 +381,7 @@
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
-              <input id="cropCaptionInput" type="text" oninput="updateCropPreviewTransform()" placeholder="Escribe un texto (ej. Feliz cumpleaños)..." class="flex-1 min-w-[200px] px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs" />
+              <input id="cropCaptionInput" type="text" maxlength="60" oninput="updateCropPreviewTransform()" placeholder="Escribe un texto (ej. Feliz cumpleaños)..." class="flex-1 min-w-[200px] px-3 py-2 rounded-xl border border-slate-300 bg-white text-xs" />
               <select id="cropCaptionPosSelect" onchange="updateCropPreviewTransform()" class="px-2.5 py-2 rounded-xl border border-slate-300 bg-white text-xs font-medium">
                 <option value="bottom">Abajo</option>
                 <option value="top">Arriba</option>
@@ -557,7 +557,7 @@
               <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                 <input id="newProNameInput" type="text" placeholder="Nombre o estudio" class="px-3 py-2 rounded-xl border border-slate-300 text-xs" />
                 <input id="newProUserInput" type="text" placeholder="Usuario (ej. luis.foto)" class="px-3 py-2 rounded-xl border border-slate-300 text-xs" />
-                <input id="newProPassInput" type="text" placeholder="Contraseña" class="px-3 py-2 rounded-xl border border-slate-300 text-xs" />
+                <input id="newProPassInput" type="password" placeholder="Contraseña" class="px-3 py-2 rounded-xl border border-slate-300 text-xs" />
                 <button onclick="addProPhotographer()" class="px-4 py-2 rounded-xl bg-sky-600 hover:bg-sky-500 text-white text-xs font-bold">+ Guardar Fotógrafo</button>
               </div>
             </div>
@@ -617,21 +617,21 @@
           <div id="labTabSecurity" class="hidden space-y-4">
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Contraseña Operativa (Caja / Lab / Kiosko)</label>
-                <input id="staffPinConfigInput" type="text" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
+                <label class="block text-xs font-bold text-slate-700 mb-1">Nueva Contraseña Operativa (Caja / Lab / Kiosko)</label>
+                <input id="staffPinConfigInput" type="password" placeholder="Dejar vacío para mantener la actual" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
               </div>
               <div>
-                <label class="block text-xs font-bold text-slate-700 mb-1">Contraseña Administrar</label>
-                <input id="adminPinConfigInput" type="text" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
+                <label class="block text-xs font-bold text-slate-700 mb-1">Nueva Contraseña Administrar</label>
+                <input id="adminPinConfigInput" type="password" placeholder="Dejar vacío para mantener la actual" class="w-full px-3.5 py-2.5 rounded-xl border border-slate-300 text-sm" />
               </div>
             </div>
 
             <div class="rounded-2xl bg-slate-50 border border-slate-200 p-4 text-xs text-slate-600 space-y-1">
-              <div class="font-bold text-slate-800">Conexión de nube administrada por el proveedor del sistema</div>
-              <p>La conexión a Supabase de cada laboratorio cliente se administra desde la configuración central del proveedor o parámetros de despliegue, evitando cambios accidentales por parte del usuario final.</p>
+              <div class="font-bold text-slate-800">Seguridad activa en servidor (RLS + RPC)</div>
+              <p>Las contraseñas operativas y de administración se verifican directamente en Supabase sin descargarse al navegador.</p>
             </div>
 
-            <button onclick="saveSecurityAndCloudSettings()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">Guardar Claves de Acceso</button>
+            <button onclick="saveSecurityAndCloudSettings()" class="px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-bold">Actualizar Claves de Acceso</button>
           </div>
         </div>
       </div>
@@ -640,7 +640,7 @@
 
   <script>
     // =========================================================================
-    // CONFIGURACIÓN INICIAL DE MARCA BLANCA Y NUBE (CONTROLADA POR EL PROVEEDOR)
+    // CONFIGURACIÓN INICIAL DE MARCA BLANCA Y NUBE (SIN CLAVES EXPUESTAS)
     // =========================================================================
     const DEFAULT_LAB_BRAND_NAME = 'Master Color';
     const DEFAULT_LAB_INFO_LINE = 'Barrio El Centro, Siguatepeque';
@@ -649,11 +649,11 @@
     const DEFAULT_SUPABASE_URL = 'https://txmnqxxxulrowbpkkmmh.supabase.co';
     const DEFAULT_SUPABASE_ANON_KEY = 'sb_publishable_yRC66EjpAC9UrP7EgLVxAQ_Yt6Xm6mC';
     const DEFAULT_SUPABASE_SCHEMA = 'foto_estudio';
-    const DEFAULT_SUPABASE_BUCKET = 'order-prints';
+    const MAX_UPLOAD_FILE_BYTES = 25 * 1024 * 1024; // 25 MB máximo por imagen
 
-    // Catálogo de clientes laboratorios (puedes registrar aquí cada laboratorio y llamarlo con ?client=id)
+    // Lista blanca cerrada de perfiles de clientes (bloquea inyección de URL/Key externa)
     const CLIENT_LAB_PROFILES = {
-      // 'cliente1': { labName: 'Foto Estudio Central', labInfo: 'Centro • Tel: 9988-7766', supabaseUrl: '', supabaseKey: '', supabaseSchema: 'foto_estudio' }
+      // 'cliente1': { labName: 'Foto Estudio Central', labInfo: 'Centro • Tel: 9988-7766', supabaseSchema: 'foto_estudio' }
     };
 
     const DEFAULT_PRINT_SIZES = {
@@ -670,11 +670,6 @@
     };
 
     const PAPER_FINISHES = ['Brillante', 'Mate', 'Seda / Perlado'];
-    const PHOTO_BORDERS = [
-      { id: 'none', label: 'Sin borde' },
-      { id: 'classic', label: 'Borde ajustable' },
-      { id: 'polaroid', label: 'Estilo Polaroid' }
-    ];
 
     function loadJsonStorage(key, fallback) {
       try {
@@ -707,11 +702,10 @@
     function getClientNamespacePrefix() {
       const params = new URLSearchParams(window.location.search);
       const clientKey = (params.get('client') || '').trim();
-      const urlSchema = (params.get('sb_schema') || '').trim();
       const profileSchema = clientKey && CLIENT_LAB_PROFILES[clientKey]?.supabaseSchema
         ? CLIENT_LAB_PROFILES[clientKey].supabaseSchema
         : '';
-      const activeNs = (urlSchema || profileSchema || clientKey || DEFAULT_SUPABASE_SCHEMA || 'foto_estudio')
+      const activeNs = (profileSchema || DEFAULT_SUPABASE_SCHEMA || 'foto_estudio')
         .toLowerCase()
         .replace(/[^a-z0-9_]/g, '_');
       return activeNs;
@@ -719,15 +713,17 @@
 
     const CLIENT_STORAGE_NS = getClientNamespacePrefix();
     const STORAGE_KEYS = {
-      printSizes: `${CLIENT_STORAGE_NS}_print_sizes_v1`,
-      studioConfig: `${CLIENT_STORAGE_NS}_studio_config_v1`,
-      securityPins: `${CLIENT_STORAGE_NS}_security_pins_v1`,
-      proPhotographers: `${CLIENT_STORAGE_NS}_pro_photographers_v1`,
-      ordersStore: `${CLIENT_STORAGE_NS}_orders_store_v1`
+      printSizes: `${CLIENT_STORAGE_NS}_print_sizes_v2`,
+      studioConfig: `${CLIENT_STORAGE_NS}_studio_config_v2`,
+      ordersStore: `${CLIENT_STORAGE_NS}_orders_store_v2`
     };
 
+    // Limpiar claves antiguas inseguras que almacenaban contraseñas en localStorage
+    ['security_pins_v1', 'pro_photographers_v1'].forEach((legacySuffix) => {
+      try { localStorage.removeItem(`${CLIENT_STORAGE_NS}_${legacySuffix}`); } catch (e) {}
+    });
+
     let printSizes = loadJsonStorage(STORAGE_KEYS.printSizes, { ...DEFAULT_PRINT_SIZES });
-    // Asegurar que los nuevos tamaños incorporados aparezcan aunque exista caché local previa
     Object.entries(DEFAULT_PRINT_SIZES).forEach(([defKey, defVal]) => {
       if (!printSizes[defKey]) {
         printSizes[defKey] = { ...defVal };
@@ -740,6 +736,7 @@
       }
     });
     saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
+
     let studioConfig = loadJsonStorage(STORAGE_KEYS.studioConfig, {
       labName: DEFAULT_LAB_BRAND_NAME,
       labInfo: DEFAULT_LAB_INFO_LINE,
@@ -749,16 +746,13 @@
         { bank: 'Banco Ficohsa', account: '2000-4512-90', holder: 'Cuenta de Ahorro • Laboratorio Fotográfico' }
       ]
     });
-    let securityPins = loadJsonStorage(STORAGE_KEYS.securityPins, {
-      staffPin: 'Master_Color_Elvin',
-      adminPin: 'Admin_Lab_2026',
-      supabaseUrl: DEFAULT_SUPABASE_URL,
-      supabaseKey: DEFAULT_SUPABASE_ANON_KEY,
-      supabaseSchema: CLIENT_STORAGE_NS
-    });
-    let proPhotographers = loadJsonStorage(STORAGE_KEYS.proPhotographers, [
-      { id: 'pro-demo-1', name: 'Estudio Pro Demo', username: 'pro.demo', password: '123', active: true }
-    ]);
+
+    // Sesión en memoria únicamente (nunca persistida en disco/localStorage)
+    let sessionAuth = {
+      staffPin: '',
+      adminPin: ''
+    };
+    let proPhotographers = [];
     let ordersStore = loadJsonStorage(STORAGE_KEYS.ordersStore, []);
 
     let uploadedPhotos = [];
@@ -795,7 +789,8 @@
         .replace(/&/g, '&amp;')
         .replace(/</g, '&lt;')
         .replace(/>/g, '&gt;')
-        .replace(/"/g, '&quot;');
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
     }
 
     function togglePasswordVisibility(inputId) {
@@ -822,7 +817,7 @@
     }
 
     // =========================================================================
-    // MARCA BLANCA Y CONEXIÓN SUPABASE (AISLADA POR ESQUEMA DE CLIENTE)
+    // MARCA BLANCA Y CONEXIÓN SUPABASE SEGURA (VISTA PÚBLICA + RPC)
     // =========================================================================
     function applyStudioBrandingUI() {
       const name = (studioConfig.labName || DEFAULT_LAB_BRAND_NAME).trim();
@@ -848,31 +843,9 @@
       if (profile) {
         if (profile.labName) studioConfig.labName = profile.labName;
         if (profile.labInfo !== undefined) studioConfig.labInfo = profile.labInfo;
-        if (profile.supabaseUrl) securityPins.supabaseUrl = profile.supabaseUrl;
-        if (profile.supabaseKey) securityPins.supabaseKey = profile.supabaseKey;
-        if (profile.supabaseSchema) securityPins.supabaseSchema = profile.supabaseSchema;
       }
 
-      const urlLab = params.get('lab');
-      const urlLabInfo = params.get('lab_info');
-      const urlSbUrl = params.get('sb_url');
-      const urlSbKey = params.get('sb_key');
-      const urlSbSchema = params.get('sb_schema');
-
-      if (urlLab) studioConfig.labName = urlLab;
-      if (urlLabInfo !== null) studioConfig.labInfo = urlLabInfo;
-
-      // Priorizar siempre las credenciales centrales del código (o parámetros explícitos en URL)
-      // para evitar que un navegador con caché viejo quede apuntando a una URL/esquema anterior.
-      securityPins.supabaseUrl = (urlSbUrl || DEFAULT_SUPABASE_URL || securityPins.supabaseUrl || '').trim();
-      securityPins.supabaseKey = (urlSbKey || DEFAULT_SUPABASE_ANON_KEY || securityPins.supabaseKey || '').trim();
-      securityPins.supabaseSchema = (urlSbSchema || profile?.supabaseSchema || clientKey || DEFAULT_SUPABASE_SCHEMA || 'foto_estudio')
-        .toLowerCase()
-        .replace(/[^a-z0-9_]/g, '_');
-
       saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
-      saveJsonStorage(STORAGE_KEYS.securityPins, securityPins);
-
       applyStudioBrandingUI();
       initSupabaseConnection();
       renderBankAccountsForCustomer();
@@ -880,13 +853,13 @@
     }
 
     function getActiveSupabaseSchema() {
-      return (securityPins.supabaseSchema || CLIENT_STORAGE_NS || DEFAULT_SUPABASE_SCHEMA || 'foto_estudio').trim();
+      return CLIENT_STORAGE_NS;
     }
 
     function initSupabaseConnection() {
       const badge = document.getElementById('cloudStatusBadge');
-      const sbUrl = (securityPins.supabaseUrl || DEFAULT_SUPABASE_URL || '').trim();
-      const sbKey = (securityPins.supabaseKey || DEFAULT_SUPABASE_ANON_KEY || '').trim();
+      const sbUrl = DEFAULT_SUPABASE_URL;
+      const sbKey = DEFAULT_SUPABASE_ANON_KEY;
       const sbSchema = getActiveSupabaseSchema();
 
       if (!sbUrl || !sbKey || !window.supabase || typeof window.supabase.createClient !== 'function') {
@@ -904,19 +877,40 @@
         });
         if (badge) {
           badge.className = 'text-xs px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-400/30';
-          badge.textContent = `● Nube Conectada (${sbSchema})`;
+          badge.textContent = `● Nube Protegida (${sbSchema})`;
         }
         loadCloudConfigurations();
-        refreshOrdersFromCloud(true);
       } catch (err) {
         console.warn('Error inicializando Supabase:', err);
         supabaseClient = null;
       }
     }
 
+    async function callSupabaseRpc(fnName, paramsObj = {}) {
+      const sbUrl = DEFAULT_SUPABASE_URL.replace(/\/+$/, '');
+      const sbKey = DEFAULT_SUPABASE_ANON_KEY;
+      const sbSchema = getActiveSupabaseSchema();
+      const res = await fetch(`${sbUrl}/rest/v1/rpc/${fnName}`, {
+        method: 'POST',
+        headers: {
+          'apikey': sbKey,
+          'Authorization': `Bearer ${sbKey}`,
+          'Accept-Profile': sbSchema,
+          'Content-Profile': sbSchema,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(paramsObj)
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(errText || `Error HTTP ${res.status}`);
+      }
+      return res.json();
+    }
+
     async function loadCloudConfigurations() {
-      const sbUrl = (securityPins.supabaseUrl || DEFAULT_SUPABASE_URL || '').replace(/\/+$/, '');
-      const sbKey = (securityPins.supabaseKey || DEFAULT_SUPABASE_ANON_KEY || '').trim();
+      const sbUrl = DEFAULT_SUPABASE_URL.replace(/\/+$/, '');
+      const sbKey = DEFAULT_SUPABASE_ANON_KEY;
       const sbSchema = getActiveSupabaseSchema();
       if (!sbUrl || !sbKey) return;
 
@@ -928,8 +922,8 @@
       };
 
       try {
-        // 1. Cargar configuración del estudio (studio_settings) vía REST directo
-        const settingsRes = await fetch(`${sbUrl}/rest/v1/studio_settings?select=*&limit=1`, {
+        // 1. Leer vista pública studio_public_info (sin columnas de PINs)
+        const settingsRes = await fetch(`${sbUrl}/rest/v1/studio_public_info?select=*&limit=1`, {
           headers: restHeaders,
           cache: 'no-store'
         });
@@ -937,27 +931,20 @@
           const settingsRows = await settingsRes.json();
           if (Array.isArray(settingsRows) && settingsRows.length > 0) {
             const row = settingsRows[0];
-            const cloudLabName = row.lab_name || row.studio_name || row.name;
-            const cloudLabInfo = row.lab_info ?? row.studio_info ?? row.address ?? row.subtitle;
-            const cloudShipping = row.shipping_cost ?? row.delivery_fee;
-            let cloudBanks = row.bank_accounts || row.banks_json;
+            if (row.lab_name) studioConfig.labName = row.lab_name;
+            if (row.lab_info !== undefined && row.lab_info !== null) studioConfig.labInfo = row.lab_info;
+            if (row.shipping_cost !== undefined && row.shipping_cost !== null && !isNaN(Number(row.shipping_cost))) {
+              studioConfig.shippingCost = Number(row.shipping_cost);
+            }
+            let cloudBanks = row.bank_accounts;
             if (typeof cloudBanks === 'string') {
               try { cloudBanks = JSON.parse(cloudBanks); } catch (e) { cloudBanks = null; }
-            }
-
-            if (cloudLabName) studioConfig.labName = cloudLabName;
-            if (cloudLabInfo !== undefined && cloudLabInfo !== null) studioConfig.labInfo = cloudLabInfo;
-            if (cloudShipping !== undefined && cloudShipping !== null && !isNaN(Number(cloudShipping))) {
-              studioConfig.shippingCost = Number(cloudShipping);
             }
             if (Array.isArray(cloudBanks) && cloudBanks.length > 0) {
               studioConfig.bankAccounts = cloudBanks;
             }
-            if (row.staff_pin) securityPins.staffPin = String(row.staff_pin);
-            if (row.admin_pin) securityPins.adminPin = String(row.admin_pin);
 
             saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
-            saveJsonStorage(STORAGE_KEYS.securityPins, securityPins);
             applyStudioBrandingUI();
             renderBankAccountsForCustomer();
             updateWebDeliveryFeeLabel();
@@ -965,7 +952,7 @@
           }
         }
 
-        // 2. Cargar precios y productos (pricing_config)
+        // 2. Cargar precios públicos y Pro desde pricing_config (solo lectura)
         const pricingRes = await fetch(`${sbUrl}/rest/v1/pricing_config?select=*`, {
           headers: restHeaders,
           cache: 'no-store'
@@ -991,187 +978,21 @@
                 isWalletSheet: key === 'wallet' || Boolean(defMatch?.isWalletSheet)
               };
             });
-            // Garantizar que los nuevos tamaños predeterminados siempre estén disponibles y subir los faltantes a Supabase
-            let hasMissingInCloud = false;
             Object.entries(DEFAULT_PRINT_SIZES).forEach(([defKey, defVal]) => {
               if (!loadedSizes[defKey]) {
                 loadedSizes[defKey] = { ...defVal };
-                hasMissingInCloud = true;
               }
             });
             if (Object.keys(loadedSizes).length > 0) {
               printSizes = loadedSizes;
               saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
-              if (hasMissingInCloud) {
-                syncPricingToCloud();
-              }
               renderUploadedPhotosList();
               updateOrderTotals();
             }
-          } else {
-            syncPricingToCloud();
-          }
-        }
-
-        // 3. Cargar fotógrafos Pro (photographers)
-        const photoRes = await fetch(`${sbUrl}/rest/v1/photographers?select=*`, {
-          headers: restHeaders,
-          cache: 'no-store'
-        });
-        if (photoRes.ok) {
-          const photoRows = await photoRes.json();
-          if (Array.isArray(photoRows) && photoRows.length > 0) {
-            proPhotographers = photoRows.map((p) => ({
-              id: p.id || `pro-${Date.now()}-${Math.random().toString(36).slice(2, 6)}`,
-              name: p.name || p.studio_name || 'Fotógrafo Pro',
-              username: p.username || '',
-              password: p.password || p.pin || '',
-              active: p.active !== false
-            }));
-            saveJsonStorage(STORAGE_KEYS.proPhotographers, proPhotographers);
           }
         }
       } catch (err) {
         console.warn('No se pudo cargar configuración remota:', err);
-      }
-    }
-
-    async function syncStudioSettingsToCloud() {
-      const sbUrl = (securityPins.supabaseUrl || DEFAULT_SUPABASE_URL || '').replace(/\/+$/, '');
-      const sbKey = (securityPins.supabaseKey || DEFAULT_SUPABASE_ANON_KEY || '').trim();
-      const sbSchema = getActiveSupabaseSchema();
-      if (!sbUrl || !sbKey) {
-        showToast('Sin credenciales de Supabase configuradas.');
-        return false;
-      }
-
-      try {
-        const readRes = await fetch(`${sbUrl}/rest/v1/studio_settings?select=id&limit=1`, {
-          headers: {
-            'apikey': sbKey,
-            'Authorization': `Bearer ${sbKey}`,
-            'Accept-Profile': sbSchema
-          },
-          cache: 'no-store'
-        });
-
-        if (!readRes.ok) {
-          const errText = await readRes.text();
-          showToast(`Error Supabase (${readRes.status}): ${errText.slice(0, 120)}`);
-          return false;
-        }
-
-        const existing = await readRes.json();
-        const existingId = Array.isArray(existing) && existing.length > 0 ? existing[0].id : null;
-        const payload = {
-          lab_name: studioConfig.labName,
-          lab_info: studioConfig.labInfo || '',
-          shipping_cost: Number(studioConfig.shippingCost) || 0,
-          bank_accounts: studioConfig.bankAccounts || [],
-          staff_pin: securityPins.staffPin,
-          admin_pin: securityPins.adminPin
-        };
-
-        const writeUrl = existingId
-          ? `${sbUrl}/rest/v1/studio_settings?id=eq.${encodeURIComponent(existingId)}`
-          : `${sbUrl}/rest/v1/studio_settings`;
-        const writeMethod = existingId ? 'PATCH' : 'POST';
-        const writeBody = existingId ? payload : { id: 'default_studio', ...payload };
-
-        const writeRes = await fetch(writeUrl, {
-          method: writeMethod,
-          headers: {
-            'apikey': sbKey,
-            'Authorization': `Bearer ${sbKey}`,
-            'Accept-Profile': sbSchema,
-            'Content-Profile': sbSchema,
-            'Content-Type': 'application/json',
-            'Prefer': 'return=representation'
-          },
-          body: JSON.stringify(writeBody)
-        });
-
-        if (!writeRes.ok) {
-          const errText = await writeRes.text();
-          const msg = `Error Supabase (${writeRes.status}): ${errText.slice(0, 140)}`;
-          const statusEl = document.getElementById('studioCloudSyncStatus');
-          if (statusEl) {
-            statusEl.textContent = msg;
-            statusEl.className = 'text-xs font-bold text-rose-600 mt-1';
-          }
-          showToast(msg);
-          return false;
-        }
-        return true;
-      } catch (err) {
-        const msg = `Fallo de red con Supabase: ${err.message || err}`;
-        const statusEl = document.getElementById('studioCloudSyncStatus');
-        if (statusEl) {
-          statusEl.textContent = msg;
-          statusEl.className = 'text-xs font-bold text-rose-600 mt-1';
-        }
-        showToast(msg);
-        return false;
-      }
-    }
-
-    async function syncPricingToCloud() {
-      const sbUrl = (securityPins.supabaseUrl || DEFAULT_SUPABASE_URL || '').replace(/\/+$/, '');
-      const sbKey = (securityPins.supabaseKey || DEFAULT_SUPABASE_ANON_KEY || '').trim();
-      const sbSchema = getActiveSupabaseSchema();
-      if (!sbUrl || !sbKey) return false;
-
-      try {
-        const rows = Object.values(printSizes).map((sz) => ({
-          size_key: String(sz.key),
-          label: String(sz.label || sz.key),
-          width_in: Number(sz.widthIn) || 4,
-          height_in: Number(sz.heightIn) || 6,
-          amateur_price: Number(sz.price) || 0,
-          price: Number(sz.price) || 0,
-          public_price: Number(sz.price) || 0,
-          pro_price: Number(sz.proPrice) || 0
-        }));
-
-        const res = await fetch(`${sbUrl}/rest/v1/pricing_config?on_conflict=size_key`, {
-          method: 'POST',
-          headers: {
-            'apikey': sbKey,
-            'Authorization': `Bearer ${sbKey}`,
-            'Accept-Profile': sbSchema,
-            'Content-Profile': sbSchema,
-            'Content-Type': 'application/json',
-            'Prefer': 'resolution=merge-duplicates,return=representation'
-          },
-          body: JSON.stringify(rows)
-        });
-
-        if (!res.ok) {
-          const errText = await res.text();
-          showToast(`Error guardando tarifas en nube (${res.status}): ${errText.slice(0, 120)}`);
-          return false;
-        }
-        return true;
-      } catch (err) {
-        console.warn('Error sincronizando pricing_config:', err);
-        return false;
-      }
-    }
-
-    async function syncPhotographersToCloud() {
-      if (!supabaseClient) return;
-      try {
-        const rows = proPhotographers.map((p) => ({
-          id: String(p.id || generateUuidV4()),
-          name: p.name,
-          username: p.username,
-          password: p.password,
-          active: p.active !== false
-        }));
-        const { error } = await supabaseClient.from('photographers').upsert(rows, { onConflict: 'username' });
-        if (error) showToast(`Aviso nube (fotógrafos): ${error.message}`);
-      } catch (err) {
-        console.warn('Error sincronizando photographers:', err);
       }
     }
 
@@ -1252,7 +1073,6 @@
       try {
         const totalPrints = (order.items || []).reduce((acc, it) => acc + (Number(it.copies) || 1), 0);
         const notesParts = [];
-        if (order.paymentStatus === 'paid') notesParts.push('[VERIFICADO_CAJA]');
         if (order.deliveryMode === 'store') notesParts.push('[KIOSKO EN TIENDA - PAGO EN CAJA]');
         if (order.photographerName) notesParts.push(`[PRO: ${order.photographerName}]`);
 
@@ -1292,6 +1112,7 @@
           };
         });
 
+        // Inserción estricta como orden pendiente (cumple política RLS anon_insert_pending_orders)
         const payload = {
           id: order.id,
           order_code: order.orderCode,
@@ -1300,12 +1121,8 @@
           delivery_method: order.deliveryMode === 'delivery' ? 'delivery' : 'pickup',
           delivery_address: order.deliveryAddress || null,
           customer_address: order.deliveryAddress || null,
-          payment_status: order.paymentStatus === 'paid' ? 'paid' : 'verifying',
-          status: order.labStatus === 'delivered'
-            ? 'entregado'
-            : order.paymentStatus === 'paid'
-            ? 'imprimiendo'
-            : 'pendiente_caja',
+          payment_status: 'verifying',
+          status: 'pendiente_caja',
           subtotal: Number(order.subtotal || 0).toFixed(2),
           shipping_cost: Number(order.shipping || 0).toFixed(2),
           delivery_fee: Number(order.shipping || 0).toFixed(2),
@@ -1317,13 +1134,13 @@
             ? 'PAGADO_EN_CAJA'
             : (order.receiptUrl || null),
           order_notes: notesParts.join(' '),
-          storage_cleaned: !!order.storageCleaned,
+          storage_cleaned: false,
           items_json: JSON.stringify(serializedItems)
         };
 
-        const { error } = await supabaseClient.from('orders').upsert(payload, { onConflict: 'id' });
+        const { error } = await supabaseClient.from('orders').insert(payload);
         if (error) {
-          console.warn('Error sincronizando orden con Supabase:', error.message);
+          console.warn('Error registrando orden en Supabase:', error.message);
         }
       } catch (err) {
         console.warn('Fallo de red sincronizando Supabase:', err);
@@ -1331,24 +1148,16 @@
     }
 
     async function refreshOrdersFromCloud(silent = false) {
-      if (!supabaseClient) {
+      if (!sessionAuth.staffPin) {
         renderCashierOrdersList();
         renderLabOrdersList();
-        if (!silent) showToast('Trabajando en modo local (sin nube conectada).');
         return;
       }
 
       try {
-        const { data, error } = await supabaseClient
-          .from('orders')
-          .select('*')
-          .order('created_at', { ascending: false })
-          .limit(100);
-
-        if (error) {
-          if (!silent) showToast(`Error leyendo nube: ${error.message}`);
-          return;
-        }
+        const data = await callSupabaseRpc('get_orders_for_staff', {
+          p_staff_pin: sessionAuth.staffPin
+        });
 
         if (Array.isArray(data)) {
           const localMap = new Map(ordersStore.map((o) => [o.id, o]));
@@ -1377,7 +1186,7 @@
     }
 
     // =========================================================================
-    // MODO KIOSKO EN TIENDA
+    // MODO KIOSKO EN TIENDA (VALIDACIÓN EN SERVIDOR)
     // =========================================================================
     function openKioskModeModal() {
       const titleEl = document.getElementById('kioskModalTitle');
@@ -1406,12 +1215,29 @@
       document.getElementById('kioskModeModal')?.classList.add('hidden');
     }
 
-    function confirmKioskModeToggle() {
+    async function confirmKioskModeToggle() {
       const pin = (document.getElementById('kioskPinInput')?.value || '').trim();
       const errEl = document.getElementById('kioskPinError');
-      if (pin !== securityPins.staffPin) {
+      if (!pin) {
         if (errEl) {
-          errEl.textContent = 'Contraseña operativa incorrecta.';
+          errEl.textContent = 'Ingresa la contraseña operativa.';
+          errEl.classList.remove('hidden');
+        }
+        return;
+      }
+
+      try {
+        const valid = await callSupabaseRpc('verify_staff_pin', { p_pin: pin });
+        if (!valid) {
+          if (errEl) {
+            errEl.textContent = 'Contraseña operativa incorrecta.';
+            errEl.classList.remove('hidden');
+          }
+          return;
+        }
+      } catch (err) {
+        if (errEl) {
+          errEl.textContent = 'No se pudo validar la clave con el servidor.';
           errEl.classList.remove('hidden');
         }
         return;
@@ -1514,8 +1340,18 @@
 
     function processSelectedImageFiles(fileList) {
       const defaultSizeKey = Object.keys(printSizes)[0] || '4x6';
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+
       Array.from(fileList).forEach((file) => {
-        if (!file.type.startsWith('image/')) return;
+        if (!allowedTypes.includes(file.type)) {
+          showToast(`Formato no permitido (${file.name}). Usa JPG, PNG o WEBP.`);
+          return;
+        }
+        if (file.size > MAX_UPLOAD_FILE_BYTES) {
+          showToast(`"${file.name}" supera el límite de 25 MB por fotografía.`);
+          return;
+        }
+
         const reader = new FileReader();
         reader.onload = (ev) => {
           const dataUrl = ev.target?.result;
@@ -1819,20 +1655,6 @@
       updateOrderTotals();
     }
 
-    function togglePhotoOrientationQuick(photoId) {
-      const photo = uploadedPhotos.find((p) => p.id === photoId);
-      if (!photo) return;
-      const targetOrient = photo.orientation === 'landscape' ? 'portrait' : 'landscape';
-      const imgIsLandscape = (photo.naturalWidth || 1) >= (photo.naturalHeight || 1);
-      photo.orientation = targetOrient;
-      if ((targetOrient === 'landscape' && !imgIsLandscape) || (targetOrient === 'portrait' && imgIsLandscape)) {
-        photo.rotation = (photo.rotation + 90) % 360;
-      } else {
-        photo.rotation = 0;
-      }
-      renderUploadedPhotosList();
-    }
-
     // =========================================================================
     // EDITOR DE ENCUADRE, ORIENTACIÓN, BORDES Y TEXTOS
     // =========================================================================
@@ -1865,7 +1687,6 @@
       previewImg.dataset.flipH = photo.flipH ? '1' : '0';
       previewImg.dataset.orientation = photo.orientation || 'portrait';
 
-      updateCropOrientationButtons();
       updateCropFrameAspect();
       updateCropPreviewTransform();
       document.getElementById('cropEditorModal')?.classList.remove('hidden');
@@ -1874,44 +1695,6 @@
     function closeCropEditor() {
       editingPhotoId = null;
       document.getElementById('cropEditorModal')?.classList.add('hidden');
-    }
-
-    function setCropOrientation(orient) {
-      const previewImg = document.getElementById('cropPreviewImage');
-      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
-      if (!previewImg) return;
-
-      previewImg.dataset.orientation = orient;
-      if (photo) {
-        const imgIsLandscape = (photo.naturalWidth || 1) >= (photo.naturalHeight || 1);
-        if ((orient === 'landscape' && !imgIsLandscape) || (orient === 'portrait' && imgIsLandscape)) {
-          previewImg.dataset.rotation = '90';
-        } else {
-          previewImg.dataset.rotation = '0';
-        }
-      }
-
-      document.getElementById('cropPanXRange').value = '0';
-      document.getElementById('cropPanYRange').value = '0';
-      updateCropOrientationButtons();
-      updateCropFrameAspect();
-      updateCropPreviewTransform();
-    }
-
-    function updateCropOrientationButtons() {
-      const previewImg = document.getElementById('cropPreviewImage');
-      const orient = previewImg?.dataset.orientation || 'portrait';
-      const landBtn = document.getElementById('orientLandscapeBtn');
-      const portBtn = document.getElementById('orientPortraitBtn');
-      if (!landBtn || !portBtn) return;
-
-      if (orient === 'landscape') {
-        landBtn.className = 'px-3 py-1.5 rounded-xl bg-sky-600 text-white font-bold';
-        portBtn.className = 'px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-semibold';
-      } else {
-        portBtn.className = 'px-3 py-1.5 rounded-xl bg-sky-600 text-white font-bold';
-        landBtn.className = 'px-3 py-1.5 rounded-xl bg-white border border-slate-300 text-slate-700 font-semibold';
-      }
     }
 
     function updateCropFrameAspect() {
@@ -2329,6 +2112,17 @@
     function handleReceiptSelected(event) {
       const file = event.target?.files?.[0];
       if (!file) return;
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        showToast('El comprobante debe ser una imagen JPG, PNG o WEBP.');
+        event.target.value = '';
+        return;
+      }
+      if (file.size > MAX_UPLOAD_FILE_BYTES) {
+        showToast('El comprobante supera el tamaño máximo de 25 MB.');
+        event.target.value = '';
+        return;
+      }
       const reader = new FileReader();
       reader.onload = (ev) => {
         receiptDataUrl = ev.target?.result || '';
@@ -2418,8 +2212,10 @@
         })
       };
 
-      ordersStore.unshift(newOrder);
-      saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
+      if (!isKioskModeActive) {
+        ordersStore.unshift(newOrder);
+        saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
+      }
       await syncOrderToSupabase(newOrder);
 
       const confBox = document.getElementById('orderConfirmationBox');
@@ -2515,7 +2311,7 @@
     }
 
     // =========================================================================
-    // FOTÓGRAFO PRO (SESIÓN Y TARIFAS)
+    // FOTÓGRAFO PRO (VALIDACIÓN SEGURA EN SERVIDOR)
     // =========================================================================
     function openProLoginModal() {
       document.getElementById('proLoginError')?.classList.add('hidden');
@@ -2528,33 +2324,49 @@
       document.getElementById('proLoginModal')?.classList.add('hidden');
     }
 
-    function verifyProPhotographerLogin() {
-      const user = (document.getElementById('proUsernameInput').value || '').trim().toLowerCase();
+    async function verifyProPhotographerLogin() {
+      const user = (document.getElementById('proUsernameInput').value || '').trim();
       const pass = (document.getElementById('proPasswordInput').value || '').trim();
       const errEl = document.getElementById('proLoginError');
 
-      const found = proPhotographers.find(
-        (p) => p.active !== false && String(p.username).trim().toLowerCase() === user && String(p.password).trim() === pass
-      );
-
-      if (!found) {
+      if (!user || !pass) {
         if (errEl) {
-          errEl.textContent = 'Usuario o contraseña de Fotógrafo Pro inválidos.';
+          errEl.textContent = 'Ingresa usuario y contraseña.';
           errEl.classList.remove('hidden');
         }
         return;
       }
 
-      activeProPhotographer = found;
-      document.getElementById('proSessionBadge').textContent = `⭐ Tarifa Pro: ${found.name}`;
-      document.getElementById('proSessionBadge')?.classList.remove('hidden');
-      document.getElementById('logoutProBtn')?.classList.remove('hidden');
-      document.getElementById('openProLoginBtn')?.classList.add('hidden');
+      try {
+        const found = await callSupabaseRpc('verify_pro_login', {
+          p_username: user,
+          p_password: pass
+        });
 
-      closeProLoginModal();
-      renderUploadedPhotosList();
-      updateOrderTotals();
-      showToast(`Bienvenido ${found.name}. Tarifas Fotógrafo Pro activadas.`);
+        if (!found || !found.id) {
+          if (errEl) {
+            errEl.textContent = 'Usuario o contraseña de Fotógrafo Pro inválidos.';
+            errEl.classList.remove('hidden');
+          }
+          return;
+        }
+
+        activeProPhotographer = found;
+        document.getElementById('proSessionBadge').textContent = `⭐ Tarifa Pro: ${found.name}`;
+        document.getElementById('proSessionBadge')?.classList.remove('hidden');
+        document.getElementById('logoutProBtn')?.classList.remove('hidden');
+        document.getElementById('openProLoginBtn')?.classList.add('hidden');
+
+        closeProLoginModal();
+        renderUploadedPhotosList();
+        updateOrderTotals();
+        showToast(`Bienvenido ${found.name}. Tarifas Fotógrafo Pro activadas.`);
+      } catch (err) {
+        if (errEl) {
+          errEl.textContent = 'No se pudo verificar la sesión en el servidor.';
+          errEl.classList.remove('hidden');
+        }
+      }
     }
 
     function logoutProPhotographer() {
@@ -2570,7 +2382,7 @@
     }
 
     // =========================================================================
-    // PANEL DE CAJA (VERIFICACIÓN Y PAGO)
+    // PANEL DE CAJA (VERIFICACIÓN EN SERVIDOR)
     // =========================================================================
     function openCashierPanelView() {
       document.getElementById('cashierPinError')?.classList.add('hidden');
@@ -2585,28 +2397,41 @@
 
     function closeCashierPanelModal() {
       isCashierAuthenticated = false;
+      if (!isLabAuthenticated) sessionAuth.staffPin = '';
       document.getElementById('cashierPanelModal')?.classList.add('hidden');
     }
 
-    function verifyCashierPin() {
+    async function verifyCashierPin() {
       const pin = (document.getElementById('cashierPinInput').value || '').trim();
       const errEl = document.getElementById('cashierPinError');
-      if (pin !== securityPins.staffPin) {
+      if (!pin) return;
+
+      try {
+        const valid = await callSupabaseRpc('verify_staff_pin', { p_pin: pin });
+        if (!valid) {
+          if (errEl) {
+            errEl.textContent = 'Contraseña operativa incorrecta.';
+            errEl.classList.remove('hidden');
+          }
+          return;
+        }
+        sessionAuth.staffPin = pin;
+        isCashierAuthenticated = true;
+        document.getElementById('cashierAuthBox')?.classList.add('hidden');
+        document.getElementById('cashierOrdersWorkspace')?.classList.remove('hidden');
+        await refreshOrdersFromCloud(true);
+        renderCashierOrdersList();
+      } catch (err) {
         if (errEl) {
-          errEl.textContent = 'Contraseña operativa incorrecta.';
+          errEl.textContent = 'Error verificando credenciales en servidor.';
           errEl.classList.remove('hidden');
         }
-        return;
       }
-      isCashierAuthenticated = true;
-      document.getElementById('cashierAuthBox')?.classList.add('hidden');
-      document.getElementById('cashierOrdersWorkspace')?.classList.remove('hidden');
-      refreshOrdersFromCloud(true);
-      renderCashierOrdersList();
     }
 
     function logoutCashierSession() {
       isCashierAuthenticated = false;
+      if (!isLabAuthenticated) sessionAuth.staffPin = '';
       closeCashierPanelModal();
       showToast('Sesión de Caja cerrada.');
     }
@@ -2653,13 +2478,13 @@
               <div class="flex flex-wrap items-center gap-2">
                 ${
                   order.receiptUrl
-                    ? `<button type="button" onclick="previewOrderReceipt('${order.id}')" class="px-3 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700">Ver comprobante</button>`
+                    ? `<button type="button" onclick="previewOrderReceipt('${escapeHtml(order.id)}')" class="px-3 py-2 rounded-xl bg-white border border-slate-300 hover:bg-slate-50 text-xs font-semibold text-slate-700">Ver comprobante</button>`
                     : ''
                 }
                 ${
                   isPaid
                     ? `<span class="px-3.5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">✓ Pagado y en Laboratorio</span>`
-                    : `<button type="button" onclick="confirmOrderPaymentInCashier('${order.id}')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-xs">Confirmar Pago → Enviar a Lab</button>`
+                    : `<button type="button" onclick="confirmOrderPaymentInCashier('${escapeHtml(order.id)}')" class="px-4 py-2 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 text-xs font-extrabold shadow-xs">Confirmar Pago → Enviar a Lab</button>`
                 }
               </div>
             </div>
@@ -2678,13 +2503,20 @@
     async function confirmOrderPaymentInCashier(orderId) {
       const order = ordersStore.find((o) => o.id === orderId);
       if (!order) return;
-      order.paymentStatus = 'paid';
-      order.labStatus = 'ready_to_print';
-      saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
-      await syncOrderToSupabase(order);
-      renderCashierOrdersList();
-      renderLabOrdersList();
-      showToast(`Pago confirmado para ${order.orderCode}. Orden enviada a Laboratorio.`);
+      try {
+        await callSupabaseRpc('cashier_confirm_payment', {
+          p_staff_pin: sessionAuth.staffPin,
+          p_order_id: orderId
+        });
+        order.paymentStatus = 'paid';
+        order.labStatus = 'ready_to_print';
+        saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
+        renderCashierOrdersList();
+        renderLabOrdersList();
+        showToast(`Pago confirmado para ${order.orderCode}. Orden enviada a Laboratorio.`);
+      } catch (err) {
+        showToast('No se pudo confirmar el pago en el servidor.');
+      }
     }
 
     // =========================================================================
@@ -2705,26 +2537,39 @@
       isLabAuthenticated = false;
       isAdminUnlocked = false;
       pendingAdminTab = null;
+      sessionAuth.adminPin = '';
+      if (!isCashierAuthenticated) sessionAuth.staffPin = '';
       updateAdminLockUI();
       document.getElementById('adminPasswordPromptBox')?.classList.add('hidden');
       document.getElementById('labPanelModal')?.classList.add('hidden');
     }
 
-    function verifyLabPin() {
+    async function verifyLabPin() {
       const pin = (document.getElementById('labPinInput').value || '').trim();
       const errEl = document.getElementById('labPinError');
-      if (pin !== securityPins.staffPin) {
+      if (!pin) return;
+
+      try {
+        const valid = await callSupabaseRpc('verify_staff_pin', { p_pin: pin });
+        if (!valid) {
+          if (errEl) {
+            errEl.textContent = 'Contraseña operativa incorrecta.';
+            errEl.classList.remove('hidden');
+          }
+          return;
+        }
+        sessionAuth.staffPin = pin;
+        isLabAuthenticated = true;
+        document.getElementById('labAuthBox')?.classList.add('hidden');
+        document.getElementById('labWorkspace')?.classList.remove('hidden');
+        await refreshOrdersFromCloud(true);
+        switchLabTab('orders');
+      } catch (err) {
         if (errEl) {
-          errEl.textContent = 'Contraseña operativa incorrecta.';
+          errEl.textContent = 'Error verificando credenciales en servidor.';
           errEl.classList.remove('hidden');
         }
-        return;
       }
-      isLabAuthenticated = true;
-      document.getElementById('labAuthBox')?.classList.add('hidden');
-      document.getElementById('labWorkspace')?.classList.remove('hidden');
-      refreshOrdersFromCloud(true);
-      switchLabTab('orders');
     }
 
     function logoutLabSession() {
@@ -2738,29 +2583,41 @@
       document.getElementById('adminPasswordPromptBox')?.classList.remove('hidden');
     }
 
-    function verifyAdminPin() {
+    async function verifyAdminPin() {
       const pin = (document.getElementById('adminPinInput').value || '').trim();
       const errEl = document.getElementById('adminPinError');
-      if (pin !== securityPins.adminPin) {
+      if (!pin) return;
+
+      try {
+        const valid = await callSupabaseRpc('verify_admin_pin', { p_pin: pin });
+        if (!valid) {
+          if (errEl) {
+            errEl.textContent = 'Contraseña de administración incorrecta.';
+            errEl.classList.remove('hidden');
+          }
+          return;
+        }
+        sessionAuth.adminPin = pin;
+        isAdminUnlocked = true;
+        document.getElementById('adminPasswordPromptBox')?.classList.add('hidden');
+        updateAdminLockUI();
+        if (pendingAdminTab) {
+          const tab = pendingAdminTab;
+          pendingAdminTab = null;
+          switchLabTab(tab);
+        }
+        showToast('Modo Administrar desbloqueado.');
+      } catch (err) {
         if (errEl) {
-          errEl.textContent = 'Contraseña de administración incorrecta.';
+          errEl.textContent = 'No se pudo validar la clave de administración.';
           errEl.classList.remove('hidden');
         }
-        return;
       }
-      isAdminUnlocked = true;
-      document.getElementById('adminPasswordPromptBox')?.classList.add('hidden');
-      updateAdminLockUI();
-      if (pendingAdminTab) {
-        const tab = pendingAdminTab;
-        pendingAdminTab = null;
-        switchLabTab(tab);
-      }
-      showToast('Modo Administrar desbloqueado.');
     }
 
     function lockAdminMode() {
       isAdminUnlocked = false;
+      sessionAuth.adminPin = '';
       updateAdminLockUI();
       switchLabTab('orders');
       showToast('Opciones administrativas bloqueadas.');
@@ -2781,7 +2638,7 @@
       switchLabTab(tabName);
     }
 
-    function switchLabTab(tabName) {
+    async function switchLabTab(tabName) {
       const tabs = {
         orders: 'labTabOrders',
         photographers: 'labTabPhotographers',
@@ -2810,7 +2667,7 @@
       });
 
       if (tabName === 'orders') renderLabOrdersList();
-      if (tabName === 'photographers') renderAdminPhotographersList();
+      if (tabName === 'photographers') await loadAndRenderAdminPhotographers();
       if (tabName === 'pricing') renderAdminPricingList();
       if (tabName === 'studio') loadStudioFormInputs();
       if (tabName === 'security') loadSecurityFormInputs();
@@ -2849,12 +2706,12 @@
               </div>
 
               <div class="flex flex-wrap items-center gap-2">
-                <button type="button" onclick="downloadOrderZip300DPI('${order.id}')" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs">
+                <button type="button" onclick="downloadOrderZip300DPI('${escapeHtml(order.id)}')" class="px-4 py-2 rounded-xl bg-slate-900 hover:bg-slate-800 text-white text-xs font-bold shadow-xs">
                   📦 Descargar ZIP (300 DPI)
                 </button>
                 ${
                   !isDelivered
-                    ? `<button type="button" onclick="markOrderDeliveredAndClean('${order.id}')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">✓ Entregado</button>`
+                    ? `<button type="button" onclick="markOrderDeliveredAndClean('${escapeHtml(order.id)}')" class="px-3.5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold">✓ Entregado</button>`
                     : ''
                 }
               </div>
@@ -3012,11 +2869,9 @@
             ctx.restore();
           }
 
-          // Si es planilla de 4 fotos tamaño pasaporte horizontales (45x35 mm), montar 2x2 en hoja 4x6" (1800x1200 px a 300 DPI)
-          // Si es planilla de 4 fotos tamaño pasaporte (2x2) o 6 fotos tamaño carnet (3x2), montar en hoja 4x6" (1800x1200 px a 300 DPI)
           if (isSheet) {
-            const sheetW = 1800; // 6 pulgadas * 300 DPI
-            const sheetH = 1200; // 4 pulgadas * 300 DPI
+            const sheetW = 1800;
+            const sheetH = 1200;
             const sheetCanvas = document.createElement('canvas');
             sheetCanvas.width = sheetW;
             sheetCanvas.height = sheetH;
@@ -3035,7 +2890,6 @@
                 const posX = gapX + c * (outW + gapX);
                 const posY = gapY + r * (outH + gapY);
                 sCtx.drawImage(canvas, posX, posY, outW, outH);
-                // Borde guía muy sutil para facilitar el corte con guillotina
                 sCtx.strokeStyle = '#cbd5e1';
                 sCtx.lineWidth = 2;
                 sCtx.strokeRect(posX, posY, outW, outH);
@@ -3090,29 +2944,50 @@
     async function markOrderDeliveredAndClean(orderId) {
       const order = ordersStore.find((o) => o.id === orderId);
       if (!order) return;
-      order.labStatus = 'delivered';
-      order.storageCleaned = true;
-      saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
-      await syncOrderToSupabase(order);
-      renderLabOrdersList();
-      showToast(`Orden ${order.orderCode} marcada como entregada.`);
+      try {
+        await callSupabaseRpc('lab_mark_delivered', {
+          p_staff_pin: sessionAuth.staffPin,
+          p_order_id: orderId
+        });
+        order.labStatus = 'delivered';
+        order.storageCleaned = true;
+        saveJsonStorage(STORAGE_KEYS.ordersStore, ordersStore);
+        renderLabOrdersList();
+        showToast(`Orden ${order.orderCode} marcada como entregada.`);
+      } catch (err) {
+        showToast('No se pudo actualizar el estado en el servidor.');
+      }
     }
 
     // =========================================================================
-    // ADMINISTRACIÓN: FOTÓGRAFOS PRO, PRODUCTOS, ESTUDIO Y CLAVES
+    // ADMINISTRACIÓN (OPERACIONES VIA RPC VERIFICADAS EN SERVIDOR)
     // =========================================================================
-    function renderAdminPhotographersList() {
+    async function loadAndRenderAdminPhotographers() {
       const listEl = document.getElementById('proPhotographersList');
       if (!listEl) return;
+      try {
+        const rows = await callSupabaseRpc('admin_list_photographers', {
+          p_admin_pin: sessionAuth.adminPin
+        });
+        proPhotographers = Array.isArray(rows) ? rows : [];
+      } catch (err) {
+        proPhotographers = [];
+      }
+
+      if (proPhotographers.length === 0) {
+        listEl.innerHTML = '<div class="text-xs text-slate-400 py-3">No hay fotógrafos Pro registrados aún.</div>';
+        return;
+      }
+
       listEl.innerHTML = proPhotographers
         .map(
           (p) => `
             <div class="flex items-center justify-between gap-2 p-3 rounded-xl border border-slate-200 bg-white text-xs">
               <div>
                 <span class="font-bold text-slate-900">${escapeHtml(p.name)}</span>
-                <span class="text-slate-500 ml-2">Usuario: <strong>${escapeHtml(p.username)}</strong> • Clave: <strong>${escapeHtml(p.password)}</strong></span>
+                <span class="text-slate-500 ml-2">Usuario: <strong>${escapeHtml(p.username)}</strong> • Clave protegida en servidor</span>
               </div>
-              <button type="button" onclick="removeProPhotographer('${p.id}')" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold">Eliminar</button>
+              <button type="button" onclick="removeProPhotographer('${escapeHtml(p.username)}')" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold">Eliminar</button>
             </div>
           `
         )
@@ -3127,30 +3002,35 @@
         showToast('Completa nombre, usuario y contraseña del fotógrafo.');
         return;
       }
-      proPhotographers.push({
-        id: generateUuidV4(),
-        name,
-        username,
-        password,
-        active: true
-      });
-      saveJsonStorage(STORAGE_KEYS.proPhotographers, proPhotographers);
-      await syncPhotographersToCloud();
-      document.getElementById('newProNameInput').value = '';
-      document.getElementById('newProUserInput').value = '';
-      document.getElementById('newProPassInput').value = '';
-      renderAdminPhotographersList();
-      showToast(`Fotógrafo Pro "${name}" guardado.`);
+      try {
+        await callSupabaseRpc('admin_add_photographer', {
+          p_admin_pin: sessionAuth.adminPin,
+          p_id: generateUuidV4(),
+          p_name: name,
+          p_username: username,
+          p_password: password
+        });
+        document.getElementById('newProNameInput').value = '';
+        document.getElementById('newProUserInput').value = '';
+        document.getElementById('newProPassInput').value = '';
+        await loadAndRenderAdminPhotographers();
+        showToast(`Fotógrafo Pro "${name}" guardado.`);
+      } catch (err) {
+        showToast('No se pudo guardar el fotógrafo en el servidor.');
+      }
     }
 
-    async function removeProPhotographer(id) {
-      const target = proPhotographers.find((p) => p.id === id);
-      proPhotographers = proPhotographers.filter((p) => p.id !== id);
-      saveJsonStorage(STORAGE_KEYS.proPhotographers, proPhotographers);
-      if (supabaseClient && target?.username) {
-        await supabaseClient.from('photographers').delete().eq('username', target.username);
+    async function removeProPhotographer(username) {
+      try {
+        await callSupabaseRpc('admin_delete_photographer', {
+          p_admin_pin: sessionAuth.adminPin,
+          p_username: username
+        });
+        await loadAndRenderAdminPhotographers();
+        showToast('Fotógrafo eliminado.');
+      } catch (err) {
+        showToast('No se pudo eliminar el fotógrafo.');
       }
-      renderAdminPhotographersList();
     }
 
     function renderAdminPricingList() {
@@ -3181,11 +3061,11 @@
                   <div class="col-span-2 sm:col-span-1 grid grid-cols-2 gap-1.5">
                     <div>
                       <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Público L</label>
-                      <input id="editSizePriceInput" type="number" step="0.01" value="${Number(sz.price) || 0}" class="w-full px-2 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-bold" />
+                      <input id="editSizePriceInput" type="number" step="0.01" value="${Number(sz.price) || 0}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-bold" />
                     </div>
                     <div>
                       <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Pro L</label>
-                      <input id="editSizeProPriceInput" type="number" step="0.01" value="${Number(sz.proPrice) || 0}" class="w-full px-2 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-bold" />
+                      <input id="editSizeProPriceInput" type="number" step="0.01" value="${Number(sz.proPrice) || 0}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-bold" />
                     </div>
                   </div>
                 </div>
@@ -3239,26 +3119,32 @@
         return;
       }
 
-      printSizes[key] = {
-        ...existing,
-        label,
-        widthIn,
-        heightIn,
-        price,
-        proPrice: isNaN(proPrice) ? price : proPrice
-      };
-
-      editingProductKey = null;
-      saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
-      await syncPricingToCloud();
-      renderAdminPricingList();
-      renderUploadedPhotosList();
-      updateOrderTotals();
-      showToast(`Producto "${label}" actualizado.`);
+      const finalPro = isNaN(proPrice) ? price : proPrice;
+      try {
+        await callSupabaseRpc('admin_upsert_pricing', {
+          p_admin_pin: sessionAuth.adminPin,
+          p_size_key: key,
+          p_label: label,
+          p_width_in: widthIn,
+          p_height_in: heightIn,
+          p_price: price,
+          p_pro_price: finalPro
+        });
+        printSizes[key] = { ...existing, label, widthIn, heightIn, price, proPrice: finalPro };
+        editingProductKey = null;
+        saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
+        renderAdminPricingList();
+        renderUploadedPhotosList();
+        updateOrderTotals();
+        showToast(`Producto "${label}" actualizado en la nube.`);
+      } catch (err) {
+        showToast('Error guardando tarifa en el servidor.');
+      }
     }
 
     async function addPrintSizeProduct() {
-      const key = (document.getElementById('newSizeKeyInput').value || '').trim();
+      const rawKey = (document.getElementById('newSizeKeyInput').value || '').trim();
+      const key = rawKey.replace(/[^a-zA-Z0-9_-]/g, '_');
       const label = (document.getElementById('newSizeLabelInput').value || '').trim();
       const widthIn = parseFloat(document.getElementById('newSizeWidthInput').value);
       const heightIn = parseFloat(document.getElementById('newSizeHeightInput').value);
@@ -3270,22 +3156,28 @@
         return;
       }
 
-      printSizes[key] = {
-        key,
-        label,
-        widthIn,
-        heightIn,
-        price,
-        proPrice: isNaN(proPrice) ? price : proPrice
-      };
-      saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
-      await syncPricingToCloud();
-      ['newSizeKeyInput', 'newSizeLabelInput', 'newSizeWidthInput', 'newSizeHeightInput', 'newSizePriceInput', 'newSizeProPriceInput'].forEach((id) => {
-        document.getElementById(id).value = '';
-      });
-      renderAdminPricingList();
-      renderUploadedPhotosList();
-      showToast(`Tamaño "${label}" agregado.`);
+      const finalPro = isNaN(proPrice) ? price : proPrice;
+      try {
+        await callSupabaseRpc('admin_upsert_pricing', {
+          p_admin_pin: sessionAuth.adminPin,
+          p_size_key: key,
+          p_label: label,
+          p_width_in: widthIn,
+          p_height_in: heightIn,
+          p_price: price,
+          p_pro_price: finalPro
+        });
+        printSizes[key] = { key, label, widthIn, heightIn, price, proPrice: finalPro };
+        saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
+        ['newSizeKeyInput', 'newSizeLabelInput', 'newSizeWidthInput', 'newSizeHeightInput', 'newSizePriceInput', 'newSizeProPriceInput'].forEach((id) => {
+          document.getElementById(id).value = '';
+        });
+        renderAdminPricingList();
+        renderUploadedPhotosList();
+        showToast(`Tamaño "${label}" agregado.`);
+      } catch (err) {
+        showToast('Error agregando producto en el servidor.');
+      }
     }
 
     async function removePrintSizeProduct(key) {
@@ -3293,13 +3185,19 @@
         showToast('Debe quedar al menos un tamaño disponible.');
         return;
       }
-      delete printSizes[key];
-      saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
-      if (supabaseClient) {
-        await supabaseClient.from('pricing_config').delete().eq('size_key', key);
+      try {
+        await callSupabaseRpc('admin_delete_pricing', {
+          p_admin_pin: sessionAuth.adminPin,
+          p_size_key: key
+        });
+        delete printSizes[key];
+        saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
+        renderAdminPricingList();
+        renderUploadedPhotosList();
+        showToast('Producto eliminado.');
+      } catch (err) {
+        showToast('No se pudo eliminar el producto.');
       }
-      renderAdminPricingList();
-      renderUploadedPhotosList();
     }
 
     function loadStudioFormInputs() {
@@ -3357,38 +3255,67 @@
       studioConfig.shippingCost = parseFloat(document.getElementById('shippingCostInput').value) || 0;
       studioConfig.labInfo = (document.getElementById('studioInfoInput').value || '').trim();
       saveJsonStorage(STORAGE_KEYS.studioConfig, studioConfig);
-      const synced = await syncStudioSettingsToCloud();
-      applyStudioBrandingUI();
-      updateWebDeliveryFeeLabel();
-      updateOrderTotals();
+
       const statusEl = document.getElementById('studioCloudSyncStatus');
-      if (synced) {
-        const okMsg = `✓ Sincronizado en Supabase (${getActiveSupabaseSchema()}): "${studioConfig.labName}".`;
+      try {
+        await callSupabaseRpc('admin_save_studio_settings', {
+          p_admin_pin: sessionAuth.adminPin,
+          p_lab_name: studioConfig.labName,
+          p_lab_info: studioConfig.labInfo || '',
+          p_shipping_cost: Number(studioConfig.shippingCost) || 0,
+          p_bank_accounts: studioConfig.bankAccounts || [],
+          p_new_staff_pin: null,
+          p_new_admin_pin: null
+        });
+        applyStudioBrandingUI();
+        updateWebDeliveryFeeLabel();
+        updateOrderTotals();
+        const okMsg = `✓ Sincronizado de forma segura en Supabase (${getActiveSupabaseSchema()}).`;
         if (statusEl) {
           statusEl.textContent = okMsg;
           statusEl.className = 'text-xs font-bold text-emerald-700 mt-1';
         }
         showToast(okMsg);
+      } catch (err) {
+        const errMsg = 'Error guardando configuración en Supabase.';
+        if (statusEl) {
+          statusEl.textContent = errMsg;
+          statusEl.className = 'text-xs font-bold text-rose-600 mt-1';
+        }
+        showToast(errMsg);
       }
     }
 
     function loadSecurityFormInputs() {
-      document.getElementById('staffPinConfigInput').value = securityPins.staffPin || '';
-      document.getElementById('adminPinConfigInput').value = securityPins.adminPin || '';
+      document.getElementById('staffPinConfigInput').value = '';
+      document.getElementById('adminPinConfigInput').value = '';
     }
 
     async function saveSecurityAndCloudSettings() {
-      const staffPin = (document.getElementById('staffPinConfigInput').value || '').trim();
-      const adminPin = (document.getElementById('adminPinConfigInput').value || '').trim();
-      if (!staffPin || !adminPin) {
-        showToast('Las contraseñas no pueden quedar vacías.');
+      const newStaffPin = (document.getElementById('staffPinConfigInput').value || '').trim();
+      const newAdminPin = (document.getElementById('adminPinConfigInput').value || '').trim();
+      if (!newStaffPin && !newAdminPin) {
+        showToast('Escribe al menos una nueva contraseña para actualizar.');
         return;
       }
-      securityPins.staffPin = staffPin;
-      securityPins.adminPin = adminPin;
-      saveJsonStorage(STORAGE_KEYS.securityPins, securityPins);
-      await syncStudioSettingsToCloud();
-      showToast('Claves de acceso actualizadas.');
+      try {
+        await callSupabaseRpc('admin_save_studio_settings', {
+          p_admin_pin: sessionAuth.adminPin,
+          p_lab_name: studioConfig.labName,
+          p_lab_info: studioConfig.labInfo || '',
+          p_shipping_cost: Number(studioConfig.shippingCost) || 0,
+          p_bank_accounts: studioConfig.bankAccounts || [],
+          p_new_staff_pin: newStaffPin || null,
+          p_new_admin_pin: newAdminPin || null
+        });
+        if (newStaffPin) sessionAuth.staffPin = newStaffPin;
+        if (newAdminPin) sessionAuth.adminPin = newAdminPin;
+        document.getElementById('staffPinConfigInput').value = '';
+        document.getElementById('adminPinConfigInput').value = '';
+        showToast('Claves actualizadas de forma segura en el servidor.');
+      } catch (err) {
+        showToast('No se pudieron actualizar las claves.');
+      }
     }
 
     window.addEventListener('DOMContentLoaded', () => {
