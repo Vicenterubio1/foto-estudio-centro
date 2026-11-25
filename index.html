@@ -306,6 +306,7 @@
             <div id="cropInnerViewport" class="relative w-full h-full overflow-hidden flex items-center justify-center">
               <img id="cropPreviewImage" src="" alt="Vista previa" draggable="false" class="photo-preview-box max-w-none max-h-none pointer-events-none" />
             </div>
+            <div id="cropPassportSheetPreview" class="hidden absolute inset-0 bg-white flex items-center justify-evenly p-2 z-10 pointer-events-none"></div>
             <div id="cropPolaroidCaptionOverlay" class="hidden absolute flex items-center justify-center text-center font-bold z-20 pointer-events-none leading-none whitespace-nowrap"></div>
           </div>
           <button type="button" onclick="resetCropEditorValues()" class="absolute top-3 right-3 px-2.5 py-1 rounded-lg bg-slate-800/90 hover:bg-slate-700 text-slate-200 text-[11px] font-semibold border border-slate-600">
@@ -660,7 +661,12 @@
       '5x7': { key: '5x7', label: '5x7" (13×18 cm)', widthIn: 5, heightIn: 7, price: 18, proPrice: 14 },
       '6x8': { key: '6x8', label: '6x8" (15×20 cm)', widthIn: 6, heightIn: 8, price: 28, proPrice: 22 },
       '8x10': { key: '8x10', label: '8x10" (20×25 cm)', widthIn: 8, heightIn: 10, price: 45, proPrice: 35 },
-      'wallet': { key: 'wallet', label: 'Wallet (2.5×3.5")', widthIn: 2.5, heightIn: 3.5, price: 6, proPrice: 4.5 }
+      '8x12': { key: '8x12', label: '8x12" (20×30 cm)', widthIn: 8, heightIn: 12, price: 65, proPrice: 50 },
+      '10x14': { key: '10x14', label: '10x14" (25×35 cm)', widthIn: 10, heightIn: 14, price: 95, proPrice: 75 },
+      'pasaporte_4x6': { key: 'pasaporte_4x6', label: '4 Fotos Pasaporte 35×45 mm (Hoja 4x6")', widthIn: 4, heightIn: 6, price: 35, proPrice: 25, isPassportSheet: true },
+      'pasaporte_2x2': { key: 'pasaporte_2x2', label: '4 Fotos Pasaporte 2×2" (Hoja 4x6")', widthIn: 4, heightIn: 6, price: 35, proPrice: 25, isPassport2x2Sheet: true },
+      'carnet_4x6': { key: 'carnet_4x6', label: '6 Fotos Carnet 2.5×3.5 cm (Hoja 4x6")', widthIn: 4, heightIn: 6, price: 35, proPrice: 25, isCarnetSheet: true },
+      'wallet': { key: 'wallet', label: '2 Fotos Wallet 2.5×3.5" (Hoja 4x6")', widthIn: 4, heightIn: 6, price: 24, proPrice: 18, isWalletSheet: true }
     };
 
     const PAPER_FINISHES = ['Brillante', 'Mate', 'Seda / Perlado'];
@@ -963,8 +969,18 @@
                 widthIn: Number(r.width_in ?? r.widthIn) || 4,
                 heightIn: Number(r.height_in ?? r.heightIn) || 6,
                 price: Number(r.price ?? r.public_price) || 0,
-                proPrice: Number(r.pro_price ?? r.proPrice ?? r.price) || 0
+                proPrice: Number(r.pro_price ?? r.proPrice ?? r.price) || 0,
+                isPassportSheet: key === 'pasaporte_4x6' || Boolean(DEFAULT_PRINT_SIZES[key]?.isPassportSheet),
+                isPassport2x2Sheet: key === 'pasaporte_2x2' || Boolean(DEFAULT_PRINT_SIZES[key]?.isPassport2x2Sheet),
+                isCarnetSheet: key === 'carnet_4x6' || Boolean(DEFAULT_PRINT_SIZES[key]?.isCarnetSheet),
+                isWalletSheet: key === 'wallet' || Boolean(DEFAULT_PRINT_SIZES[key]?.isWalletSheet)
               };
+            });
+            // Garantizar que los nuevos tamaños predeterminados siempre estén disponibles
+            Object.entries(DEFAULT_PRINT_SIZES).forEach(([defKey, defVal]) => {
+              if (!loadedSizes[defKey]) {
+                loadedSizes[defKey] = { ...defVal };
+              }
             });
             if (Object.keys(loadedSizes).length > 0) {
               printSizes = loadedSizes;
@@ -1525,18 +1541,23 @@
         .map((photo, index) => {
           const unitPrice = getUnitPriceForSize(photo.sizeKey);
           const lineTotal = unitPrice * (Number(photo.copies) || 1);
+          const isPassport = isPassportProduct(photo.sizeKey);
+          const isPassport2x2 = isPassport2x2Product(photo.sizeKey);
+          const isCarnet = isCarnetProduct(photo.sizeKey);
+          const isWallet = isWalletProduct(photo.sizeKey);
+          const isSheetProduct = isPassport || isPassport2x2 || isCarnet || isWallet;
           const sizeObj = printSizes[photo.sizeKey] || { widthIn: 4, heightIn: 6 };
           const shortIn = Math.min(Number(sizeObj.widthIn) || 4, Number(sizeObj.heightIn) || 6);
           const longIn = Math.max(Number(sizeObj.widthIn) || 4, Number(sizeObj.heightIn) || 6);
-          const isLandscape = photo.orientation === 'landscape';
+          const isLandscape = isSheetProduct || photo.orientation === 'landscape';
           const frameW = isLandscape ? 148 : Math.round(132 * (shortIn / longIn));
           const frameH = isLandscape ? Math.round(148 * (shortIn / longIn)) : 132;
 
           const rot = Number(photo.rotation) || 0;
           const isSideways = rot % 180 !== 0;
-          const borderStyle = photo.borderStyle || 'none';
+          const borderStyle = isSheetProduct ? 'none' : (photo.borderStyle || 'none');
           const borderMm = Number(photo.borderThicknessMm) || 5;
-          const hasCaption = Boolean(photo.caption && photo.caption.trim());
+          const hasCaption = !isSheetProduct && Boolean(photo.caption && photo.caption.trim());
           const captionPos = photo.captionPos || 'bottom';
           const captionColor = photo.captionColor || '#1e293b';
           const pxBorder = borderStyle === 'none' ? 0 : Math.max(3, Math.round(borderMm * 1.15));
@@ -1611,15 +1632,55 @@
               captionOverlayHtml = `<div style="position: absolute; left: 0; right: 0; ${vertPos} width: 100%; height: ${bandH}px; color: ${captionColor}; font-size: ${thumbFontPx}px; text-shadow: ${textShadow};" class="flex items-center justify-center text-center font-bold leading-none whitespace-nowrap pointer-events-none z-10 overflow-hidden px-1">${escapeHtml(photo.caption.trim())}</div>`;
             }
           }
+          const frameBg = isSheetProduct ? '#ffffff' : (borderStyle === 'none' ? '#0f172a' : (photo.borderColor || '#ffffff'));
 
-          const frameBg = borderStyle === 'none' ? '#0f172a' : (photo.borderColor || '#ffffff');
+          let previewMediaHtml = `
+            <div class="relative w-full h-full overflow-hidden flex items-center justify-center">
+              <img src="${photo.dataUrl}" alt="${escapeHtml(photo.name)}" style="width: ${imgDrawW}px; height: ${imgDrawH}px; filter: ${filterCss}; transform: ${transformCss};" class="max-w-none max-h-none" />
+            </div>
+          `;
+
+          if (isSheetProduct) {
+            const cellW = isPassport
+              ? Math.round(frameW * (45 / 152.4))
+              : isPassport2x2
+              ? Math.floor(frameH / 2)
+              : isCarnet
+              ? Math.round(frameW * (35 / 152.4))
+              : Math.round(frameW * (2.5 / 6));
+            const cellH = isPassport
+              ? Math.round(cellW * (35 / 45))
+              : isPassport2x2
+              ? cellW
+              : isCarnet
+              ? Math.round(cellW * (25 / 35))
+              : Math.round(cellW * (3.5 / 2.5));
+            const pCoverScale = Math.max(cellW / effW, cellH / effH) * ((Number(photo.zoom) || 100) / 100);
+            const pDrawW = Math.round(natW * pCoverScale);
+            const pDrawH = Math.round(natH * pCoverScale);
+            const pPanScale = cellW / 90;
+            const pPanX = Math.round((Number(photo.panX) || 0) * pPanScale);
+            const pPanY = Math.round((Number(photo.panY) || 0) * pPanScale);
+            const pTransform = `translate(${pPanX}px, ${pPanY}px) rotate(${rot}deg) scaleX(${photo.flipH ? -1 : 1})`;
+
+            const singleCell = `
+              <div style="width: ${cellW}px; height: ${cellH}px;" class="relative overflow-hidden border border-slate-300 bg-slate-100 flex items-center justify-center shrink-0">
+                <img src="${photo.dataUrl}" alt="${escapeHtml(photo.name)}" style="width: ${pDrawW}px; height: ${pDrawH}px; filter: ${filterCss}; transform: ${pTransform};" class="max-w-none max-h-none" />
+              </div>
+            `;
+            previewMediaHtml = isPassport
+              ? `<div class="w-full h-full bg-white grid grid-cols-2 place-items-center p-1.5 gap-1">${singleCell.repeat(4)}</div>`
+              : isPassport2x2
+              ? `<div class="w-full h-full bg-white flex items-center justify-center"><div style="width: ${cellW * 2}px; height: ${cellH * 2}px;" class="grid grid-cols-2 gap-0">${singleCell.repeat(4)}</div></div>`
+              : isCarnet
+              ? `<div class="w-full h-full bg-white grid grid-cols-3 place-items-center p-1.5 gap-1">${singleCell.repeat(6)}</div>`
+              : `<div class="w-full h-full bg-white grid grid-cols-2 place-items-center p-1.5 gap-1">${singleCell.repeat(2)}</div>`;
+          }
 
           return `
             <div class="rounded-2xl border border-slate-200 bg-slate-50/60 p-4 flex flex-col sm:flex-row gap-4 items-start">
               <div style="width: ${frameW}px; height: ${frameH}px; background-color: ${frameBg}; padding: ${topPad}px ${rightPad}px ${bottomPad}px ${leftPad}px;" class="box-border rounded-xl overflow-hidden flex items-center justify-center shrink-0 relative border border-slate-300 shadow-xs transition-all">
-                <div class="relative w-full h-full overflow-hidden flex items-center justify-center">
-                  <img src="${photo.dataUrl}" alt="${escapeHtml(photo.name)}" style="width: ${imgDrawW}px; height: ${imgDrawH}px; filter: ${filterCss}; transform: ${transformCss};" class="max-w-none max-h-none" />
-                </div>
+                ${previewMediaHtml}
                 ${captionOverlayHtml}
                 <span class="absolute top-1.5 left-1.5 px-1.5 py-0.5 rounded bg-slate-950/75 text-white text-[10px] font-bold z-20">#${index + 1}</span>
               </div>
@@ -1629,9 +1690,7 @@
                   <div>
                     <p class="text-xs font-bold text-slate-800 truncate max-w-[240px]">${escapeHtml(photo.name)}</p>
                     <p class="text-[11px] text-slate-500">
-                      ${photo.orientation === 'landscape' ? 'Horizontal' : 'Vertical'} •
-                      ${photo.borderStyle === 'none' ? 'Sin borde' : `Borde (${photo.borderThicknessMm} mm)`}
-                      ${photo.caption ? ` • "${escapeHtml(photo.caption)}"` : ''}
+                      ${isPassport ? 'Planilla 4 fotos pasaporte 35×45 mm en hoja 4x6"' : isPassport2x2 ? 'Planilla 4 fotos pasaporte 2×2" en hoja 4x6"' : isCarnet ? 'Planilla 6 fotos carnet 2.5×3.5 cm en hoja 4x6"' : isWallet ? 'Planilla 2 fotos Wallet 2.5×3.5" en hoja 4x6"' : `${photo.orientation === 'landscape' ? 'Horizontal' : 'Vertical'} • ${photo.borderStyle === 'none' ? 'Sin borde' : `Borde (${photo.borderThicknessMm} mm)`}${photo.caption ? ` • "${escapeHtml(photo.caption)}"` : ''}`}
                     </p>
                   </div>
                   <button type="button" onclick="removeUploadedPhoto('${photo.id}')" class="text-xs text-rose-600 hover:text-rose-700 font-semibold px-2 py-1 rounded-lg hover:bg-rose-50">
@@ -1681,8 +1740,30 @@
       const photo = uploadedPhotos.find((p) => p.id === photoId);
       if (!photo) return;
       photo[field] = value;
+      if (field === 'sizeKey' && (isPassportProduct(value) || isPassport2x2Product(value) || isCarnetProduct(value) || isWalletProduct(value))) {
+        const imgIsLandscape = (photo.naturalWidth || 1) >= (photo.naturalHeight || 1);
+        photo.orientation = 'landscape';
+        photo.rotation = (isPassport2x2Product(value) || isWalletProduct(value)) ? 0 : (imgIsLandscape ? 0 : 90);
+        photo.borderStyle = 'none';
+      }
       renderUploadedPhotosList();
       updateOrderTotals();
+    }
+
+    function isPassportProduct(sizeKey) {
+      return sizeKey === 'pasaporte_4x6' || Boolean(printSizes[sizeKey]?.isPassportSheet);
+    }
+
+    function isPassport2x2Product(sizeKey) {
+      return sizeKey === 'pasaporte_2x2' || Boolean(printSizes[sizeKey]?.isPassport2x2Sheet);
+    }
+
+    function isCarnetProduct(sizeKey) {
+      return sizeKey === 'carnet_4x6' || Boolean(printSizes[sizeKey]?.isCarnetSheet);
+    }
+
+    function isWalletProduct(sizeKey) {
+      return sizeKey === 'wallet' || Boolean(printSizes[sizeKey]?.isWalletSheet);
     }
 
     function removeUploadedPhoto(photoId) {
@@ -1792,8 +1873,9 @@
       const previewImg = document.getElementById('cropPreviewImage');
       if (!photo || !frame || !previewImg) return;
 
+      const isSheet = isPassportProduct(photo.sizeKey) || isPassport2x2Product(photo.sizeKey) || isCarnetProduct(photo.sizeKey) || isWalletProduct(photo.sizeKey);
       const sizeObj = printSizes[photo.sizeKey] || { widthIn: 4, heightIn: 6 };
-      const orient = previewImg.dataset.orientation || 'portrait';
+      const orient = isSheet ? 'landscape' : (previewImg.dataset.orientation || 'portrait');
       const shortSide = Math.min(Number(sizeObj.widthIn) || 4, Number(sizeObj.heightIn) || 6);
       const longSide = Math.max(Number(sizeObj.widthIn) || 4, Number(sizeObj.heightIn) || 6);
       const wIn = orient === 'landscape' ? longSide : shortSide;
@@ -1888,8 +1970,16 @@
     function updateCropPreviewTransform() {
       const previewImg = document.getElementById('cropPreviewImage');
       const frame = document.getElementById('cropAspectFrame');
+      const innerViewport = document.getElementById('cropInnerViewport');
+      const passportSheet = document.getElementById('cropPassportSheetPreview');
+      const photo = uploadedPhotos.find((p) => p.id === editingPhotoId);
       if (!previewImg || !frame) return;
 
+      const isPassport = photo ? isPassportProduct(photo.sizeKey) : false;
+      const isPassport2x2 = photo ? isPassport2x2Product(photo.sizeKey) : false;
+      const isCarnet = photo ? isCarnetProduct(photo.sizeKey) : false;
+      const isWallet = photo ? isWalletProduct(photo.sizeKey) : false;
+      const isSheet = isPassport || isPassport2x2 || isCarnet || isWallet;
       const zoom = Number(document.getElementById('cropZoomRange').value) || 100;
       const panX = Number(document.getElementById('cropPanXRange').value) || 0;
       const panY = Number(document.getElementById('cropPanYRange').value) || 0;
@@ -1918,11 +2008,68 @@
       const natH = previewImg.naturalHeight || 1000;
       const effW = rot90 ? natH : natW;
       const effH = rot90 ? natW : natH;
+      const filterCss = `brightness(${brightness}%) contrast(${contrast}%) ${filter !== 'none' ? filter : ''}`;
+
+      if (isSheet && passportSheet && innerViewport) {
+        innerViewport.classList.add('hidden');
+        passportSheet.classList.remove('hidden');
+        frame.style.backgroundColor = '#ffffff';
+        frame.style.padding = '0px';
+        document.getElementById('cropTopCaptionOverlay')?.classList.add('hidden');
+        document.getElementById('cropPolaroidCaptionOverlay')?.classList.add('hidden');
+
+        const cellW = isPassport
+          ? Math.round(frameW * (45 / 152.4))
+          : isPassport2x2
+          ? Math.floor(frameH / 2)
+          : isCarnet
+          ? Math.round(frameW * (35 / 152.4))
+          : Math.round(frameW * (2.5 / 6));
+        const cellH = isPassport
+          ? Math.round(cellW * (35 / 45))
+          : isPassport2x2
+          ? cellW
+          : isCarnet
+          ? Math.round(cellW * (25 / 35))
+          : Math.round(cellW * (3.5 / 2.5));
+        const pCoverScale = Math.max(cellW / effW, cellH / effH) * (zoom / 100);
+        const pDrawW = Math.round(natW * pCoverScale);
+        const pDrawH = Math.round(natH * pCoverScale);
+        const pPanScale = cellW / 90;
+        const pPanX = Math.round(panX * pPanScale);
+        const pPanY = Math.round(panY * pPanScale);
+        const pTransform = `translate(${pPanX}px, ${pPanY}px) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1})`;
+
+        const cellHtml = `
+          <div style="width: ${cellW}px; height: ${cellH}px;" class="relative overflow-hidden border border-dashed border-slate-400 bg-slate-100 flex items-center justify-center shrink-0 shadow-2xs">
+            <img src="${previewImg.src}" alt="Planilla" draggable="false" style="width: ${pDrawW}px; height: ${pDrawH}px; filter: ${filterCss}; transform: ${pTransform};" class="max-w-none max-h-none pointer-events-none" />
+          </div>
+        `;
+        passportSheet.className = isPassport
+          ? 'absolute inset-0 bg-white grid grid-cols-2 place-items-center p-2.5 gap-2 z-10 pointer-events-none'
+          : isPassport2x2
+          ? 'absolute inset-0 bg-white flex items-center justify-center z-10 pointer-events-none'
+          : isCarnet
+          ? 'absolute inset-0 bg-white grid grid-cols-3 place-items-center p-2.5 gap-1.5 z-10 pointer-events-none'
+          : 'absolute inset-0 bg-white grid grid-cols-2 place-items-center p-2.5 gap-2 z-10 pointer-events-none';
+        passportSheet.innerHTML = isPassport
+          ? cellHtml.repeat(4)
+          : isPassport2x2
+          ? `<div style="width: ${cellW * 2}px; height: ${cellH * 2}px;" class="grid grid-cols-2 gap-0">${cellHtml.repeat(4)}</div>`
+          : isCarnet
+          ? cellHtml.repeat(6)
+          : cellHtml.repeat(2);
+        return;
+      }
+
+      if (passportSheet) passportSheet.classList.add('hidden');
+      if (innerViewport) innerViewport.classList.remove('hidden');
+
       const coverScale = Math.max(frameW / effW, frameH / effH);
 
       previewImg.style.width = `${Math.round(natW * coverScale)}px`;
       previewImg.style.height = `${Math.round(natH * coverScale)}px`;
-      previewImg.style.filter = `brightness(${brightness}%) contrast(${contrast}%) ${filter !== 'none' ? filter : ''}`;
+      previewImg.style.filter = filterCss;
       previewImg.style.transform = `translate(${panX}px, ${panY}px) scale(${zoom / 100}) rotate(${rotation}deg) scaleX(${flipH ? -1 : 1})`;
 
       const pxBorder = Math.max(4, Math.round(borderMm * 2.4));
@@ -2678,10 +2825,23 @@
         }
         const img = new Image();
         img.onload = () => {
-          const sizeObj = printSizes[item.sizeKey] || { widthIn: 4, heightIn: 6 };
+          const isPassport = isPassportProduct(item.sizeKey);
+          const isPassport2x2 = isPassport2x2Product(item.sizeKey);
+          const isCarnet = isCarnetProduct(item.sizeKey);
+          const isWallet = isWalletProduct(item.sizeKey);
+          const isSheet = isPassport || isPassport2x2 || isCarnet || isWallet;
+          const sizeObj = isPassport
+            ? { widthIn: 45 / 25.4, heightIn: 35 / 25.4 }
+            : isPassport2x2
+            ? { widthIn: 2, heightIn: 2 }
+            : isCarnet
+            ? { widthIn: 35 / 25.4, heightIn: 25 / 25.4 }
+            : isWallet
+            ? { widthIn: 2.5, heightIn: 3.5 }
+            : (printSizes[item.sizeKey] || { widthIn: 4, heightIn: 6 });
           const shortIn = Math.min(Number(sizeObj.widthIn) || 4, Number(sizeObj.heightIn) || 6);
           const longIn = Math.max(Number(sizeObj.widthIn) || 4, Number(sizeObj.heightIn) || 6);
-          const isLandscape = item.orientation === 'landscape';
+          const isLandscape = isWallet ? false : (isSheet ? true : item.orientation === 'landscape');
           const outW = Math.round((isLandscape ? longIn : shortIn) * 300);
           const outH = Math.round((isLandscape ? shortIn : longIn) * 300);
 
@@ -2803,6 +2963,40 @@
               ctx.fillText(item.caption.trim(), outW / 2, textY, outW - leftBorderPx - rightBorderPx);
             }
             ctx.restore();
+          }
+
+          // Si es planilla de 4 fotos tamaño pasaporte horizontales (45x35 mm), montar 2x2 en hoja 4x6" (1800x1200 px a 300 DPI)
+          // Si es planilla de 4 fotos tamaño pasaporte (2x2) o 6 fotos tamaño carnet (3x2), montar en hoja 4x6" (1800x1200 px a 300 DPI)
+          if (isSheet) {
+            const sheetW = 1800; // 6 pulgadas * 300 DPI
+            const sheetH = 1200; // 4 pulgadas * 300 DPI
+            const sheetCanvas = document.createElement('canvas');
+            sheetCanvas.width = sheetW;
+            sheetCanvas.height = sheetH;
+            const sCtx = sheetCanvas.getContext('2d');
+
+            sCtx.fillStyle = '#ffffff';
+            sCtx.fillRect(0, 0, sheetW, sheetH);
+
+            const cols = isCarnet ? 3 : 2;
+            const rows = isWallet ? 1 : 2;
+            const gapX = Math.max(0, Math.floor((sheetW - cols * outW) / (cols + 1)));
+            const gapY = Math.max(0, Math.floor((sheetH - rows * outH) / (rows + 1)));
+
+            for (let r = 0; r < rows; r++) {
+              for (let c = 0; c < cols; c++) {
+                const posX = gapX + c * (outW + gapX);
+                const posY = gapY + r * (outH + gapY);
+                sCtx.drawImage(canvas, posX, posY, outW, outH);
+                // Borde guía muy sutil para facilitar el corte con guillotina
+                sCtx.strokeStyle = '#cbd5e1';
+                sCtx.lineWidth = 2;
+                sCtx.strokeRect(posX, posY, outW, outH);
+              }
+            }
+
+            resolve(sheetCanvas.toDataURL('image/jpeg', 0.95));
+            return;
           }
 
           resolve(canvas.toDataURL('image/jpeg', 0.95));
