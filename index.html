@@ -1116,34 +1116,44 @@
     }
 
     async function syncPricingToCloud() {
-      if (!supabaseClient) return;
+      const sbUrl = (securityPins.supabaseUrl || DEFAULT_SUPABASE_URL || '').replace(/\/+$/, '');
+      const sbKey = (securityPins.supabaseKey || DEFAULT_SUPABASE_ANON_KEY || '').trim();
+      const sbSchema = getActiveSupabaseSchema();
+      if (!sbUrl || !sbKey) return false;
+
       try {
-        // Inspeccionar una fila existente para respetar el nombre exacto de columnas de la tabla en Supabase
-        const { data: sampleRows } = await supabaseClient.from('pricing_config').select('*').limit(1);
-        const sample = Array.isArray(sampleRows) && sampleRows.length > 0 ? sampleRows[0] : null;
-        const usesPublicPrice = sample ? ('public_price' in sample && !('price' in sample)) : true;
-        const usesSizeLabel = sample ? ('size_label' in sample && !('label' in sample)) : false;
+        const rows = Object.values(printSizes).map((sz) => ({
+          size_key: String(sz.key),
+          label: String(sz.label || sz.key),
+          width_in: Number(sz.widthIn) || 4,
+          height_in: Number(sz.heightIn) || 6,
+          price: Number(sz.price) || 0,
+          public_price: Number(sz.price) || 0,
+          pro_price: Number(sz.proPrice) || 0
+        }));
 
-        const rows = Object.values(printSizes).map((sz) => {
-          const row = {
-            size_key: sz.key,
-            width_in: Number(sz.widthIn) || 4,
-            height_in: Number(sz.heightIn) || 6,
-            pro_price: Number(sz.proPrice) || 0
-          };
-          if (usesSizeLabel) row.size_label = sz.label;
-          else row.label = sz.label;
-
-          if (usesPublicPrice) row.public_price = Number(sz.price) || 0;
-          else row.price = Number(sz.price) || 0;
-
-          return row;
+        const res = await fetch(`${sbUrl}/rest/v1/pricing_config?on_conflict=size_key`, {
+          method: 'POST',
+          headers: {
+            'apikey': sbKey,
+            'Authorization': `Bearer ${sbKey}`,
+            'Accept-Profile': sbSchema,
+            'Content-Profile': sbSchema,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates,return=representation'
+          },
+          body: JSON.stringify(rows)
         });
 
-        const { error } = await supabaseClient.from('pricing_config').upsert(rows, { onConflict: 'size_key' });
-        if (error) console.warn('Aviso nube (tarifas):', error.message);
+        if (!res.ok) {
+          const errText = await res.text();
+          showToast(`Error guardando tarifas en nube (${res.status}): ${errText.slice(0, 120)}`);
+          return false;
+        }
+        return true;
       } catch (err) {
         console.warn('Error sincronizando pricing_config:', err);
+        return false;
       }
     }
 
