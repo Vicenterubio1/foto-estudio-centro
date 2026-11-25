@@ -772,6 +772,7 @@
     let isAdminUnlocked = false;
     let pendingAdminTab = null;
     let editingPhotoId = null;
+    let editingProductKey = null;
     let cropDragState = null;
     let supabaseClient = null;
     let toastTimeoutId = null;
@@ -3145,18 +3146,104 @@
       const listEl = document.getElementById('pricingProductsList');
       if (!listEl) return;
       listEl.innerHTML = Object.values(printSizes)
-        .map(
-          (sz) => `
+        .map((sz) => {
+          const isEditing = editingProductKey === sz.key;
+          if (isEditing) {
+            return `
+              <div class="p-3.5 rounded-xl border-2 border-sky-500 bg-sky-50/40 space-y-2.5 text-xs">
+                <div class="flex items-center justify-between">
+                  <span class="font-bold text-sky-900">Editando producto: <code class="font-mono bg-white px-1.5 py-0.5 rounded border border-sky-200">${escapeHtml(sz.key)}</code></span>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+                  <div class="col-span-2 sm:col-span-2">
+                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Etiqueta visible</label>
+                    <input id="editSizeLabelInput" type="text" value="${escapeHtml(sz.label)}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-medium" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Ancho (in)</label>
+                    <input id="editSizeWidthInput" type="number" step="0.1" value="${Number(sz.widthIn) || 4}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs" />
+                  </div>
+                  <div>
+                    <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Alto (in)</label>
+                    <input id="editSizeHeightInput" type="number" step="0.1" value="${Number(sz.heightIn) || 6}" class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 bg-white text-xs" />
+                  </div>
+                  <div class="col-span-2 sm:col-span-1 grid grid-cols-2 gap-1.5">
+                    <div>
+                      <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Público L</label>
+                      <input id="editSizePriceInput" type="number" step="0.01" value="${Number(sz.price) || 0}" class="w-full px-2 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-bold" />
+                    </div>
+                    <div>
+                      <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Pro L</label>
+                      <input id="editSizeProPriceInput" type="number" step="0.01" value="${Number(sz.proPrice) || 0}" class="w-full px-2 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-bold" />
+                    </div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-end gap-2 pt-1">
+                  <button type="button" onclick="cancelEditPrintSizeProduct()" class="px-3 py-1.5 rounded-lg border border-slate-300 bg-white hover:bg-slate-50 text-slate-700 font-semibold">Cancelar</button>
+                  <button type="button" onclick="saveEditedPrintSizeProduct('${escapeHtml(sz.key)}')" class="px-3.5 py-1.5 rounded-lg bg-sky-600 hover:bg-sky-500 text-white font-bold">Guardar cambios</button>
+                </div>
+              </div>
+            `;
+          }
+
+          return `
             <div class="flex flex-wrap items-center justify-between gap-2 p-3 rounded-xl border border-slate-200 bg-white text-xs">
               <div>
                 <span class="font-bold text-slate-900">${escapeHtml(sz.label)}</span>
                 <span class="text-slate-500 ml-2">(${sz.widthIn}×${sz.heightIn}") • Público: <strong>L ${Number(sz.price).toFixed(2)}</strong> • Pro: <strong>L ${Number(sz.proPrice).toFixed(2)}</strong></span>
               </div>
-              <button type="button" onclick="removePrintSizeProduct('${escapeHtml(sz.key)}')" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold">Quitar</button>
+              <div class="flex items-center gap-1.5">
+                <button type="button" onclick="startEditPrintSizeProduct('${escapeHtml(sz.key)}')" class="px-2.5 py-1 rounded-lg bg-sky-50 text-sky-700 hover:bg-sky-100 font-semibold">Editar</button>
+                <button type="button" onclick="removePrintSizeProduct('${escapeHtml(sz.key)}')" class="px-2.5 py-1 rounded-lg bg-rose-50 text-rose-700 hover:bg-rose-100 font-semibold">Quitar</button>
+              </div>
             </div>
-          `
-        )
+          `;
+        })
         .join('');
+    }
+
+    function startEditPrintSizeProduct(key) {
+      if (!printSizes[key]) return;
+      editingProductKey = key;
+      renderAdminPricingList();
+    }
+
+    function cancelEditPrintSizeProduct() {
+      editingProductKey = null;
+      renderAdminPricingList();
+    }
+
+    async function saveEditedPrintSizeProduct(key) {
+      const existing = printSizes[key];
+      if (!existing) return;
+
+      const label = (document.getElementById('editSizeLabelInput')?.value || '').trim();
+      const widthIn = parseFloat(document.getElementById('editSizeWidthInput')?.value);
+      const heightIn = parseFloat(document.getElementById('editSizeHeightInput')?.value);
+      const price = parseFloat(document.getElementById('editSizePriceInput')?.value);
+      const proPrice = parseFloat(document.getElementById('editSizeProPriceInput')?.value);
+
+      if (!label || isNaN(widthIn) || isNaN(heightIn) || isNaN(price)) {
+        showToast('Completa etiqueta, dimensiones y precio válido.');
+        return;
+      }
+
+      printSizes[key] = {
+        ...existing,
+        label,
+        widthIn,
+        heightIn,
+        price,
+        proPrice: isNaN(proPrice) ? price : proPrice
+      };
+
+      editingProductKey = null;
+      saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
+      await syncPricingToCloud();
+      renderAdminPricingList();
+      renderUploadedPhotosList();
+      updateOrderTotals();
+      showToast(`Producto "${label}" actualizado.`);
     }
 
     async function addPrintSizeProduct() {
