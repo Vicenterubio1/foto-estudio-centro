@@ -983,8 +983,8 @@
                 label: defMatch ? defMatch.label : (r.label || r.size_label || String(key)),
                 widthIn: Number(r.width_in ?? r.widthIn) || 4,
                 heightIn: Number(r.height_in ?? r.heightIn) || 6,
-                price: Number(r.price ?? r.public_price) || 0,
-                proPrice: Number(r.pro_price ?? r.proPrice ?? r.price) || 0,
+                price: Number(r.amateur_price ?? r.price ?? r.public_price) || 0,
+                proPrice: Number(r.pro_price ?? r.proPrice ?? r.amateur_price ?? r.price) || 0,
                 isPassportSheet: key === 'pasaporte_4x6' || Boolean(defMatch?.isPassportSheet),
                 isPassport2x2Sheet: key === 'pasaporte_2x2' || Boolean(defMatch?.isPassport2x2Sheet),
                 isCarnetSheet: key === 'carnet_4x6' || Boolean(defMatch?.isCarnetSheet),
@@ -1127,6 +1127,7 @@
           label: String(sz.label || sz.key),
           width_in: Number(sz.widthIn) || 4,
           height_in: Number(sz.heightIn) || 6,
+          amateur_price: Number(sz.price) || 0,
           price: Number(sz.price) || 0,
           public_price: Number(sz.price) || 0,
           pro_price: Number(sz.proPrice) || 0
