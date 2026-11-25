@@ -727,6 +727,19 @@
     };
 
     let printSizes = loadJsonStorage(STORAGE_KEYS.printSizes, { ...DEFAULT_PRINT_SIZES });
+    // Asegurar que los nuevos tamaños incorporados aparezcan aunque exista caché local previa
+    Object.entries(DEFAULT_PRINT_SIZES).forEach(([defKey, defVal]) => {
+      if (!printSizes[defKey]) {
+        printSizes[defKey] = { ...defVal };
+      } else {
+        printSizes[defKey].label = defVal.label;
+        printSizes[defKey].isPassportSheet = defVal.isPassportSheet;
+        printSizes[defKey].isPassport2x2Sheet = defVal.isPassport2x2Sheet;
+        printSizes[defKey].isCarnetSheet = defVal.isCarnetSheet;
+        printSizes[defKey].isWalletSheet = defVal.isWalletSheet;
+      }
+    });
+    saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
     let studioConfig = loadJsonStorage(STORAGE_KEYS.studioConfig, {
       labName: DEFAULT_LAB_BRAND_NAME,
       labInfo: DEFAULT_LAB_INFO_LINE,
@@ -963,31 +976,39 @@
             pricingRows.forEach((r) => {
               const key = r.size_key || r.key || r.id;
               if (!key) return;
+              const defMatch = DEFAULT_PRINT_SIZES[key];
               loadedSizes[key] = {
                 key: String(key),
-                label: r.label || r.size_label || String(key),
+                label: defMatch ? defMatch.label : (r.label || r.size_label || String(key)),
                 widthIn: Number(r.width_in ?? r.widthIn) || 4,
                 heightIn: Number(r.height_in ?? r.heightIn) || 6,
                 price: Number(r.price ?? r.public_price) || 0,
                 proPrice: Number(r.pro_price ?? r.proPrice ?? r.price) || 0,
-                isPassportSheet: key === 'pasaporte_4x6' || Boolean(DEFAULT_PRINT_SIZES[key]?.isPassportSheet),
-                isPassport2x2Sheet: key === 'pasaporte_2x2' || Boolean(DEFAULT_PRINT_SIZES[key]?.isPassport2x2Sheet),
-                isCarnetSheet: key === 'carnet_4x6' || Boolean(DEFAULT_PRINT_SIZES[key]?.isCarnetSheet),
-                isWalletSheet: key === 'wallet' || Boolean(DEFAULT_PRINT_SIZES[key]?.isWalletSheet)
+                isPassportSheet: key === 'pasaporte_4x6' || Boolean(defMatch?.isPassportSheet),
+                isPassport2x2Sheet: key === 'pasaporte_2x2' || Boolean(defMatch?.isPassport2x2Sheet),
+                isCarnetSheet: key === 'carnet_4x6' || Boolean(defMatch?.isCarnetSheet),
+                isWalletSheet: key === 'wallet' || Boolean(defMatch?.isWalletSheet)
               };
             });
-            // Garantizar que los nuevos tamaños predeterminados siempre estén disponibles
+            // Garantizar que los nuevos tamaños predeterminados siempre estén disponibles y subir los faltantes a Supabase
+            let hasMissingInCloud = false;
             Object.entries(DEFAULT_PRINT_SIZES).forEach(([defKey, defVal]) => {
               if (!loadedSizes[defKey]) {
                 loadedSizes[defKey] = { ...defVal };
+                hasMissingInCloud = true;
               }
             });
             if (Object.keys(loadedSizes).length > 0) {
               printSizes = loadedSizes;
               saveJsonStorage(STORAGE_KEYS.printSizes, printSizes);
+              if (hasMissingInCloud) {
+                syncPricingToCloud();
+              }
               renderUploadedPhotosList();
               updateOrderTotals();
             }
+          } else {
+            syncPricingToCloud();
           }
         }
 
@@ -1743,7 +1764,7 @@
       if (field === 'sizeKey' && (isPassportProduct(value) || isPassport2x2Product(value) || isCarnetProduct(value) || isWalletProduct(value))) {
         const imgIsLandscape = (photo.naturalWidth || 1) >= (photo.naturalHeight || 1);
         photo.orientation = 'landscape';
-        photo.rotation = (isPassport2x2Product(value) || isWalletProduct(value)) ? 0 : (imgIsLandscape ? 0 : 90);
+        photo.rotation = isPassport2x2Product(value) ? 0 : (imgIsLandscape ? 0 : 90);
         photo.borderStyle = 'none';
       }
       renderUploadedPhotosList();
